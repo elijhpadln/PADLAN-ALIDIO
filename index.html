@@ -3,34 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Axiom Clash</title>
+<title>Axiom Clash - RPG 3v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<!-- 3D SVG Filter Definition -->
+<svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="pseudo3d" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="5" flood-color="rgba(0,0,0,0.7)"/>
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.5" result="blur"/>
+      <feSpecularLighting in="blur" surfaceScale="2" specularConstant="0.8" specularExponent="25" lighting-color="#ffffff" result="specOut">
+        <fePointLight x="-1000" y="-5000" z="5000"/>
+      </feSpecularLighting>
+      <feComposite in="specOut" in2="SourceAlpha" operator="in" result="specOut"/>
+      <feComposite in="SourceGraphic" in2="specOut" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="lit"/>
+      <feOffset in="SourceAlpha" dx="-2" dy="-2" result="offsetAlpha"/>
+      <feComposite in="SourceAlpha" in2="offsetAlpha" operator="out" result="innerShadowMask"/>
+      <feFlood flood-color="rgba(0,0,0,0.4)" result="innerShadowColor"/>
+      <feComposite in="innerShadowColor" in2="innerShadowMask" operator="in" result="innerShadow"/>
+      <feComposite in="lit" in2="innerShadow" operator="over"/>
+    </filter>
+  </defs>
+</svg>
+
 <!-- MENU -->
 <div id="menuScreen" class="screen active">
   <div class="stars" id="starsEl"></div>
   <div class="game-title">AXIOM CLASH</div>
-  <div style="font-family:'Press Start 2P',monospace;font-size:.42rem;color:var(--text2);letter-spacing:.18em;position:relative;z-index:1">CREATURE BATTLE ARENA</div>
+  <div style="font-family:'Press Start 2P',monospace;font-size:.42rem;color:var(--text2);letter-spacing:.18em;position:relative;z-index:1">3v3 TACTICAL BATTLE</div>
   <div class="menu-creatures" id="menuCreatures"></div>
-  <div class="name-wrap">
-    <label>YOUR NAME</label>
-    <input type="text" id="playerName" placeholder="Trainer..." maxlength="12" value="Trainer">
-  </div>
   <div class="btn-row">
     <button class="btn btn-primary" onclick="startGame()">▶ START BATTLE</button>
-  </div>
-  <div style="font-family:'Press Start 2P',monospace;font-size:.36rem;color:var(--text2);line-height:2.2;text-align:center;max-width:360px;position:relative;z-index:1">
-    PICK 3 · USE MOVES · DEFEAT ALL ENEMIES
   </div>
 </div>
 
 <!-- TEAM SELECT -->
 <div id="teamScreen" class="screen">
   <div class="inner">
-    <div class="screen-title">CHOOSE YOUR TEAM</div>
+    <div class="screen-title">CHOOSE YOUR SQUAD</div>
     <div style="font-family:'Press Start 2P',monospace;font-size:.4rem;color:var(--text2)">SELECT 3 CREATURES</div>
     <div class="creature-grid" id="creatureGrid"></div>
     <div class="team-preview">
@@ -45,137 +58,81 @@
 
 <!-- BATTLE -->
 <div id="battleScreen" class="screen">
-
+  <!-- TOP HALF: Stage & Field -->
   <div class="stage" id="stage">
-    <!-- Sky + animated clouds -->
-    <div class="stage-sky">
-      <div class="cloud-layer" id="cloudLayer"></div>
-    </div>
-
-    <!-- Ground -->
-    <div class="stage-ground" id="stageGround"></div>
-
-    <!-- SVG scenery: trees, bushes, mountains (injected by JS) -->
-    <svg id="scenerySvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2" preserveAspectRatio="none"></svg>
-
-    <!-- Platforms -->
-    <div class="platform plat-enemy"></div>
-    <div class="platform plat-player"></div>
-
-    <!-- ENEMY HUD — top left -->
-    <div class="poke-hud poke-hud-enemy" id="enemyHud">
-      <div class="poke-hud-inner">
-        <!-- Portrait -->
-        <div class="poke-portrait">
-          <svg id="enemyPortrait" width="52" height="52" viewBox="0 0 32 32"></svg>
-          <div class="poke-portrait-name" id="enemyPortraitName">—</div>
-        </div>
-        <!-- Stats panel -->
-        <div class="poke-stats-panel">
-          <div class="poke-hud-top">
-            <div class="poke-name-wrap">
-              <div class="poke-type-dot" id="enemyTypeDot"></div>
-              <span class="poke-name" id="enemyName">—</span>
-            </div>
-            <span class="poke-level" id="enemyLevel">Lv.??</span>
-          </div>
-          <div class="poke-hud-hp-row">
-            <span class="hp-label">HP</span>
-            <div class="poke-hp-bar-wrap"><div class="poke-hp-bar" id="enemyFill" style="width:100%"></div></div>
-          </div>
-          <div class="poke-stat-rows">
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Defense</span><span class="poke-stat-val" id="eStatDef">—</span></div>
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Accuracy</span><span class="poke-stat-val" id="eStatAcc">—</span></div>
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Damage</span><span class="poke-stat-val" id="eStatDmg">—</span></div>
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Initiative</span><span class="poke-stat-val" id="eStatSpd">—</span></div>
-          </div>
-          <div class="poke-hud-statuses" id="enemyStat"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ENEMY sprite -->
-    <div class="spr-wrap spr-enemy" id="enemyWrap">
-      <svg id="enemySvg" class="csvg csvg-enemy" viewBox="0 0 32 32"></svg>
-    </div>
-
-    <!-- PLAYER HUD — bottom right -->
-    <div class="poke-hud poke-hud-player" id="playerHud">
-      <div class="poke-hud-inner">
-        <div class="poke-portrait">
-          <svg id="playerPortrait" width="52" height="52" viewBox="0 0 32 32"></svg>
-          <div class="poke-portrait-name" id="playerPortraitName">—</div>
-        </div>
-        <div class="poke-stats-panel">
-          <div class="poke-hud-top">
-            <div class="poke-name-wrap">
-              <div class="poke-type-dot" id="playerTypeDot"></div>
-              <span class="poke-name" id="playerCName">—</span>
-            </div>
-            <span class="poke-level" id="playerLevel">Lv.??</span>
-          </div>
-          <div class="poke-hud-hp-row">
-            <span class="hp-label">HP</span>
-            <div class="poke-hp-bar-wrap"><div class="poke-hp-bar" id="playerFill" style="width:100%"></div></div>
-          </div>
-          <div class="poke-hp-nums" id="playerNums">—/—</div>
-          <div class="poke-stat-rows">
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Defense</span><span class="poke-stat-val" id="pStatDef">—</span></div>
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Accuracy</span><span class="poke-stat-val" id="pStatAcc">—</span></div>
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Damage</span><span class="poke-stat-val" id="pStatDmg">—</span></div>
-            <div class="poke-stat-row"><span class="poke-stat-lbl">Initiative</span><span class="poke-stat-val" id="pStatSpd">—</span></div>
-          </div>
-          <div class="poke-hud-statuses" id="playerStat"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PLAYER sprite -->
-    <div class="spr-wrap spr-player" id="playerWrap">
-      <svg id="playerSvg" class="csvg csvg-player" viewBox="0 0 32 32"></svg>
-    </div>
-
-    <!-- Team dots -->
-    <div class="team-dots" id="playerDots"></div>
-    <div class="team-dots team-dots-enemy" id="enemyDots"></div>
-
-  </div><!-- /stage -->
-
-  <!-- BOTTOM PANEL -->
-  <div class="battle-bottom">
-    <div class="dialogue-box" id="dialogueBox">
-      <div class="dlg-txt" id="dlgTxt">Battle begins!</div>
-      <div class="dlg-ind" id="dlgInd">▼</div>
-    </div>
-    <div class="action-menu" id="actionMenu">
-      <div class="moves-grid" id="movesRow"></div>
-      <div class="action-sidebar">
-        <div class="energy-display">
-          <div class="e-lbl">⚡</div>
-          <div class="e-gems" id="eGems"></div>
-          <div class="e-cnt" id="eCnt">3/3</div>
-        </div>
-        <button class="btn btn-secondary btn-sm end-turn-btn" id="endTurnBtn" onclick="playerEndTurn()">END<br>TURN</button>
-      </div>
-    </div>
+    <!-- The sky and ground elements are hidden in CSS so the background image shows through -->
+    <div id="entitiesLayer"></div>
   </div>
 
+  <!-- BOTTOM HALF: Classic Dual Screen Emulation -->
+  <div class="bottom-panel">
+    
+    <!-- Left: Dialogue / Info Box -->
+    <div class="dialogue-box" id="dialogueBox">
+      <div class="dlg-txt" id="dlgTxt">Battle begins!</div>
+    </div>
+
+    <!-- Right: Menus -->
+    <div class="menu-area" id="menuArea">
+      
+      <!-- State 0: Main Command Menu -->
+      <div class="grid-menu" id="mainMenu">
+        <button class="action-btn btn-fight" onclick="showSkillsMenu()">FIGHT</button>
+        <button class="action-btn btn-elements" onclick="showElementsModal()">ELEMENTS<br><span style="font-size:0.45rem">(Bag)</span></button>
+        <button class="action-btn btn-info" onclick="showInfoModal()">INFO<br><span style="font-size:0.45rem">(Squad)</span></button>
+        <div class="action-btn btn-empty"></div>
+      </div>
+
+      <!-- State 1: Skills Menu -->
+      <div class="grid-menu hidden" id="skillsMenu">
+        <div id="skillsGrid" class="skills-grid"></div>
+        <button class="action-btn btn-cancel" onclick="showMainMenu()">BACK</button>
+      </div>
+
+      <!-- State 2: Targeting Cancel -->
+      <div class="target-menu hidden" id="targetMenu">
+        <div style="font-family:'Press Start 2P',monospace;font-size:0.5rem;color:#fff;text-align:center;margin-bottom:15px;line-height:1.5;">Select a target!</div>
+        <button class="action-btn btn-cancel" onclick="showSkillsMenu()" style="width:100%">CANCEL</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="elementsModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">ELEMENTAL COUNTERS</div>
+    <div class="modal-body" style="font-size:0.8rem;line-height:1.8;">
+      <p><strong style="color:#ff6b35">🔥 FIRE</strong> beats <span style="color:#56ab2f">PLANT</span>, <span style="color:#a8edea">ICE</span></p>
+      <p><strong style="color:#4ecdc4">💧 WATER</strong> beats <span style="color:#ff6b35">FIRE</span></p>
+      <p><strong style="color:#56ab2f">🌿 PLANT</strong> beats <span style="color:#4ecdc4">WATER</span>, <span style="color:#f7971e">ELECTRIC</span></p>
+      <p><strong style="color:#f7971e">⚡ ELECTRIC</strong> beats <span style="color:#4ecdc4">WATER</span>, <span style="color:#7c3aed">DARK</span></p>
+      <p><strong style="color:#a8edea">❄️ ICE</strong> beats <span style="color:#56ab2f">PLANT</span>, <span style="color:#7c3aed">DARK</span></p>
+      <p><strong style="color:#7c3aed">🌑 DARK</strong> beats <span style="color:#ff6b35">FIRE</span>, <span style="color:#a8edea">ICE</span></p>
+    </div>
+    <button class="btn btn-primary" onclick="closeModals()" style="width:100%;font-size:0.7rem;">CLOSE</button>
+  </div>
+</div>
+
+<div id="infoModal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:90%; width:900px;">
+    <div class="modal-header">BATTLEFIELD INFO</div>
+    <div class="modal-body" id="infoModalBody" style="display:flex;gap:20px;text-align:left;">
+      <!-- Populated via JS -->
+    </div>
+    <button class="btn btn-primary" onclick="closeModals()" style="width:100%;font-size:0.7rem;">CLOSE</button>
+  </div>
 </div>
 
 <!-- GAME OVER -->
 <div id="gameoverScreen" class="screen">
   <div class="go-title" id="goTitle">—</div>
   <div class="go-sub" id="goSub">—</div>
-  <div class="go-stats" id="goStats"></div>
   <div class="btn-row">
     <button class="btn btn-primary" onclick="playAgain()">▶ PLAY AGAIN</button>
     <button class="btn btn-secondary" onclick="goMenu()">MENU</button>
   </div>
-</div>
-
-<div class="toast" id="toast"></div>
-<div class="cpu-ov" id="cpuOv">
-  <div class="cpu-box">⚔️ <span id="cpuThinkName">CPU</span> is thinking<div class="dots"><span>.</span><span>.</span><span>.</span></div></div>
 </div>
 
 <script src="game.js"></script>
