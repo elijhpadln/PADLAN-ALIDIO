@@ -1,448 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Axiom Clash</title>
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-:root {
-  --gold:#ffd700; --gold2:#ffaa00; --bg:#1a0a2e; --panel:#0d1117;
-  --panel2:#161b22; --border:#30363d; --text:#e6edf3; --text2:#8b949e;
-  --hp-green:#3fb950; --hp-yellow:#d29922; --hp-red:#f85149;
-  --energy:#58a6ff;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:'Rajdhani',sans-serif;
-  background:var(--bg);color:var(--text);
-  min-height:100vh;overflow:hidden;
-  background-image:
-    radial-gradient(ellipse at 30% 20%,rgba(88,166,255,.07) 0%,transparent 50%),
-    radial-gradient(ellipse at 70% 80%,rgba(255,107,71,.06) 0%,transparent 50%);
-}
-.screen{display:none;width:100%;height:100vh}
-.screen.active{display:flex;flex-direction:column}
-@keyframes screenFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.screen.active{animation:screenFade .35s ease}
-
-/* MENU */
-#menuScreen{align-items:center;justify-content:center;gap:1.4rem;text-align:center;position:relative}
-.stars{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d) ease-in-out infinite var(--delay)}
-@keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.9}}
-.game-title{
-  font-family:'Press Start 2P',monospace;
-  font-size:clamp(1rem,3.5vw,2rem);
-  background:linear-gradient(135deg,#ffd700,#ff7a47,#ce93d8);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:glow 2.5s ease-in-out infinite;line-height:1.4;position:relative;z-index:1;
-}
-@keyframes glow{0%,100%{filter:drop-shadow(0 0 18px rgba(255,215,0,.3))}50%{filter:drop-shadow(0 0 45px rgba(255,215,0,.7))}}
-.menu-creatures{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
-.mc-wrap{display:flex;flex-direction:column;align-items:center;gap:.25rem}
-.mc-wrap svg{animation:mFloat 3s ease-in-out infinite;animation-delay:var(--d2)}
-@keyframes mFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.mc-label{font-family:'Press Start 2P',monospace;font-size:.35rem;color:var(--text2)}
-.name-wrap{display:flex;flex-direction:column;gap:.4rem;align-items:center;position:relative;z-index:1}
-.name-wrap label{font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--text2)}
-input[type=text]{
-  background:var(--panel2);border:1px solid var(--border);border-radius:6px;
-  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;
-  padding:.6rem 1.2rem;text-align:center;outline:none;width:230px;transition:border-color .2s;
-}
-input:focus{border-color:var(--gold)}
-.btn{
-  font-family:'Press Start 2P',monospace;font-size:.55rem;padding:.75rem 1.6rem;
-  border:none;border-radius:6px;cursor:pointer;transition:all .15s;
-}
-.btn:active{transform:scale(.96)}
-.btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
-.btn-primary{background:linear-gradient(135deg,var(--gold2),#ff7a47);color:#0d1117;box-shadow:0 4px 18px rgba(255,170,0,.35)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(255,170,0,.5)}
-.btn-secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
-.btn-secondary:hover{border-color:var(--gold)}
-.btn-sm{font-size:.4rem;padding:.5rem .9rem}
-.btn-row{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
-
-/* TEAM SELECT */
-#teamScreen{overflow-y:auto}
-#teamScreen .inner{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:1rem}
-.screen-title{font-family:'Press Start 2P',monospace;font-size:.85rem;color:var(--gold);text-align:center;filter:drop-shadow(0 0 10px rgba(255,215,0,.4))}
-.creature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.7rem;max-width:960px;width:100%}
-.cc{
-  background:var(--panel);border:2px solid var(--border);border-radius:10px;
-  padding:.85rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
-}
-.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc);opacity:.8}
-.cc:hover{border-color:var(--acc);transform:translateY(-3px);box-shadow:0 6px 22px rgba(0,0,0,.5)}
-.cc.selected{border-color:var(--gold);background:rgba(255,215,0,.06);box-shadow:0 0 18px rgba(255,215,0,.2)}
-.cc.selected::after{content:'✓';position:absolute;top:.35rem;right:.55rem;color:var(--gold);font-size:.95rem;font-weight:900}
-.cc-sprite{display:flex;justify-content:center;margin-bottom:.35rem}
-.cc-name{font-family:'Press Start 2P',monospace;font-size:.4rem;text-align:center;margin-bottom:.2rem}
-.cc-type{font-size:.65rem;text-align:center;color:var(--acc);font-weight:700;margin-bottom:.35rem}
-.cc-stats{display:flex;justify-content:space-around;font-size:.62rem;color:var(--text2)}
-.cc-stats span{color:var(--text);font-weight:700}
-.team-preview{
-  display:flex;gap:.6rem;align-items:center;background:var(--panel);
-  padding:.75rem 1.1rem;border-radius:8px;border:1px solid var(--border);flex-wrap:wrap;justify-content:center;
-}
-.tp-label{font-family:'Press Start 2P',monospace;font-size:.4rem;color:var(--text2);width:100%;text-align:center;margin-bottom:.15rem}
-.team-slot{
-  width:52px;height:52px;border:2px dashed var(--border);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;background:var(--panel2);transition:all .2s;
-}
-.team-slot.filled{border-color:var(--gold);border-style:solid;animation:slotPop .3s ease}
-@keyframes slotPop{0%{transform:scale(.7)}100%{transform:scale(1)}}
-
-/* BATTLE */
-#battleScreen{display:none;flex-direction:column;height:100vh;overflow:hidden}
-#battleScreen.active{display:flex}
-
-.b-hud{
-  background:var(--panel);border-bottom:1px solid var(--border);
-  padding:.45rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;
-}
-.b-hud-name{font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--text2)}
-.b-hud-name strong{color:var(--gold)}
-.turn-pill{font-family:'Press Start 2P',monospace;font-size:.46rem;padding:.3rem .8rem;border-radius:20px;transition:all .3s}
-.turn-pill.mine{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid var(--gold);animation:pingP 1.5s ease-in-out infinite}
-.turn-pill.theirs{background:rgba(248,81,73,.1);color:#f85149;border:1px solid #f85149}
-@keyframes pingP{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.4)}50%{box-shadow:0 0 0 8px rgba(255,215,0,0)}}
-
-/* Stage */
-.stage{
-  flex:1;position:relative;overflow:hidden;min-height:0;
-  background:linear-gradient(180deg,#060d1c 0%,#0d1b2e 55%,#0e1f0e 55%,#0a170a 100%);
-}
-.stage-sky{position:absolute;inset:0 0 43% 0;pointer-events:none}
-.stage-ground{
-  position:absolute;bottom:0;left:0;right:0;height:43%;
-  background:linear-gradient(180deg,#162616 0%,#0e1a0e 100%);
-  border-top:2px solid rgba(100,180,100,.2);pointer-events:none;
-}
-.platform{
-  position:absolute;z-index:1;width:90px;height:10px;
-  background:radial-gradient(ellipse,rgba(255,255,255,.18) 0%,transparent 70%);border-radius:50%;
-}
-.plat-enemy{bottom:43%;left:58%;transform:translateX(-50%)}
-.plat-player{bottom:43%;left:22%;transform:translateX(-50%)}
-
-/* Sprite containers */
-.spr-wrap{
-  position:absolute;z-index:2;
-  display:flex;flex-direction:column;align-items:center;
-}
-.spr-enemy{bottom:42%;left:58%;transform:translateX(-50%)}
-.spr-player{bottom:42%;left:22%;transform:translateX(-50%)}
-
-/* HP panel above sprite */
-.spr-hp{
-  background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.12);border-radius:5px;
-  padding:.22rem .5rem;margin-bottom:.25rem;min-width:105px;
-}
-.spr-name{font-family:'Press Start 2P',monospace;font-size:.36rem;text-align:center;margin-bottom:.2rem;color:var(--text)}
-.hp-track{width:100%;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-bottom:.18rem}
-.hp-fill{height:100%;border-radius:3px;transition:width .6s ease,background .3s}
-.hp-nums{font-family:'Press Start 2P',monospace;font-size:.3rem;text-align:center;color:var(--text2)}
-.spr-statuses{font-size:.55rem;text-align:center;min-height:.75rem;margin-top:.12rem}
-
-/* Creature SVG */
-.csvg{
-  display:block;image-rendering:pixelated;
-  filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));
-  animation:idle 2s ease-in-out infinite;transform-origin:center bottom;
-}
-.spr-enemy .csvg{transform:scaleX(-1);animation:idleE 2.2s ease-in-out infinite}
-@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes idleE{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-7px)}}
-
-/* Attack / hit animations */
-@keyframes lunge{
-  0%{transform:translateX(0) translateY(0) scale(1)}
-  35%{transform:translateX(65px) translateY(-18px) scale(1.12)}
-  60%{transform:translateX(55px) translateY(-12px) scale(1.06)}
-  100%{transform:translateX(0) translateY(0) scale(1)}
-}
-@keyframes lungeE{
-  0%{transform:scaleX(-1) translateX(0)}
-  35%{transform:scaleX(-1) translateX(65px) translateY(-18px) scale(1.12)}
-  60%{transform:scaleX(-1) translateX(55px) translateY(-12px)}
-  100%{transform:scaleX(-1) translateX(0)}
-}
-@keyframes hit{
-  0%{transform:translateX(0) rotate(0)}
-  18%{transform:translateX(-13px) rotate(-3deg)}
-  36%{transform:translateX(9px) rotate(2deg)}
-  55%{transform:translateX(-6px)}
-  73%{transform:translateX(3px)}
-  100%{transform:translateX(0) rotate(0)}
-}
-@keyframes hitE{
-  0%{transform:scaleX(-1)}
-  18%{transform:scaleX(-1) translateX(-13px)}
-  36%{transform:scaleX(-1) translateX(9px)}
-  55%{transform:scaleX(-1) translateX(-6px)}
-  100%{transform:scaleX(-1) translateX(0)}
-}
-@keyframes healPop{
-  0%{transform:scale(1)}
-  40%{transform:scale(1.1);filter:drop-shadow(0 0 18px rgba(105,219,124,.9))}
-  100%{transform:scale(1)}
-}
-@keyframes healPopE{
-  0%{transform:scaleX(-1) scale(1)}
-  40%{transform:scaleX(-1) scale(1.1)}
-  100%{transform:scaleX(-1) scale(1)}
-}
-@keyframes deathFall{
-  0%{transform:translateY(0) rotate(0) scale(1);opacity:1}
-  40%{transform:translateY(-12px) rotate(6deg) scale(1.08);opacity:.75}
-  100%{transform:translateY(32px) rotate(28deg) scale(.65);opacity:0}
-}
-@keyframes deathFallE{
-  0%{transform:scaleX(-1) rotate(0);opacity:1}
-  40%{transform:scaleX(-1) rotate(-6deg) translateY(-12px);opacity:.75}
-  100%{transform:scaleX(-1) rotate(-28deg) translateY(32px) scale(.65);opacity:0}
-}
-
-/* Spell & float overlays */
-.spell-fx{
-  position:absolute;pointer-events:none;z-index:5;font-size:2.8rem;
-  animation:spellPop .65s ease forwards;
-}
-@keyframes spellPop{
-  0%{transform:scale(0) rotate(-25deg);opacity:1}
-  50%{transform:scale(1.6) rotate(8deg);opacity:1}
-  100%{transform:scale(2.2) rotate(0);opacity:0}
-}
-.fnum{
-  position:absolute;pointer-events:none;z-index:6;
-  font-family:'Press Start 2P',monospace;font-size:.85rem;
-  animation:numUp 1.4s ease forwards;text-shadow:0 2px 6px rgba(0,0,0,.9);
-}
-@keyframes numUp{
-  0%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
-  35%{opacity:1;transform:translateX(-50%) translateY(-44px) scale(1.25)}
-  100%{opacity:0;transform:translateX(-50%) translateY(-100px) scale(.7)}
-}
-.fnum.dmg{color:#ff5252} .fnum.heal{color:#69db7c}
-.fnum.shld{color:#90caf9} .fnum.buff{color:var(--gold)}
-
-/* Dialogue */
-.dialogue{
-  position:absolute;bottom:0;left:0;right:0;z-index:8;
-  background:rgba(8,12,24,.93);border-top:2px solid var(--border);
-  padding:.55rem 1.1rem;min-height:3.2rem;display:flex;align-items:center;gap:.4rem;
-}
-.dlg-txt{font-family:'Press Start 2P',monospace;font-size:.48rem;color:var(--text);line-height:2;flex:1}
-.dlg-ind{font-size:.75rem;color:var(--gold);animation:blink .7s step-end infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-
-/* Opponent overlay top-right */
-.opp-panel{
-  position:absolute;top:.7rem;right:.8rem;z-index:3;
-  background:rgba(0,0,0,.65);border:1px solid var(--border);border-radius:6px;
-  padding:.35rem .6rem;text-align:center;
-}
-.opp-panel-lbl{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--text2)}
-.opp-panel-val{font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--text)}
-.opp-panel-e{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--energy);margin-top:.15rem}
-
-/* ACTION PANEL */
-.act-panel{
-  background:var(--panel);border-top:1px solid var(--border);
-  padding:.55rem .75rem;flex-shrink:0;
-}
-.e-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem}
-.e-lbl{font-family:'Press Start 2P',monospace;font-size:.36rem;color:var(--energy)}
-.e-gems{display:flex;gap:3px;flex:1;flex-wrap:wrap}
-.e-gem{width:13px;height:13px;border-radius:3px;border:1px solid rgba(88,166,255,.3);background:rgba(88,166,255,.05);transition:all .2s}
-.e-gem.lit{background:var(--energy);border-color:var(--energy);box-shadow:0 0 6px rgba(88,166,255,.6)}
-.e-cnt{font-family:'Press Start 2P',monospace;font-size:.52rem;color:var(--energy)}
-
-.moves-row{display:flex;gap:.45rem;flex-wrap:wrap}
-.mv-btn{
-  flex:1;min-width:90px;max-width:150px;
-  background:var(--panel2);border:2px solid var(--border);border-radius:7px;
-  padding:.45rem .55rem;cursor:pointer;transition:all .15s;text-align:left;position:relative;overflow:hidden;
-}
-.mv-btn:hover{border-color:var(--gold);transform:translateY(-2px)}
-.mv-btn.sel{border-color:var(--gold);background:rgba(255,215,0,.07)}
-.mv-btn.nrg{opacity:.32;cursor:not-allowed;pointer-events:none}
-.mv-cost{
-  position:absolute;top:.28rem;right:.38rem;background:var(--energy);color:#0d1117;
-  font-family:'Press Start 2P',monospace;font-size:.36rem;width:15px;height:15px;
-  border-radius:50%;display:flex;align-items:center;justify-content:center;
-}
-.mv-emoji{font-size:1.1rem;display:block;margin-bottom:.18rem}
-.mv-name{font-family:'Press Start 2P',monospace;font-size:.34rem;color:var(--text);margin-bottom:.12rem;line-height:1.3}
-.mv-desc{font-size:.58rem;color:var(--text2);font-weight:600}
-.mv-pow{font-family:'Press Start 2P',monospace;font-size:.36rem;color:var(--gold);margin-top:.12rem}
-.bot-row{display:flex;justify-content:flex-end;margin-top:.4rem}
-
-/* GAMEOVER */
-#gameoverScreen{align-items:center;justify-content:center;gap:1.4rem;text-align:center}
-.go-title{font-family:'Press Start 2P',monospace;font-size:clamp(.9rem,3.5vw,1.8rem);filter:drop-shadow(0 0 28px currentColor)}
-.go-title.win{color:var(--gold)} .go-title.lose{color:#f85149}
-.go-sub{font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--text2);letter-spacing:.1em}
-.go-stats{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.4rem;text-align:left;min-width:230px}
-.sr{display:flex;justify-content:space-between;padding:.28rem 0;font-size:.75rem;border-bottom:1px solid rgba(255,255,255,.04)}
-.sr:last-child{border:none}
-.sr .lbl{color:var(--text2)} .sr .val{color:var(--gold);font-family:'Press Start 2P',monospace;font-size:.45rem}
-
-/* TOAST */
-.toast{
-  position:fixed;top:3.5rem;left:50%;transform:translateX(-50%);
-  background:var(--panel);border:1px solid var(--border);border-radius:6px;
-  padding:.45rem 1.1rem;font-family:'Press Start 2P',monospace;font-size:.42rem;color:var(--text2);
-  opacity:0;transition:opacity .3s;pointer-events:none;z-index:300;white-space:nowrap;
-}
-.toast.show{opacity:1}
-
-/* CPU OVERLAY */
-.cpu-ov{
-  position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:200;
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;transition:opacity .3s;
-}
-.cpu-ov.show{opacity:1;pointer-events:all}
-.cpu-box{
-  background:var(--panel);border:1px solid var(--gold);border-radius:7px;
-  padding:.7rem 1.4rem;font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--gold);
-  display:flex;align-items:center;gap:.5rem;
-}
-.dots span{animation:dotB .8s ease-in-out infinite}
-.dots span:nth-child(2){animation-delay:.25s} .dots span:nth-child(3){animation-delay:.5s}
-@keyframes dotB{0%,100%{opacity:.12}50%{opacity:1}}
-
-@media(max-width:600px){
-  .creature-grid{grid-template-columns:repeat(3,1fr)}
-  .moves-row{flex-wrap:wrap}
-  .mv-btn{min-width:80px}
-  .spr-enemy{left:62%} .spr-player{left:18%}
-  .plat-enemy{left:62%} .plat-player{left:18%}
-}
-</style>
-</head>
-<body>
-
-<!-- MENU -->
-<div id="menuScreen" class="screen active">
-  <div class="stars" id="starsEl"></div>
-  <div class="game-title">AXIOM CLASH</div>
-  <div style="font-family:'Press Start 2P',monospace;font-size:.42rem;color:var(--text2);letter-spacing:.18em;position:relative;z-index:1">CREATURE BATTLE ARENA</div>
-  <div class="menu-creatures" id="menuCreatures"></div>
-  <div class="name-wrap">
-    <label>YOUR NAME</label>
-    <input type="text" id="playerName" placeholder="Trainer..." maxlength="12" value="Trainer">
-  </div>
-  <div class="btn-row">
-    <button class="btn btn-primary" onclick="startGame()">▶ START BATTLE</button>
-  </div>
-  <div style="font-family:'Press Start 2P',monospace;font-size:.36rem;color:var(--text2);line-height:2.2;text-align:center;max-width:360px;position:relative;z-index:1">
-    PICK 3 · USE MOVES · DEFEAT ALL ENEMIES
-  </div>
-</div>
-
-<!-- TEAM SELECT -->
-<div id="teamScreen" class="screen">
-  <div class="inner">
-    <div class="screen-title">CHOOSE YOUR TEAM</div>
-    <div style="font-family:'Press Start 2P',monospace;font-size:.4rem;color:var(--text2)">SELECT 3 CREATURES</div>
-    <div class="creature-grid" id="creatureGrid"></div>
-    <div class="team-preview">
-      <div class="tp-label">YOUR TEAM</div>
-      <div class="team-slot" id="slot0"><span style="opacity:.3;font-size:.8rem">?</span></div>
-      <div class="team-slot" id="slot1"><span style="opacity:.3;font-size:.8rem">?</span></div>
-      <div class="team-slot" id="slot2"><span style="opacity:.3;font-size:.8rem">?</span></div>
-      <button class="btn btn-primary btn-sm" id="confirmBtn" onclick="confirmTeam()" disabled>FIGHT! →</button>
-    </div>
-  </div>
-</div>
-
-<!-- BATTLE -->
-<div id="battleScreen" class="screen">
-  <div class="b-hud">
-    <div class="b-hud-name" id="hudPlayer">YOU</div>
-    <div class="turn-pill" id="turnPill">—</div>
-    <div class="b-hud-name" id="hudCPU">CPU</div>
-  </div>
-
-  <div class="stage" id="stage">
-    <div class="stage-sky"></div>
-    <div class="stage-ground"></div>
-
-    <div class="platform plat-enemy"></div>
-    <div class="platform plat-player"></div>
-
-    <!-- Enemy sprite -->
-    <div class="spr-wrap spr-enemy" id="enemyWrap">
-      <div class="spr-hp" id="enemyHpBox">
-        <div class="spr-name" id="enemyName">—</div>
-        <div class="hp-track"><div class="hp-fill" id="enemyFill" style="width:100%"></div></div>
-        <div class="hp-nums" id="enemyNums">—</div>
-        <div class="spr-statuses" id="enemyStat"></div>
-      </div>
-      <svg id="enemySvg" class="csvg" width="88" height="88" viewBox="0 0 32 32"></svg>
-    </div>
-
-    <!-- Player sprite -->
-    <div class="spr-wrap spr-player" id="playerWrap">
-      <div class="spr-hp" id="playerHpBox">
-        <div class="spr-name" id="playerCName">—</div>
-        <div class="hp-track"><div class="hp-fill" id="playerFill" style="width:100%"></div></div>
-        <div class="hp-nums" id="playerNums">—</div>
-        <div class="spr-statuses" id="playerStat"></div>
-      </div>
-      <svg id="playerSvg" class="csvg" width="88" height="88" viewBox="0 0 32 32"></svg>
-    </div>
-
-    <!-- CPU info top-right -->
-    <div class="opp-panel">
-      <div class="opp-panel-lbl">HAND</div>
-      <div class="opp-panel-val" id="cpuHand">3</div>
-      <div class="opp-panel-e" id="cpuEn">⚡3</div>
-    </div>
-
-    <!-- Dialogue bottom -->
-    <div class="dialogue">
-      <div class="dlg-txt" id="dlgTxt">Battle begins!</div>
-      <div class="dlg-ind">▼</div>
-    </div>
-  </div>
-
-  <!-- Action panel -->
-  <div class="act-panel">
-    <div class="e-row">
-      <div class="e-lbl">⚡ ENERGY</div>
-      <div class="e-gems" id="eGems"></div>
-      <div class="e-cnt" id="eCnt">3/3</div>
-    </div>
-    <div class="moves-row" id="movesRow"></div>
-    <div class="bot-row">
-      <button class="btn btn-secondary btn-sm" id="endTurnBtn" onclick="playerEndTurn()">END TURN ▶</button>
-    </div>
-  </div>
-</div>
-
-<!-- GAME OVER -->
-<div id="gameoverScreen" class="screen">
-  <div class="go-title" id="goTitle">—</div>
-  <div class="go-sub" id="goSub">—</div>
-  <div class="go-stats" id="goStats"></div>
-  <div class="btn-row">
-    <button class="btn btn-primary" onclick="playAgain()">▶ PLAY AGAIN</button>
-    <button class="btn btn-secondary" onclick="goMenu()">MENU</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-<div class="cpu-ov" id="cpuOv">
-  <div class="cpu-box">🤖 CPU Thinking <div class="dots"><span>.</span><span>.</span><span>.</span></div></div>
-</div>
-
-<script>
 // ═══ SVG SPRITES ═══
 const SVG = {
   // Fire lizard
@@ -610,32 +165,32 @@ const CREATURES = [
       {id:'0_0',name:'Flame Slash', type:'attack',cost:1,power:80,  emoji:'⚔️',desc:'80 fire dmg'},
       {id:'0_1',name:'Inferno',     type:'attack',cost:3,power:160, emoji:'🔥',desc:'160 blast'},
       {id:'0_2',name:'Dragonscale', type:'shield', cost:1,power:60,  emoji:'🛡️',desc:'+60 shield'},
-      {id:'0_3',name:'Ember Surge', type:'aoe',   cost:2,power:45,  emoji:'💥',desc:'45 AOE dmg'},
+      {id:'0_3',name:'Ember Surge', type:'aoe',   cost:2,power:45,  emoji:'💥',desc:'45 AOE all'},
     ]},
   { id:1, name:'Tidecaller',  type:'Water',     color:'#4ecdc4', maxHp:380, atk:5,  spd:6,
     moves:[
       {id:'1_0',name:'Tidal Wave',   type:'attack',cost:2,power:110,emoji:'🌊',desc:'110 wave dmg'},
       {id:'1_1',name:'Heal Spring',  type:'heal',  cost:1,power:90, emoji:'💚',desc:'+90 HP'},
       {id:'1_2',name:'Aqua Barrier', type:'shield',cost:1,power:55, emoji:'🛡️',desc:'+55 shield'},
-      {id:'1_3',name:'Flood',        type:'aoe',   cost:3,power:55, emoji:'💦',desc:'55 AOE dmg'},
+      {id:'1_3',name:'Flood',        type:'aoe',   cost:3,power:55, emoji:'💦',desc:'55 AOE all'},
     ]},
   { id:2, name:'Thornback',   type:'Plant',     color:'#56ab2f', maxHp:520, atk:0,  spd:4,
     moves:[
       {id:'2_0',name:'Vine Whip',     type:'attack',cost:1,power:70, emoji:'🌱',desc:'70 dmg'},
-      {id:'2_1',name:'Natures Grasp', type:'aoe',   cost:3,power:55, emoji:'🌲',desc:'55 AOE dmg'},
+      {id:'2_1',name:'Natures Grasp', type:'aoe',   cost:3,power:55, emoji:'🌲',desc:'55 AOE all'},
       {id:'2_2',name:'Photosynthesis',type:'heal',  cost:1,power:120,emoji:'💚',desc:'+120 HP'},
       {id:'2_3',name:'Thorn Armor',   type:'shield',cost:2,power:90, emoji:'🛡️',desc:'+90 shield'},
     ]},
   { id:3, name:'Stormclaw',   type:'Lightning', color:'#f7971e', maxHp:360, atk:15, spd:10,
     moves:[
       {id:'3_0',name:'Thunder Strike',type:'attack',cost:1,power:95, emoji:'⚡',desc:'95 dmg'},
-      {id:'3_1',name:'Volt Chain',    type:'aoe',   cost:2,power:45, emoji:'🌩️',desc:'45 AOE dmg'},
+      {id:'3_1',name:'Volt Chain',    type:'aoe',   cost:2,power:45, emoji:'🌩️',desc:'45 AOE all'},
       {id:'3_2',name:'Power Surge',   type:'buff',  cost:1,power:0,  emoji:'💪',atkBoost:25,desc:'+25 ATK'},
       {id:'3_3',name:'Overcharge',    type:'attack',cost:3,power:180,emoji:'🔱',desc:'180 dmg'},
     ]},
   { id:4, name:'Frostmane',   type:'Ice',       color:'#a8edea', maxHp:460, atk:8,  spd:5,
     moves:[
-      {id:'4_0',name:'Blizzard',  type:'aoe',   cost:2,power:60, emoji:'❄️',desc:'60 AOE dmg'},
+      {id:'4_0',name:'Blizzard',  type:'aoe',   cost:2,power:60, emoji:'❄️',desc:'60 AOE all'},
       {id:'4_1',name:'Ice Fang',  type:'attack',cost:1,power:90, emoji:'🐺',desc:'90 dmg'},
       {id:'4_2',name:'Frost Armor',type:'shield',cost:1,power:85, emoji:'🛡️',desc:'+85 shield'},
       {id:'4_3',name:'Glacial Ray',type:'attack',cost:3,power:150,emoji:'🌨️',desc:'150 dmg'},
@@ -649,25 +204,26 @@ const CREATURES = [
     ]},
 ];
 
+// ═══ TYPE COLORS for move badges ═══
+// ═══ TYPE COLORS ═══
+const TYPE_COLORS={
+  attack:'#c0392b', aoe:'#8e44ad', heal:'#27ae60',
+  shield:'#2980b9', buff:'#f39c12'
+};
+
 // ═══ STATE ═══
 let G={};
 let isAnimating=false;
 let cpuQueue=[];
-let bStats={pm:0,cm:0,dmg:0,rounds:0};
+let bStats={pm:0,cm:0,dmg:0};
 
 // ═══ UTILS ═══
 const clone=x=>JSON.parse(JSON.stringify(x));
 const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}; return a;};
 
-function buildCreature(base){
-  return{...clone(base),currentHp:base.maxHp,shield:0,atkBonus:0,alive:true};
-}
-function buildDeck(c){
-  let d=[];
-  c.moves.forEach(m=>{for(let i=0;i<4;i++)d.push(clone(m))});
-  return shuffle(d);
-}
+function buildCreature(base){return{...clone(base),currentHp:base.maxHp,shield:0,atkBonus:0,alive:true};}
+function buildDeck(c){let d=[];c.moves.forEach(m=>{for(let i=0;i<4;i++)d.push(clone(m))});return shuffle(d);}
 function drawCards(st,n=1){
   for(let i=0;i<n;i++){
     if(st.deck.length===0){st.deck=shuffle([...st.discard]);st.discard=[];}
@@ -675,6 +231,172 @@ function drawCards(st,n=1){
   }
 }
 function aliveOf(team){return team.filter(c=>c.currentHp>0);}
+
+// ═══ BACKGROUND SCENERY ═══
+function buildScenery(){
+  const svg=document.getElementById('scenerySvg');
+  const stageEl=document.getElementById('stage');
+  const W=stageEl.offsetWidth||800;
+  const H=stageEl.offsetHeight||280;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  const groundY=H*0.42;
+
+  // Distant mountains — 3 layers for depth
+  const mountains=`
+    <polygon points="0,${groundY} ${W*0.08},${groundY*0.45} ${W*0.18},${groundY*0.72} ${W*0.28},${groundY*0.32} ${W*0.38},${groundY*0.6} ${W*0.5},${groundY*0.18} ${W*0.62},${groundY*0.5} ${W*0.72},${groundY*0.28} ${W*0.82},${groundY*0.55} ${W*0.9},${groundY*0.38} ${W},${groundY*0.62} ${W},${groundY} 0,${groundY}" fill="#1a3860" opacity=".7"/>
+    <polygon points="0,${groundY} ${W*0.05},${groundY*0.58} ${W*0.14},${groundY*0.8} ${W*0.22},${groundY*0.48} ${W*0.32},${groundY*0.7} ${W*0.44},${groundY*0.35} ${W*0.56},${groundY*0.65} ${W*0.65},${groundY*0.45} ${W*0.76},${groundY*0.68} ${W*0.86},${groundY*0.5} ${W*0.95},${groundY*0.72} ${W},${groundY*0.62} ${W},${groundY} 0,${groundY}" fill="#0f2548" opacity=".55"/>
+    <polygon points="0,${groundY} ${W*0.1},${groundY*0.7} ${W*0.2},${groundY*0.88} ${W*0.3},${groundY*0.62} ${W*0.42},${groundY*0.82} ${W*0.54},${groundY*0.55} ${W*0.66},${groundY*0.78} ${W*0.75},${groundY*0.6} ${W*0.88},${groundY*0.8} ${W},${groundY*0.72} ${W},${groundY} 0,${groundY}" fill="#0a1830" opacity=".4"/>
+    <line x1="0" y1="${groundY}" x2="${W}" y2="${groundY}" stroke="rgba(255,200,80,.12)" stroke-width="2"/>
+  `;
+
+  // Tall pine tree
+  function pine(x,y,s){
+    return `<g transform="translate(${x},${y}) scale(${s||1})">
+      <rect x="-4" y="15" width="8" height="12" fill="#4a2e0e" rx="1"/>
+      <polygon points="0,-28 -16,0 16,0" fill="#174d10"/>
+      <polygon points="0,-38 -13,-10 13,-10" fill="#1d5e14"/>
+      <polygon points="0,-46 -10,-20 10,-20" fill="#22701a"/>
+      <polygon points="0,-52 -7,-30 7,-30" fill="#278020"/>
+      <polygon points="-4,-28 -16,0 0,-6" fill="#0e3008" opacity=".5"/>
+      <polygon points="-3,-38 -13,-10 0,-14" fill="#0e3008" opacity=".4"/>
+    </g>`;
+  }
+  // Broad deciduous tree
+  function broadtree(x,y,s){
+    return `<g transform="translate(${x},${y}) scale(${s||1})">
+      <rect x="-5" y="10" width="10" height="18" fill="#5a3a1a" rx="2"/>
+      <ellipse cx="0" cy="-10" rx="22" ry="18" fill="#1e6e12"/>
+      <ellipse cx="-10" cy="-5" rx="16" ry="13" fill="#175a0e"/>
+      <ellipse cx="10" cy="-8" rx="18" ry="15" fill="#238a18"/>
+      <ellipse cx="0" cy="-18" rx="14" ry="12" fill="#2a9a1e"/>
+    </g>`;
+  }
+  // Bush
+  function bush(x,y,s){
+    return `<g transform="translate(${x},${y}) scale(${s||1})">
+      <ellipse cx="0" cy="0" rx="20" ry="13" fill="#246618"/>
+      <ellipse cx="-11" cy="2" rx="13" ry="10" fill="#1c5212"/>
+      <ellipse cx="12" cy="1" rx="15" ry="11" fill="#2a7a1e"/>
+      <ellipse cx="0" cy="-5" rx="11" ry="9" fill="#32901e"/>
+    </g>`;
+  }
+  // Tall grass tuft
+  function grass(x,y,s){
+    return `<g transform="translate(${x},${y}) scale(${s||1})">
+      <line x1="0" y1="0" x2="-4" y2="-14" stroke="#4a9830" stroke-width="2" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="0" y2="-18" stroke="#58a838" stroke-width="2" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="5" y2="-15" stroke="#4a9830" stroke-width="2" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="-7" y2="-10" stroke="#3a7820" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="0" y1="0" x2="8" y2="-11" stroke="#3a7820" stroke-width="1.5" stroke-linecap="round"/>
+    </g>`;
+  }
+  // Rock
+  function rock(x,y,s){
+    return `<g transform="translate(${x},${y}) scale(${s||1})">
+      <ellipse cx="0" cy="0" rx="18" ry="10" fill="#3a4050"/>
+      <ellipse cx="-4" cy="-3" rx="14" ry="8" fill="#4a5060"/>
+      <ellipse cx="4" cy="-4" rx="10" ry="6" fill="#565c6e"/>
+      <ellipse cx="-6" cy="-2" rx="5" ry="3" fill="#6a7080" opacity=".4"/>
+    </g>`;
+  }
+  // Flowers
+  function flowers(x,y,s){
+    return `<g transform="translate(${x},${y}) scale(${s||1})">
+      <circle cx="0" cy="-5" r="3.5" fill="#ffee44" opacity=".9"/>
+      <circle cx="10" cy="-3" r="3" fill="#ff88aa" opacity=".9"/>
+      <circle cx="-8" cy="-2" r="2.5" fill="#88aaff" opacity=".9"/>
+      <circle cx="5" cy="-8" r="2" fill="#ff9944" opacity=".85"/>
+      <line x1="0" y1="0" x2="0" y2="-4" stroke="#5a9830" stroke-width="1.2"/>
+      <line x1="10" y1="0" x2="10" y2="-2" stroke="#5a9830" stroke-width="1.2"/>
+      <line x1="-8" y1="0" x2="-8" y2="-1" stroke="#5a9830" stroke-width="1.2"/>
+    </g>`;
+  }
+
+  let c = mountains;
+
+  // === FAR BACKGROUND TREES (behind horizon, very small) ===
+  c+=pine(W*0.05,groundY+1,0.45);
+  c+=pine(W*0.09,groundY-2,0.52);
+  c+=pine(W*0.87,groundY+1,0.48);
+  c+=pine(W*0.91,groundY-1,0.55);
+  c+=pine(W*0.95,groundY+2,0.42);
+  c+=broadtree(W*0.13,groundY+2,0.5);
+  c+=broadtree(W*0.83,groundY+1,0.5);
+
+  // === MID TREES ===
+  c+=pine(W*0.28,groundY+10,0.85);
+  c+=pine(W*0.34,groundY+6,0.95);
+  c+=pine(W*0.4,groundY+8,0.78);
+  c+=broadtree(W*0.45,groundY+10,0.75);
+  c+=pine(W*0.62,groundY+7,0.82);
+  c+=pine(W*0.68,groundY+5,0.92);
+  c+=broadtree(W*0.74,groundY+9,0.8);
+  c+=pine(W*0.79,groundY+6,0.88);
+
+  // === FOREGROUND ROCKS ===
+  c+=rock(W*0.07,H*0.53,0.7);
+  c+=rock(W*0.88,H*0.52,0.65);
+  c+=rock(W*0.5,H*0.51,0.5);
+
+  // === FOREGROUND BUSHES ===
+  c+=bush(W*0.02,H*0.56,0.8);
+  c+=bush(W*0.1,H*0.57,0.65);
+  c+=bush(W*0.18,H*0.55,0.58);
+  c+=bush(W*0.43,H*0.54,0.72);
+  c+=bush(W*0.57,H*0.55,0.82);
+  c+=bush(W*0.82,H*0.54,0.7);
+  c+=bush(W*0.9,H*0.56,0.62);
+  c+=bush(W*0.97,H*0.55,0.55);
+
+  // === GRASS TUFTS ===
+  for(let gx=0.03;gx<1;gx+=0.06){
+    if(gx>0.19&&gx<0.28) continue; // gap for player
+    if(gx>0.58&&gx<0.66) continue; // gap for enemy
+    c+=grass(W*gx,H*0.59,0.7+Math.random()*0.4);
+  }
+
+  // === FLOWERS ===
+  c+=flowers(W*0.05,H*0.62,0.9);
+  c+=flowers(W*0.16,H*0.61,0.8);
+  c+=flowers(W*0.47,H*0.60,1.0);
+  c+=flowers(W*0.8,H*0.62,0.85);
+  c+=flowers(W*0.93,H*0.61,0.75);
+
+  svg.innerHTML=c;
+}
+
+// ═══ CLOUD GENERATOR ═══
+function buildClouds(){
+  const layer=document.getElementById('cloudLayer');
+  if(!layer)return;
+  layer.innerHTML='';
+  // Build double-width of SVG clouds
+  for(let pass=0;pass<2;pass++){
+    const offX=pass===1?50:0; // second set offset by 50%
+    [
+      {x:5+offX,y:18,w:180,h:55},
+      {x:22+offX,y:28,w:220,h:65},
+      {x:14+offX,y:55,w:150,h:40},
+      {x:38+offX,y:10,w:160,h:50},
+      {x:55+offX,y:35,w:200,h:60},
+      {x:68+offX,y:15,w:170,h:52},
+      {x:82+offX,y:42,w:140,h:45},
+    ].forEach(c=>{
+      const el=document.createElement('div');
+      el.style.cssText=`
+        position:absolute;
+        left:${c.x}%;top:${c.y}%;
+        width:${c.w}px;height:${c.h}px;
+        background:rgba(255,255,255,${0.55+Math.random()*0.2});
+        border-radius:50px;
+        filter:blur(${6+Math.random()*4}px);
+        pointer-events:none;
+      `;
+      layer.appendChild(el);
+    });
+  }
+}
 
 // ═══ INIT ═══
 function startGame(){
@@ -704,48 +426,78 @@ function initBattle(pIds,cIds){
   };
   G.p=mk(pIds); G.c=mk(cIds);
   G.round=1; G.turn='player'; G.over=false;
-  bStats={pm:0,cm:0,dmg:0,rounds:0};
+  bStats={pm:0,cm:0,dmg:0};
   G.cpuName=['Rival Zed','Shadow Kai','Storm Nova','Chaos Rex'][rnd(0,3)];
 
   drawCards(G.p,3); drawCards(G.c,3);
 
-  document.getElementById('hudPlayer').innerHTML=`YOU · <strong>${G.playerName}</strong>`;
-  document.getElementById('hudCPU').innerHTML=`CPU · <strong>${G.cpuName}</strong>`;
+  document.getElementById('cpuThinkName').textContent=G.cpuName;
 
   setSprite('playerSvg',G.p.active.id);
   setSprite('enemySvg',G.c.active.id);
   renderBattleUI();
-  say(`Go ${G.p.active.name}! Wild ${G.c.active.name} appeared!`);
+  typeText(`A wild ${G.c.active.name} appeared!\nGo, ${G.p.active.name}!`);
 }
 
-// ═══ SPRITE ═══
+// ═══ SPRITE with 3D lighting overlay ═══
 function setSprite(svgId,cid){
   const svg=document.getElementById(svgId);
-  svg.innerHTML=SVG[cid]||'';
-  svg.style.filter=`drop-shadow(0 4px 14px ${CREATURES[cid].color}aa)`;
+  const c=CREATURES[cid];
+  svg.innerHTML=SVG[cid]+`
+    <radialGradient id="light3d_${svgId}" cx="35%" cy="25%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.35"/>
+    </radialGradient>
+    <rect x="0" y="0" width="32" height="32" fill="url(#light3d_${svgId})" rx="2"/>
+  `;
+  svg.style.filter=`drop-shadow(0 6px 18px ${c.color}cc) drop-shadow(-3px -3px 6px rgba(255,255,255,.1))`;
+  const dotId=svgId==='playerSvg'?'playerTypeDot':'enemyTypeDot';
+  const dot=document.getElementById(dotId);
+  if(dot)dot.style.background=c.color;
+  // Also update portrait
+  const isPlayer=svgId==='playerSvg';
+  const psvg=document.getElementById(isPlayer?'playerPortrait':'enemyPortrait');
+  const pname=document.getElementById(isPlayer?'playerPortraitName':'enemyPortraitName');
+  if(psvg){psvg.innerHTML=SVG[cid];psvg.style.filter=`drop-shadow(0 3px 10px ${c.color}99)`;}
+  if(pname)pname.textContent=c.type.toUpperCase();
 }
+
+// ═══ TYPEWRITER dialogue ═══
+let _typeTimer=null;
+function typeText(txt){
+  const el=document.getElementById('dlgTxt');
+  if(_typeTimer)clearInterval(_typeTimer);
+  el.textContent='';
+  let i=0;
+  const flat=txt.replace(/\n/g,' ');
+  _typeTimer=setInterval(()=>{
+    el.textContent+=flat[i];i++;
+    if(i>=flat.length)clearInterval(_typeTimer);
+  },28);
+}
+function say(t){typeText(t);}
 
 // ═══ UI ═══
 function renderBattleUI(){
   if(!G.p)return;
   const isMine=G.turn==='player'&&!G.over;
-  const pill=document.getElementById('turnPill');
-  pill.textContent=isMine?'⚡ YOUR TURN':"⏳ CPU TURN";
-  pill.className='turn-pill '+(isMine?'mine':'theirs');
 
-  // Energy gems
   const gems=document.getElementById('eGems'); gems.innerHTML='';
   const show=Math.min(G.p.maxEnergy,10);
   for(let i=0;i<show;i++){const g=document.createElement('div');g.className='e-gem'+(i<G.p.energy?' lit':'');gems.appendChild(g);}
   document.getElementById('eCnt').textContent=`${G.p.energy}/${G.p.maxEnergy}`;
 
-  // Moves
   renderMoves(G.p.hand,G.p.energy,isMine);
-
   document.getElementById('endTurnBtn').disabled=!isMine||isAnimating;
-  document.getElementById('cpuHand').textContent=G.c.hand.length;
-  document.getElementById('cpuEn').textContent=`⚡${G.c.energy}`;
+  document.getElementById('actionMenu').style.display=isMine?'flex':'none';
+  document.getElementById('dialogueBox').style.flex=isMine?'0 0 58%':'1';
+
   updateHpBars();
+  renderTeamDots();
+
+  document.getElementById('playerLevel').textContent=`Lv.${G.p.active.spd+5}`;
+  document.getElementById('enemyLevel').textContent=`Lv.${G.c.active.spd+5}`;
 }
 
 function updateHpBars(){
@@ -755,17 +507,35 @@ function updateHpBars(){
 
   document.getElementById('playerCName').textContent=p.name;
   document.getElementById('playerFill').style.cssText=`width:${pp}%;background:${col(pp)}`;
-  document.getElementById('playerNums').textContent=`${p.currentHp}/${p.maxHp}`;
+  document.getElementById('playerNums').textContent=`${p.currentHp} / ${p.maxHp}`;
   let ps=''; if(p.shield>0)ps+=`<span style="color:#90caf9">🛡️${p.shield}</span> `;
   if(p.atkBonus>0)ps+=`<span style="color:var(--gold)">+${p.atkBonus}ATK</span>`;
   document.getElementById('playerStat').innerHTML=ps;
 
   document.getElementById('enemyName').textContent=e.name;
   document.getElementById('enemyFill').style.cssText=`width:${ep}%;background:${col(ep)}`;
-  document.getElementById('enemyNums').textContent=`${e.currentHp}/${e.maxHp}`;
   let es=''; if(e.shield>0)es+=`<span style="color:#90caf9">🛡️${e.shield}</span> `;
   if(e.atkBonus>0)es+=`<span style="color:var(--gold)">+${e.atkBonus}ATK</span>`;
   document.getElementById('enemyStat').innerHTML=es;
+
+  // Stat rows
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('pStatDef',Math.round(p.maxHp/50)); set('pStatAcc',100); set('pStatDmg',p.atk+(p.atkBonus||0)); set('pStatSpd',p.spd);
+  set('eStatDef',Math.round(e.maxHp/50)); set('eStatAcc',100); set('eStatDmg',e.atk+(e.atkBonus||0)); set('eStatSpd',e.spd);
+}
+
+function renderTeamDots(){
+  const render=(cid,state)=>{
+    const el=document.getElementById(cid); el.innerHTML='';
+    state.team.forEach(c=>{
+      const d=document.createElement('div'); d.className='t-dot';
+      if(c.currentHp<=0)d.classList.add('fainted');
+      else if(c===state.active)d.classList.add('active');
+      el.appendChild(d);
+    });
+  };
+  render('playerDots',G.p);
+  render('enemyDots',G.c);
 }
 
 function renderMoves(hand,energy,isMine){
@@ -777,14 +547,16 @@ function renderMoves(hand,energy,isMine){
     const ok=card.cost<=energy&&isMine;
     const btn=document.createElement('button');
     btn.className='mv-btn'+(ok?'':' nrg');
+    const typeBg=TYPE_COLORS[card.type]||'#555';
     const c=CREATURES.find(cr=>cr.moves.find(m=>m.id===card.id));
-    const tc=c?c.color:'#aaa';
-    btn.innerHTML=`<div class="mv-cost">${card.cost}</div>
+    btn.style.setProperty('--mv-color',typeBg);
+    btn.innerHTML=`
+      <div class="mv-cost">${card.cost}</div>
       <span class="mv-emoji">${card.emoji||'⚔️'}</span>
       <div class="mv-name">${card.name}</div>
-      <div class="mv-desc" style="color:${tc}">${card.desc}</div>
-      <div class="mv-pow">${card.power>0?card.power+(card.type==='heal'?' HP':card.type==='shield'?' DEF':' DMG'):card.atkBoost?'+'+card.atkBoost+' ATK':''}</div>`;
-    if(ok) btn.onclick=()=>playerUseMove(card);
+      <div class="mv-desc">${card.desc}</div>
+      <span class="mv-type-badge" style="background:${typeBg}">${card.type.toUpperCase()}</span>`;
+    if(ok)btn.onclick=()=>playerUseMove(card);
     row.appendChild(btn);
   });
 }
@@ -799,18 +571,18 @@ function playerUseMove(card){
 function playerEndTurn(){
   if(G.turn!=='player'||isAnimating||G.over)return;
   G.turn='cpu';
-  say(`${G.p.active.name} holds position...`);
+  say(`${G.p.active.name} is waiting...`);
   renderBattleUI();
   setTimeout(()=>doCpuTurn(),700);
 }
 
 function startPlayerTurn(){
-  G.turn='player'; G.round++; bStats.rounds++;
+  G.turn='player'; G.round++;
   G.p.maxEnergy=Math.min(G.p.maxEnergy+1,10);
   G.p.energy=G.p.maxEnergy;
   G.p.active.atkBonus=0; G.c.active.atkBonus=0;
   drawCards(G.p,2);
-  say(`Round ${G.round} — Your move, ${G.playerName}!`);
+  say(`Round ${G.round} — What will ${G.p.active.name} do?`);
   renderBattleUI();
   if(checkOver())return;
 }
@@ -830,7 +602,6 @@ function executeMove(who,card){
   const atkSvg=document.getElementById(isP?'playerSvg':'enemySvg');
   const defSvg=document.getElementById(isP?'enemySvg':'playerSvg');
 
-  // Lunge on attacker
   if(card.type==='attack'||card.type==='aoe'){
     atkSvg.style.animation='none'; void atkSvg.offsetWidth;
     atkSvg.style.animation=isP?'lunge .55s ease':'lungeE .55s ease';
@@ -850,14 +621,25 @@ function executeMove(who,card){
       spawnNum(`-${dmg}`,defSvg,sr,'dmg');
       spawnFx(card.emoji,defSvg,sr);
       msg=`${actor.active.name} used ${card.name}! ${dmg} damage!`;
+
     } else if(card.type==='aoe'){
-      const dmg=calcDmg(card.power+actor.active.atkBonus,enemy.active);
-      enemy.active.currentHp=Math.max(0,enemy.active.currentHp-dmg);
-      bStats.dmg+=dmg;
+      // ✅ AOE hits ALL alive enemies
+      let totalDmg=0;
+      enemy.team.forEach(target=>{
+        if(target.currentHp>0){
+          const dmg=calcDmg(card.power+actor.active.atkBonus,target);
+          target.currentHp=Math.max(0,target.currentHp-dmg);
+          bStats.dmg+=dmg; totalDmg+=dmg;
+        }
+      });
+      const flash=document.createElement('div');
+      flash.className='aoe-flash'; stage.appendChild(flash);
+      setTimeout(()=>flash.remove(),550);
       doHitAnim(defSvg,isP?'enemy':'player');
-      spawnNum(`-${dmg}`,defSvg,sr,'dmg');
+      spawnNum(`-${totalDmg}`,defSvg,sr,'dmg');
       spawnFx(card.emoji,defSvg,sr);
-      msg=`${actor.active.name} used ${card.name}! AOE ${dmg} dmg!`;
+      msg=`${actor.active.name} used ${card.name}! Hit all for ${totalDmg} total!`;
+
     } else if(card.type==='heal'){
       const old=actor.active.currentHp;
       actor.active.currentHp=Math.min(actor.active.maxHp,actor.active.currentHp+card.power);
@@ -866,22 +648,25 @@ function executeMove(who,card){
       spawnNum(`+${actual}`,atkSvg,sr,'heal');
       spawnFx(card.emoji,atkSvg,sr);
       msg=`${actor.active.name} used ${card.name}! +${actual} HP!`;
+
     } else if(card.type==='shield'){
       actor.active.shield+=card.power;
       doHealAnim(atkSvg,isP);
       spawnNum(`🛡️+${card.power}`,atkSvg,sr,'shld');
       spawnFx(card.emoji,atkSvg,sr);
-      msg=`${actor.active.name} put up a shield! +${card.power} DEF!`;
+      msg=`${actor.active.name} used ${card.name}! +${card.power} DEF!`;
+
     } else if(card.type==='buff'){
       actor.active.atkBonus=(actor.active.atkBonus||0)+(card.atkBoost||0);
       doHealAnim(atkSvg,isP);
       spawnNum(`⚡+${card.atkBoost}`,atkSvg,sr,'buff');
       spawnFx(card.emoji,atkSvg,sr);
-      msg=`${actor.active.name} powers up! +${card.atkBoost} ATK!`;
+      msg=`${actor.active.name} used ${card.name}! +${card.atkBoost} ATK!`;
     }
 
     say(msg);
     updateHpBars();
+    renderTeamDots();
 
     setTimeout(()=>{
       isAnimating=false;
@@ -908,6 +693,7 @@ function handleFaint(state,side){
   svg.style.animation='none'; void svg.offsetWidth;
   svg.style.animation=side==='enemy'?'deathFallE .9s ease forwards':'deathFall .9s ease forwards';
   say(`${state.active.name} fainted!`);
+  renderTeamDots();
 
   setTimeout(()=>{
     const next=state.team.find(c=>c.id!==state.active.id&&c.currentHp>0);
@@ -918,7 +704,9 @@ function handleFaint(state,side){
       drawCards(state,2);
       svg.style.animation='';
       setSprite(svgId,next.id);
-      say(`${next.name} was sent out!`);
+      if(side==='player')document.getElementById('playerLevel').textContent=`Lv.${next.spd+5}`;
+      else document.getElementById('enemyLevel').textContent=`Lv.${next.spd+5}`;
+      say(`Go, ${next.name}!`);
       setTimeout(()=>{
         if(checkOver())return;
         renderBattleUI();
@@ -935,10 +723,10 @@ function doHitAnim(svg,side){
   svg.style.animation='none'; void svg.offsetWidth;
   svg.style.animation=side==='enemy'?'hitE .5s ease':'hit .5s ease';
   setTimeout(()=>svg.style.animation='',600);
-  const boxId=side==='enemy'?'enemyHpBox':'playerHpBox';
-  const box=document.getElementById(boxId);
-  box.style.background='rgba(255,82,82,.3)';
-  setTimeout(()=>box.style.background='',400);
+  const hudId=side==='enemy'?'enemyHud':'playerHud';
+  const box=document.getElementById(hudId);
+  box.style.animation='hudFlash .4s ease';
+  setTimeout(()=>box.style.animation='',450);
 }
 
 function doHealAnim(svg,isPlayer){
@@ -950,8 +738,7 @@ function doHealAnim(svg,isPlayer){
 function spawnNum(text,anchorSvg,stageRect,type){
   const r=anchorSvg.getBoundingClientRect();
   const el=document.createElement('div');
-  el.className='fnum '+type;
-  el.textContent=text;
+  el.className='fnum '+type; el.textContent=text;
   el.style.left=(r.left+r.width/2-stageRect.left)+'px';
   el.style.top=(r.top+r.height/3-stageRect.top)+'px';
   document.getElementById('stage').appendChild(el);
@@ -961,8 +748,7 @@ function spawnNum(text,anchorSvg,stageRect,type){
 function spawnFx(emoji,anchorSvg,stageRect){
   const r=anchorSvg.getBoundingClientRect();
   const el=document.createElement('div');
-  el.className='spell-fx';
-  el.textContent=emoji;
+  el.className='spell-fx'; el.textContent=emoji;
   el.style.left=(r.left+r.width/2-stageRect.left-18)+'px';
   el.style.top=(r.top+r.height/2-stageRect.top-18)+'px';
   document.getElementById('stage').appendChild(el);
@@ -976,12 +762,10 @@ function doCpuTurn(){
   G.c.energy=G.c.maxEnergy;
   drawCards(G.c,2);
   if(checkOver()){showCpuThink(false);return;}
-
   cpuQueue=[];
   const sorted=[...G.c.hand].sort((a,b)=>cpuPri(b)-cpuPri(a));
   let sim=G.c.energy;
   for(const c of sorted){if(c.cost<=sim){cpuQueue.push(c);sim-=c.cost;if(sim<=0)break;}}
-
   setTimeout(()=>{showCpuThink(false);continueCpu();},900);
 }
 
@@ -995,7 +779,7 @@ function cpuPri(card){
 function continueCpu(){
   if(G.over)return;
   if(cpuQueue.length===0){
-    say(`${G.c.active.name} waits...`);
+    say(`${G.c.active.name} is waiting...`);
     setTimeout(()=>startPlayerTurn(),500);
     return;
   }
@@ -1075,13 +859,16 @@ function updateTeamPreview(){
 }
 
 // ═══ MISC ═══
-function say(t){document.getElementById('dlgTxt').textContent=t;}
 function showCpuThink(s){document.getElementById('cpuOv').classList.toggle('show',s);}
 function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
 function showScreen(n){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(n+'Screen').classList.add('active');
-  if(n==='battle')renderBattleUI();
+  if(n==='battle'){
+    renderBattleUI();
+    // Build scenery after screen is visible
+    setTimeout(()=>{buildScenery();buildClouds();},50);
+  }
 }
 function playAgain(){startGame();}
 function goMenu(){G={};showScreen('menu');}
@@ -1097,7 +884,6 @@ function makeStars(){
   }
 }
 
-// Menu creature previews
 function buildMenuCreatures(){
   const wrap=document.getElementById('menuCreatures');
   CREATURES.forEach((c,i)=>{
@@ -1113,6 +899,3 @@ function buildMenuCreatures(){
 makeStars();
 buildMenuCreatures();
 showScreen('menu');
-</script>
-</body>
-</html>
