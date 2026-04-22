@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axiom Clash</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --fire: #ff6b35;
+    --water: #4ecdc4;
+    --plant: #56ab2f;
+    --lightning: #f7971e;
+    --ice: #a8edea;
+    --dark: #7c3aed;
+    --gold: #ffd700;
+    --gold2: #ffaa00;
+    --bg: #0a0a1a;
+    --panel: #0f1628;
+    --panel2: #16203a;
+    --border: #2a3a6a;
+    --text: #e0e8ff;
+    --text2: #8899cc;
+    --hp-green: #22c55e;
+    --hp-yellow: #f59e0b;
+    --hp-red: #ef4444;
+    --energy: #38bdf8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(78,205,196,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 60% 80%, rgba(255,107,53,0.05) 0%, transparent 50%);
+  }
+
+  /* ─── SCREENS ─── */
+  .screen { display: none; width: 100%; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* ─── MENU ─── */
+  #menuScreen {
+    text-align: center;
+    gap: 2rem;
+    position: relative;
+  }
+
+  .menu-bg {
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cdefs%3E%3Cpattern id='g' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='50' cy='50' r='1' fill='%232a3a6a' opacity='0.4'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3C/svg%3E");
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  .game-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold), var(--gold2), #ff6b35, var(--dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    letter-spacing: 0.05em;
+    animation: titlePulse 3s ease-in-out infinite;
+    position: relative;
+  }
+
+  @keyframes titlePulse {
+    0%,100% { filter: drop-shadow(0 0 20px rgba(255,215,0,0.3)); }
+    50% { filter: drop-shadow(0 0 40px rgba(255,215,0,0.6)); }
+  }
+
+  .game-subtitle {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    color: var(--text2);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    margin-top: -1rem;
+  }
+
+  .creature-parade {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+
+  .creature-icon {
+    font-size: 3rem;
+    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 15px currentColor);
+  }
+  .creature-icon:nth-child(2) { animation-delay: 0.5s; }
+  .creature-icon:nth-child(3) { animation-delay: 1s; }
+  .creature-icon:nth-child(4) { animation-delay: 1.5s; }
+  .creature-icon:nth-child(5) { animation-delay: 2s; }
+  .creature-icon:nth-child(6) { animation-delay: 2.5s; }
+
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .name-input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .name-input-wrap label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--text2);
+  }
+
+  input[type="text"] {
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    text-align: center;
+    outline: none;
+    width: 280px;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--gold); }
+
+  .btn-group {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 0.9rem 2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.1);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .btn:hover::before { opacity: 1; }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold2), var(--fire));
+    color: #0a0a1a;
+    box-shadow: 0 4px 20px rgba(255,170,0,0.3);
+  }
+  .btn-primary:hover { box-shadow: 0 4px 30px rgba(255,170,0,0.5); transform: translateY(-2px); }
+
+  .btn-secondary {
+    background: var(--panel2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--gold); }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #7c3aed);
+    color: white;
+    box-shadow: 0 4px 20px rgba(239,68,68,0.3);
+  }
+
+  .btn-sm {
+    font-size: 0.7rem;
+    padding: 0.5rem 1rem;
+  }
+
+  /* ─── TEAM SELECT ─── */
+  #teamScreen { padding: 1.5rem; gap: 1.5rem; }
+
+  .screen-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: 1.8rem;
+    color: var(--gold);
+    text-align: center;
+    filter: drop-shadow(0 0 10px rgba(255,215,0,0.4));
+  }
+
+  .creature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    width: 100%;
+  }
+
+  .creature-card {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .creature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    opacity: 0.7;
+  }
+  .creature-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  }
+  .creature-card.selected {
+    border-color: var(--gold);
+    background: var(--panel2);
+    box-shadow: 0 0 20px rgba(255,215,0,0.2);
+  }
+  .creature-card.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 0.5rem; right: 0.7rem;
+    color: var(--gold);
+    font-size: 1.2rem;
+    font-weight: 900;
+  }
+
+  .creature-card .icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; text-align: center; }
+  .creature-card .cname {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+  }
+  .creature-card .ctype {
+    font-size: 0.75rem;
+    text-align: center;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .creature-card .stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--text2);
+  }
+  .creature-card .stat span { color: var(--text); font-weight: 600; }
+
+  .team-preview {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    background: var(--panel);
+    padding: 1rem 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    min-width: 300px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .team-preview-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    color: var(--text2);
+    letter-spacing: 0.2em;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+  .team-slot {
+    width: 60px; height: 60px;
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    background: var(--panel2);
+    transition: all 0.2s;
+  }
+  .team-slot.filled {
+    border-color: var(--gold);
+    border-style: solid;
+    animation: slotFill 0.3s ease;
+  }
+  @keyframes slotFill {
+    0% { transform: scale(0.8); }
+    100% { transform: scale(1); }
+  }
+
+  /* ─── BATTLE SCREEN ─── */
+  #battleScreen {
+    padding: 0;
+    justify-content: stretch;
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    gap: 0;
+  }
+
+  .battle-header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .battle-info {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: var(--text2);
+  }
+  .battle-info strong { color: var(--gold); font-size: 0.9rem; }
+
+  .turn-indicator {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-weight: 700;
+    transition: all 0.3s;
+  }
+  .turn-indicator.my-turn {
+    background: rgba(255,215,0,0.15);
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    animation: myTurnPulse 1.5s ease-in-out infinite;
+  }
+  .turn-indicator.their-turn {
+    background: rgba(239,68,68,0.1);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+  }
+  @keyframes myTurnPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.3); }
+    50% { box-shadow: 0 0 0 8px rgba(255,215,0,0); }
+  }
+
+  .battle-arena {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .arena-half {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .arena-half.opponent {
+    background: linear-gradient(180deg, rgba(239,68,68,0.05) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+    padding-top: 1.5rem;
+  }
+
+  .arena-half.player {
+    background: linear-gradient(0deg, rgba(78,205,196,0.05) 0%, transparent 100%);
+    align-items: flex-end;
+    padding-bottom: 1.5rem;
+  }
+
+  .arena-label {
+    position: absolute;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text2);
+    opacity: 0.7;
+  }
+  .opponent .arena-label { top: 0.4rem; left: 1.5rem; }
+  .player .arena-label { bottom: 0.4rem; left: 1.5rem; }
+
+  .battle-creature {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    width: 140px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    position: relative;
+    cursor: default;
+  }
+  .battle-creature.targetable {
+    border-color: rgba(239,68,68,0.5);
+    cursor: crosshair;
+  }
+  .battle-creature.targetable:hover {
+    border-color: #ef4444;
+    box-shadow: 0 0 20px rgba(239,68,68,0.3);
+    transform: translateY(-4px);
+  }
+  .battle-creature.dead {
+    opacity: 0.35;
+    filter: grayscale(1);
+    border-color: #333;
+  }
+  .battle-creature.hit {
+    animation: hitAnim 0.4s ease;
+  }
+  .battle-creature.healed {
+    animation: healAnim 0.4s ease;
+  }
+  @keyframes hitAnim {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-8px); background: rgba(239,68,68,0.2); }
+    75% { transform: translateX(8px); }
+    100% { transform: translateX(0); background: var(--panel); }
+  }
+  @keyframes healAnim {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); background: rgba(34,197,94,0.15); }
+    100% { transform: scale(1); background: var(--panel); }
+  }
+
+  .bc-icon { font-size: 2rem; text-align: center; display: block; margin-bottom: 0.3rem; }
+  .bc-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    text-align: center;
+    color: var(--text2);
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .bc-shield {
+    font-size: 0.65rem;
+    text-align: center;
+    color: #93c5fd;
+    margin-bottom: 0.3rem;
+    min-height: 1rem;
+  }
+
+  .hp-bar-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 0.25rem;
+  }
+  .hp-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease, background 0.3s;
+  }
+  .hp-text {
+    font-size: 0.65rem;
+    text-align: center;
+    color: var(--text2);
+    font-weight: 600;
+  }
+
+  /* ─── ENERGY BAR ─── */
+  .energy-panel {
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    padding: 0.6rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .energy-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: var(--energy);
+    letter-spacing: 0.15em;
+    flex-shrink: 0;
+  }
+
+  .energy-gems {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+
+  .energy-gem {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1px solid rgba(56,189,248,0.3);
+    background: rgba(56,189,248,0.05);
+    transition: all 0.2s;
+  }
+  .energy-gem.filled {
+    background: var(--energy);
+    border-color: var(--energy);
+    box-shadow: 0 0 8px rgba(56,189,248,0.5);
+  }
+
+  .energy-count {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    color: var(--energy);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* ─── HAND ─── */
+  .hand-area {
+    background: var(--panel2);
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    min-height: 140px;
+    max-height: 180px;
+    overflow-x: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .hand-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .hand-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: var(--text2);
+    letter-spacing: 0.2em;
+  }
+
+  .hand-cards {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+  .hand-cards::-webkit-scrollbar { height: 3px; }
+  .hand-cards::-webkit-scrollbar-track { background: var(--panel); }
+  .hand-cards::-webkit-scrollbar-thumb { background: var(--border); }
+
+  .hand-card {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.7rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 110px;
+    transition: all 0.15s;
+    position: relative;
+    user-select: none;
+  }
+  .hand-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    z-index: 10;
+  }
+  .hand-card.selected-card {
+    border-color: var(--gold);
+    background: rgba(255,215,0,0.08);
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(255,215,0,0.2);
+  }
+  .hand-card.cant-afford {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .hand-card.cant-afford:hover { transform: none; border-color: var(--border); box-shadow: none; }
+
+  .card-cost {
+    position: absolute;
+    top: 0.3rem; right: 0.4rem;
+    background: var(--energy);
+    color: #0a0a1a;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    font-weight: 900;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .card-emoji { font-size: 1.4rem; display: block; text-align: center; margin-bottom: 0.3rem; }
+  .card-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+    line-height: 1.2;
+  }
+  .card-type {
+    font-size: 0.6rem;
+    text-align: center;
+    color: var(--text2);
+    font-weight: 600;
+  }
+  .card-power {
+    font-size: 0.65rem;
+    text-align: center;
+    color: var(--gold);
+    font-weight: 700;
+    margin-top: 0.2rem;
+  }
+
+  /* ─── LOG / ACTIONS ─── */
+  .action-hint {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    color: var(--text2);
+    text-align: center;
+    padding: 0.3rem;
+  }
+
+  /* ─── FLOATING DAMAGE ─── */
+  .float-text {
+    position: fixed;
+    pointer-events: none;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    z-index: 1000;
+    animation: floatUp 1.2s ease forwards;
+  }
+  .float-text.dmg { color: #ef4444; }
+  .float-text.heal { color: #22c55e; }
+  .float-text.shield { color: #93c5fd; }
+
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-40px) scale(1.3); }
+    100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
+  }
+
+  /* ─── GAME OVER ─── */
+  #gameoverScreen {
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .gameover-title {
+    font-family: 'Cinzel Decorative', cursive;
+    font-size: clamp(2rem, 5vw, 4rem);
+    filter: drop-shadow(0 0 30px currentColor);
+  }
+  .gameover-title.win { color: var(--gold); }
+  .gameover-title.lose { color: #ef4444; }
+
+  .gameover-sub {
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    color: var(--text2);
+    letter-spacing: 0.2em;
+  }
+
+  /* ─── WAITING ─── */
+  #waitingScreen { gap: 1.5rem; text-align: center; }
+  .spinner {
+    width: 60px; height: 60px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .waiting-text {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    color: var(--text2);
+    letter-spacing: 0.2em;
+  }
+
+  /* ─── TOOLTIPS ─── */
+  .tooltip {
+    position: fixed;
+    background: var(--panel);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.75rem;
+    color: var(--text);
+    pointer-events: none;
+    z-index: 999;
+    max-width: 180px;
+    display: none;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .creature-grid { grid-template-columns: repeat(2, 1fr); }
+    .battle-creature { width: 100px; padding: 0.7rem; }
+    .bc-icon { font-size: 1.5rem; }
+  }
+
+  /* ─── MISC ─── */
+  .divider {
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), var(--gold2), var(--border), transparent);
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .vs-badge {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    z-index: 10;
+    background: var(--panel);
+    border: 2px solid var(--gold);
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    font-weight: 900;
+    color: var(--gold);
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
+  }
+
+  .status-msg {
+    position: fixed;
+    top: 5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: var(--text2);
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .status-msg.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- MENU -->
+<div id="menuScreen" class="screen active">
+  <div class="menu-bg"></div>
+  <div class="game-title">⚔️ Axiom Clash</div>
+  <div class="game-subtitle">Creature Battle Arena</div>
+
+  <div class="creature-parade">
+    <span class="creature-icon" style="color:#ff6b35">🔥</span>
+    <span class="creature-icon" style="color:#4ecdc4">🌊</span>
+    <span class="creature-icon" style="color:#56ab2f">🌿</span>
+    <span class="creature-icon" style="color:#f7971e">⚡</span>
+    <span class="creature-icon" style="color:#a8edea">❄️</span>
+    <span class="creature-icon" style="color:#7c3aed">🌑</span>
+  </div>
+
+  <div class="name-input-wrap">
+    <label>YOUR TRAINER NAME</label>
+    <input type="text" id="playerName" placeholder="Enter name..." maxlength="16" value="Trainer">
+  </div>
+
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="startSingle()">⚔️ vs CPU</button>
+    <button class="btn btn-secondary" onclick="joinQueue()">👥 vs Player</button>
+  </div>
+
+  <div style="color:var(--text2);font-size:0.8rem;font-family:'Rajdhani',sans-serif;text-align:center;max-width:400px;line-height:1.6;">
+    Pick 3 creatures. Play skill cards using energy. Defeat all enemy creatures to win!
+  </div>
+</div>
+
+<!-- WAITING -->
+<div id="waitingScreen" class="screen">
+  <div class="spinner"></div>
+  <div class="game-title" style="font-size:2rem;">Axiom Clash</div>
+  <div class="waiting-text">Searching for opponent...</div>
+  <button class="btn btn-secondary btn-sm" onclick="cancelQueue()">Cancel</button>
+</div>
+
+<!-- TEAM SELECT -->
+<div id="teamScreen" class="screen">
+  <div class="screen-title">⚔️ Choose Your Team</div>
+  <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--text2);letter-spacing:0.2em;">SELECT 3 CREATURES</div>
+
+  <div class="creature-grid" id="creatureGrid"></div>
+
+  <div class="team-preview" id="teamPreview">
+    <div class="team-preview-label">YOUR TEAM</div>
+    <div class="team-slot" id="slot0">?</div>
+    <div class="team-slot" id="slot1">?</div>
+    <div class="team-slot" id="slot2">?</div>
+    <button class="btn btn-primary" id="confirmTeamBtn" onclick="confirmTeam()" disabled>Confirm Team →</button>
+  </div>
+</div>
+
+<!-- BATTLE -->
+<div id="battleScreen" class="screen">
+  <div class="battle-header">
+    <div class="battle-info">Round <strong id="roundNum">1</strong></div>
+    <div class="turn-indicator" id="turnIndicator">—</div>
+    <div class="battle-info" id="opponentName">Opponent</div>
+  </div>
+
+  <div class="battle-arena">
+    <!-- Opponent half -->
+    <div class="arena-half opponent">
+      <span class="arena-label" id="opNameLabel">OPPONENT</span>
+      <div id="opponentField" style="display:flex;gap:0.75rem;flex-wrap:wrap;"></div>
+      <div style="margin-left:auto;display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
+        <div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--text2);">CARDS IN HAND</div>
+        <div id="opponentCardCount" style="font-family:'Orbitron',monospace;font-size:1.5rem;color:var(--text2);">0</div>
+        <div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--energy);" id="opponentEnergyDisplay">⚡ 0</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="vs-badge">VS</div>
+
+    <!-- Player half -->
+    <div class="arena-half player">
+      <span class="arena-label">YOU</span>
+      <div id="playerField" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;"></div>
+    </div>
+  </div>
+
+  <!-- Energy -->
+  <div class="energy-panel">
+    <div class="energy-label">⚡ ENERGY</div>
+    <div class="energy-gems" id="energyGems"></div>
+    <div class="energy-count" id="energyCount">3/10</div>
+  </div>
+
+  <!-- Hand -->
+  <div class="hand-area">
+    <div class="hand-header">
+      <div class="hand-label">YOUR HAND</div>
+      <div style="display:flex;gap:0.5rem;">
+        <div class="action-hint" id="actionHint">Select a card, then click a target</div>
+        <button class="btn btn-secondary btn-sm" id="endTurnBtn" onclick="endTurn()">End Turn</button>
+      </div>
+    </div>
+    <div class="hand-cards" id="handCards"></div>
+  </div>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameoverScreen" class="screen">
+  <div class="gameover-title" id="gameoverTitle">—</div>
+  <div class="gameover-sub" id="gameoverSub">Battle complete</div>
+  <div class="btn-group">
+    <button class="btn btn-primary" onclick="playAgain()">Play Again</button>
+    <button class="btn btn-secondary" onclick="goMenu()">Main Menu</button>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<div class="status-msg" id="statusMsg"></div>
+
+<script>
+// ─── STATE ───
+const CREATURES = [
+  { id:0, name:'Emberwing', type:'Fire', maxHp:420, atk:10, spd:8, emoji:'🔥', color:'#ff6b35',
+    cards:[
+      {id:'0_0',name:'Flame Slash',type:'attack',cost:1,power:80,emoji:'⚔️'},
+      {id:'0_1',name:'Inferno',type:'attack',cost:2,power:130,emoji:'🔥'},
+      {id:'0_2',name:'Dragon Scale',type:'shield',cost:1,power:60,emoji:'🛡️'}
+    ]},
+  { id:1, name:'Tidecaller', type:'Water', maxHp:380, atk:5, spd:6, emoji:'🌊', color:'#4ecdc4',
+    cards:[
+      {id:'1_0',name:'Tidal Wave',type:'attack',cost:2,power:100,emoji:'💧'},
+      {id:'1_1',name:'Healing Spring',type:'heal',cost:1,power:80,emoji:'💚'},
+      {id:'1_2',name:'Aqua Barrier',type:'shield',cost:1,power:50,emoji:'🛡️'}
+    ]},
+  { id:2, name:'Thornback', type:'Plant', maxHp:500, atk:0, spd:4, emoji:'🌿', color:'#56ab2f',
+    cards:[
+      {id:'2_0',name:'Vine Whip',type:'attack',cost:1,power:70,emoji:'🌱'},
+      {id:'2_1',name:"Nature's Grasp",type:'aoe',cost:3,power:50,emoji:'🌲'},
+      {id:'2_2',name:'Photosynthesis',type:'heal',cost:1,power:100,emoji:'💚'}
+    ]},
+  { id:3, name:'Stormclaw', type:'Lightning', maxHp:360, atk:15, spd:10, emoji:'⚡', color:'#f7971e',
+    cards:[
+      {id:'3_0',name:'Thunder Strike',type:'attack',cost:1,power:90,emoji:'⚡'},
+      {id:'3_1',name:'Volt Chain',type:'aoe',cost:2,power:40,emoji:'🌩️'},
+      {id:'3_2',name:'Power Surge',type:'buff',cost:1,power:0,atkBoost:20,emoji:'💪'}
+    ]},
+  { id:4, name:'Frostmane', type:'Ice', maxHp:440, atk:8, spd:5, emoji:'❄️', color:'#a8edea',
+    cards:[
+      {id:'4_0',name:'Blizzard',type:'aoe',cost:2,power:55,emoji:'❄️'},
+      {id:'4_1',name:'Ice Fang',type:'attack',cost:1,power:85,emoji:'🐺'},
+      {id:'4_2',name:'Frost Armor',type:'shield',cost:1,power:80,emoji:'🛡️'}
+    ]},
+  { id:5, name:'Shadowpounce', type:'Dark', maxHp:340, atk:20, spd:12, emoji:'🌑', color:'#7c3aed',
+    cards:[
+      {id:'5_0',name:'Dark Slash',type:'attack',cost:1,power:110,emoji:'🌑'},
+      {id:'5_1',name:'Soul Drain',type:'heal',cost:2,power:60,emoji:'💜'},
+      {id:'5_2',name:'Nightmare',type:'attack',cost:2,power:150,emoji:'👁️'}
+    ]}
+];
+
+let ws = null;
+let state = {
+  screen: 'menu',
+  playerIndex: -1,
+  selectedTeam: [],
+  selectedCard: null,
+  gameData: null,
+  isMyTurn: false,
+  gameId: null
+};
+
+// ─── WS ───
+function connect(onopen) {
+  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  ws = new WebSocket(`${protocol}//${location.host}`);
+  ws.onopen = onopen;
+  ws.onmessage = e => handleMsg(JSON.parse(e.data));
+  ws.onerror = () => showStatus('Connection error!');
+  ws.onclose = () => { if(state.screen==='battle') showStatus('Disconnected!'); };
+}
+
+function handleMsg(msg) {
+  switch(msg.type) {
+    case 'CONNECTED': break;
+    case 'WAITING': showScreen('waiting'); break;
+    case 'GAME_START':
+      state.playerIndex = msg.playerIndex;
+      state.gameId = msg.gameId;
+      document.getElementById('opponentName').textContent = msg.opponentName;
+      document.getElementById('opNameLabel').textContent = msg.opponentName.toUpperCase();
+      showScreen('team');
+      break;
+    case 'BATTLE_START':
+    case 'CARD_PLAYED':
+    case 'TURN_CHANGE':
+      state.gameData = msg;
+      state.isMyTurn = msg.isMyTurn;
+      updateBattleUI(msg);
+      if(state.screen !== 'battle') showScreen('battle');
+      break;
+    case 'GAME_OVER':
+      state.gameData = msg;
+      updateBattleUI(msg);
+      setTimeout(() => showGameOver(msg.winner === state.playerIndex), 1000);
+      break;
+    case 'OPPONENT_DISCONNECTED':
+      showStatus('Opponent disconnected!');
+      setTimeout(() => showGameOver(true), 1500);
+      break;
+    case 'ERROR':
+      showStatus(msg.message);
+      break;
+  }
+}
+
+// ─── MENU ACTIONS ───
+function startSingle() {
+  const name = document.getElementById('playerName').value.trim() || 'Trainer';
+  connect(() => {
+    ws.send(JSON.stringify({ type:'SINGLE_PLAYER', name }));
+  });
+}
+
+function joinQueue() {
+  const name = document.getElementById('playerName').value.trim() || 'Trainer';
+  connect(() => {
+    ws.send(JSON.stringify({ type:'JOIN_QUEUE', name }));
+  });
+}
+
+function cancelQueue() {
+  if(ws) ws.close();
+  showScreen('menu');
+}
+
+// ─── TEAM SELECT ───
+function renderTeamSelect() {
+  const grid = document.getElementById('creatureGrid');
+  grid.innerHTML = '';
+  CREATURES.forEach(c => {
+    const el = document.createElement('div');
+    el.className = 'creature-card';
+    el.style.setProperty('--accent', c.color);
+    el.dataset.id = c.id;
+    el.innerHTML = `
+      <span class="icon">${c.emoji}</span>
+      <div class="cname">${c.name}</div>
+      <div class="ctype" style="color:${c.color}">${c.type}</div>
+      <div class="stats">
+        <div class="stat">❤️ <span>${c.maxHp}</span></div>
+        <div class="stat">⚔️ <span>${c.atk}</span></div>
+        <div class="stat">💨 <span>${c.spd}</span></div>
+      </div>
+    `;
+    el.onclick = () => toggleCreature(c.id);
+    grid.appendChild(el);
+  });
+}
+
+function toggleCreature(id) {
+  const idx = state.selectedTeam.indexOf(id);
+  if(idx !== -1) {
+    state.selectedTeam.splice(idx, 1);
+  } else {
+    if(state.selectedTeam.length >= 3) {
+      showStatus('You can only pick 3 creatures!');
+      return;
+    }
+    state.selectedTeam.push(id);
+  }
+  updateTeamPreview();
+}
+
+function updateTeamPreview() {
+  document.querySelectorAll('.creature-card').forEach(el => {
+    const id = parseInt(el.dataset.id);
+    el.classList.toggle('selected', state.selectedTeam.includes(id));
+  });
+  for(let i=0;i<3;i++) {
+    const slot = document.getElementById('slot'+i);
+    const cid = state.selectedTeam[i];
+    if(cid !== undefined) {
+      const c = CREATURES[cid];
+      slot.textContent = c.emoji;
+      slot.classList.add('filled');
+      slot.title = c.name;
+    } else {
+      slot.textContent = '?';
+      slot.classList.remove('filled');
+    }
+  }
+  document.getElementById('confirmTeamBtn').disabled = state.selectedTeam.length !== 3;
+}
+
+function confirmTeam() {
+  if(state.selectedTeam.length !== 3) return;
+  ws.send(JSON.stringify({ type:'SELECT_TEAM', creatureIds: state.selectedTeam }));
+  showStatus('Waiting for opponent...');
+}
+
+// ─── BATTLE UI ───
+function updateBattleUI(data) {
+  document.getElementById('roundNum').textContent = data.round || 1;
+
+  const indicator = document.getElementById('turnIndicator');
+  indicator.textContent = data.isMyTurn ? '⚡ YOUR TURN' : '⏳ OPPONENT\'S TURN';
+  indicator.className = 'turn-indicator ' + (data.isMyTurn ? 'my-turn' : 'their-turn');
+
+  // Fields
+  renderField('opponentField', data.opponentTeam, true, data);
+  renderField('playerField', data.myTeam, false, data);
+
+  // Opponent info
+  document.getElementById('opponentCardCount').textContent = data.opponentHandCount || 0;
+  document.getElementById('opponentEnergyDisplay').textContent = `⚡ ${data.opponentEnergy || 0}`;
+
+  // Energy
+  renderEnergy(data.myEnergy, data.myMaxEnergy);
+
+  // Hand
+  renderHand(data.myHand, data.myEnergy);
+
+  // Action buttons
+  document.getElementById('endTurnBtn').disabled = !data.isMyTurn;
+  document.getElementById('endTurnBtn').style.opacity = data.isMyTurn ? '1' : '0.4';
+
+  // Action hint
+  const hint = document.getElementById('actionHint');
+  if(!data.isMyTurn) hint.textContent = "Opponent's turn...";
+  else if(state.selectedCard) hint.textContent = 'Click an enemy to attack!';
+  else hint.textContent = 'Select a card to play';
+
+  // Handle last action animation
+  if(data.lastAction && data.lastAction.type === 'CARD_PLAYED') {
+    const la = data.lastAction;
+    if(la.result) {
+      if(la.result.damage > 0) {
+        // Show floating damage on opponent or player side
+        const isOppAttacking = la.playerIndex !== state.playerIndex;
+        showFloat(isOppAttacking ? la.result.damage : la.result.damage, isOppAttacking ? 'player' : 'opponent', 'dmg');
+      }
+      if(la.result.heal > 0) {
+        showFloat('+' + la.result.heal, la.playerIndex === state.playerIndex ? 'player' : 'opponent', 'heal');
+      }
+      if(la.result.shield > 0) {
+        showFloat('🛡️' + la.result.shield, la.playerIndex === state.playerIndex ? 'player' : 'opponent', 'shield');
+      }
+    }
+  }
+}
+
+function renderField(containerId, team, isOpponent, data) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  if(!team) return;
+
+  team.forEach(creature => {
+    const hpPct = Math.max(0, creature.currentHp / creature.maxHp * 100);
+    const hpColor = hpPct > 60 ? 'var(--hp-green)' : hpPct > 25 ? 'var(--hp-yellow)' : 'var(--hp-red)';
+    const isDead = creature.currentHp <= 0;
+    const isTargetable = isOpponent && !isDead && state.selectedCard && state.isMyTurn;
+
+    const el = document.createElement('div');
+    el.className = 'battle-creature' + (isDead ? ' dead' : '') + (isTargetable ? ' targetable' : '');
+    el.dataset.cid = creature.id;
+    el.innerHTML = `
+      <span class="bc-icon">${creature.emoji || '?'}</span>
+      <div class="bc-name">${creature.name}</div>
+      <div class="bc-shield">${creature.shield > 0 ? '🛡️ ' + creature.shield : ''}</div>
+      <div class="hp-bar-wrap">
+        <div class="hp-bar" style="width:${hpPct}%;background:${hpColor}"></div>
+      </div>
+      <div class="hp-text">${creature.currentHp}/${creature.maxHp}</div>
+    `;
+    if(isTargetable) el.onclick = () => playCardOnTarget(creature.id);
+    container.appendChild(el);
+  });
+}
+
+function renderEnergy(current, max) {
+  const gems = document.getElementById('energyGems');
+  gems.innerHTML = '';
+  const show = Math.min(max || 10, 10);
+  for(let i=0;i<show;i++) {
+    const gem = document.createElement('div');
+    gem.className = 'energy-gem' + (i < current ? ' filled' : '');
+    gems.appendChild(gem);
+  }
+  document.getElementById('energyCount').textContent = `${current}/${max}`;
+}
+
+function renderHand(hand, energy) {
+  const container = document.getElementById('handCards');
+  container.innerHTML = '';
+  if(!hand) return;
+
+  hand.forEach(card => {
+    const canAfford = card.cost <= energy;
+    const isSelected = state.selectedCard && state.selectedCard.id === card.id;
+    const el = document.createElement('div');
+    el.className = 'hand-card' + (!canAfford ? ' cant-afford' : '') + (isSelected ? ' selected-card' : '');
+    el.innerHTML = `
+      <div class="card-cost">${card.cost}</div>
+      <span class="card-emoji">${card.emoji || '⚔️'}</span>
+      <div class="card-name">${card.name}</div>
+      <div class="card-type">${card.type.toUpperCase()}</div>
+      <div class="card-power">${card.power > 0 ? card.power + (card.type==='heal'?' HP':' DMG') : card.atkBoost ? '+'+card.atkBoost+' ATK' : ''}</div>
+    `;
+    if(canAfford && state.isMyTurn) {
+      el.onclick = () => selectCard(card);
+    }
+    container.appendChild(el);
+  });
+}
+
+function selectCard(card) {
+  if(!state.isMyTurn) return;
+
+  if(state.selectedCard && state.selectedCard.id === card.id) {
+    state.selectedCard = null;
+  } else {
+    state.selectedCard = card;
+    // For buff/heal cards, auto-apply to own team
+    if(card.type === 'buff' || card.type === 'heal' || card.type === 'shield') {
+      // Pick first alive creature on player team
+      const data = state.gameData;
+      if(data && data.myTeam) {
+        const alive = data.myTeam.find(c => c.currentHp > 0);
+        if(alive) {
+          playCardOnTarget(alive.id);
+          return;
+        }
+      }
+    }
+  }
+  // Re-render to update selection state and targetable indicators
+  if(state.gameData) {
+    renderField('opponentField', state.gameData.opponentTeam, true, state.gameData);
+    renderHand(state.gameData.myHand, state.gameData.myEnergy);
+    document.getElementById('actionHint').textContent = state.selectedCard ? 'Click an enemy to attack!' : 'Select a card to play';
+  }
+}
+
+function playCardOnTarget(targetId) {
+  if(!state.selectedCard || !state.isMyTurn) return;
+  ws.send(JSON.stringify({
+    type: 'PLAY_CARD',
+    cardId: state.selectedCard.id,
+    targetId
+  }));
+  state.selectedCard = null;
+}
+
+function endTurn() {
+  if(!state.isMyTurn) return;
+  state.selectedCard = null;
+  ws.send(JSON.stringify({ type: 'END_TURN' }));
+}
+
+// ─── FLOAT TEXT ───
+function showFloat(text, side, type) {
+  const el = document.createElement('div');
+  el.className = 'float-text ' + type;
+  el.textContent = (type === 'dmg' ? '-' : '') + text;
+  document.body.appendChild(el);
+
+  const field = document.getElementById(side === 'player' ? 'playerField' : 'opponentField');
+  const rect = field.getBoundingClientRect();
+  el.style.left = (rect.left + rect.width / 2) + 'px';
+  el.style.top = (rect.top + rect.height / 2) + 'px';
+
+  setTimeout(() => el.remove(), 1300);
+}
+
+// ─── SCREENS ───
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(name + 'Screen').classList.add('active');
+  state.screen = name;
+  if(name === 'team') renderTeamSelect();
+}
+
+function showGameOver(won) {
+  const title = document.getElementById('gameoverTitle');
+  const sub = document.getElementById('gameoverSub');
+  title.textContent = won ? '🏆 VICTORY!' : '💀 DEFEAT';
+  title.className = 'gameover-title ' + (won ? 'win' : 'lose');
+  sub.textContent = won ? 'You defeated your opponent!' : 'Better luck next time!';
+  showScreen('gameover');
+}
+
+function playAgain() {
+  state.selectedTeam = [];
+  state.selectedCard = null;
+  if(ws) ws.close();
+  showScreen('menu');
+  setTimeout(() => startSingle(), 100);
+}
+
+function goMenu() {
+  state.selectedTeam = [];
+  state.selectedCard = null;
+  if(ws) ws.close();
+  showScreen('menu');
+}
+
+function showStatus(msg) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ─── INIT ───
+showScreen('menu');
+</script>
+</body>
+</html>
