@@ -4,1303 +4,1114 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Axiom Clash</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --fire: #ff6b35;
-    --water: #4ecdc4;
-    --plant: #56ab2f;
-    --lightning: #f7971e;
-    --ice: #a8edea;
-    --dark: #7c3aed;
-    --gold: #ffd700;
-    --gold2: #ffaa00;
-    --bg: #0a0a1a;
-    --panel: #0f1628;
-    --panel2: #16203a;
-    --border: #2a3a6a;
-    --text: #e0e8ff;
-    --text2: #8899cc;
-    --hp-green: #22c55e;
-    --hp-yellow: #f59e0b;
-    --hp-red: #ef4444;
-    --energy: #38bdf8;
-  }
+:root {
+  --gold:#ffd700; --gold2:#ffaa00; --bg:#1a0a2e; --panel:#0d1117;
+  --panel2:#161b22; --border:#30363d; --text:#e6edf3; --text2:#8b949e;
+  --hp-green:#3fb950; --hp-yellow:#d29922; --hp-red:#f85149;
+  --energy:#58a6ff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Rajdhani',sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow:hidden;
+  background-image:
+    radial-gradient(ellipse at 30% 20%,rgba(88,166,255,.07) 0%,transparent 50%),
+    radial-gradient(ellipse at 70% 80%,rgba(255,107,71,.06) 0%,transparent 50%);
+}
+.screen{display:none;width:100%;height:100vh}
+.screen.active{display:flex;flex-direction:column}
+@keyframes screenFade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.screen.active{animation:screenFade .35s ease}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* MENU */
+#menuScreen{align-items:center;justify-content:center;gap:1.4rem;text-align:center;position:relative}
+.stars{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--d) ease-in-out infinite var(--delay)}
+@keyframes twinkle{0%,100%{opacity:.1}50%{opacity:.9}}
+.game-title{
+  font-family:'Press Start 2P',monospace;
+  font-size:clamp(1rem,3.5vw,2rem);
+  background:linear-gradient(135deg,#ffd700,#ff7a47,#ce93d8);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:glow 2.5s ease-in-out infinite;line-height:1.4;position:relative;z-index:1;
+}
+@keyframes glow{0%,100%{filter:drop-shadow(0 0 18px rgba(255,215,0,.3))}50%{filter:drop-shadow(0 0 45px rgba(255,215,0,.7))}}
+.menu-creatures{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+.mc-wrap{display:flex;flex-direction:column;align-items:center;gap:.25rem}
+.mc-wrap svg{animation:mFloat 3s ease-in-out infinite;animation-delay:var(--d2)}
+@keyframes mFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.mc-label{font-family:'Press Start 2P',monospace;font-size:.35rem;color:var(--text2)}
+.name-wrap{display:flex;flex-direction:column;gap:.4rem;align-items:center;position:relative;z-index:1}
+.name-wrap label{font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--text2)}
+input[type=text]{
+  background:var(--panel2);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:600;
+  padding:.6rem 1.2rem;text-align:center;outline:none;width:230px;transition:border-color .2s;
+}
+input:focus{border-color:var(--gold)}
+.btn{
+  font-family:'Press Start 2P',monospace;font-size:.55rem;padding:.75rem 1.6rem;
+  border:none;border-radius:6px;cursor:pointer;transition:all .15s;
+}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.3;cursor:not-allowed;pointer-events:none}
+.btn-primary{background:linear-gradient(135deg,var(--gold2),#ff7a47);color:#0d1117;box-shadow:0 4px 18px rgba(255,170,0,.35)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(255,170,0,.5)}
+.btn-secondary{background:var(--panel2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--gold)}
+.btn-sm{font-size:.4rem;padding:.5rem .9rem}
+.btn-row{display:flex;gap:.75rem;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
 
-  body {
-    font-family: 'Rajdhani', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(78,205,196,0.06) 0%, transparent 50%),
-      radial-gradient(ellipse at 60% 80%, rgba(255,107,53,0.05) 0%, transparent 50%);
-  }
+/* TEAM SELECT */
+#teamScreen{overflow-y:auto}
+#teamScreen .inner{display:flex;flex-direction:column;align-items:center;gap:1rem;padding:1rem}
+.screen-title{font-family:'Press Start 2P',monospace;font-size:.85rem;color:var(--gold);text-align:center;filter:drop-shadow(0 0 10px rgba(255,215,0,.4))}
+.creature-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.7rem;max-width:960px;width:100%}
+.cc{
+  background:var(--panel);border:2px solid var(--border);border-radius:10px;
+  padding:.85rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;
+}
+.cc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--acc);opacity:.8}
+.cc:hover{border-color:var(--acc);transform:translateY(-3px);box-shadow:0 6px 22px rgba(0,0,0,.5)}
+.cc.selected{border-color:var(--gold);background:rgba(255,215,0,.06);box-shadow:0 0 18px rgba(255,215,0,.2)}
+.cc.selected::after{content:'✓';position:absolute;top:.35rem;right:.55rem;color:var(--gold);font-size:.95rem;font-weight:900}
+.cc-sprite{display:flex;justify-content:center;margin-bottom:.35rem}
+.cc-name{font-family:'Press Start 2P',monospace;font-size:.4rem;text-align:center;margin-bottom:.2rem}
+.cc-type{font-size:.65rem;text-align:center;color:var(--acc);font-weight:700;margin-bottom:.35rem}
+.cc-stats{display:flex;justify-content:space-around;font-size:.62rem;color:var(--text2)}
+.cc-stats span{color:var(--text);font-weight:700}
+.team-preview{
+  display:flex;gap:.6rem;align-items:center;background:var(--panel);
+  padding:.75rem 1.1rem;border-radius:8px;border:1px solid var(--border);flex-wrap:wrap;justify-content:center;
+}
+.tp-label{font-family:'Press Start 2P',monospace;font-size:.4rem;color:var(--text2);width:100%;text-align:center;margin-bottom:.15rem}
+.team-slot{
+  width:52px;height:52px;border:2px dashed var(--border);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;background:var(--panel2);transition:all .2s;
+}
+.team-slot.filled{border-color:var(--gold);border-style:solid;animation:slotPop .3s ease}
+@keyframes slotPop{0%{transform:scale(.7)}100%{transform:scale(1)}}
 
-  /* ─── SCREENS ─── */
-  .screen { display: none; width: 100%; min-height: 100vh; }
-  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+/* BATTLE */
+#battleScreen{display:none;flex-direction:column;height:100vh;overflow:hidden}
+#battleScreen.active{display:flex}
 
-  /* ─── MENU ─── */
-  #menuScreen {
-    text-align: center;
-    gap: 2rem;
-    position: relative;
-  }
+.b-hud{
+  background:var(--panel);border-bottom:1px solid var(--border);
+  padding:.45rem 1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;
+}
+.b-hud-name{font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--text2)}
+.b-hud-name strong{color:var(--gold)}
+.turn-pill{font-family:'Press Start 2P',monospace;font-size:.46rem;padding:.3rem .8rem;border-radius:20px;transition:all .3s}
+.turn-pill.mine{background:rgba(255,215,0,.15);color:var(--gold);border:1px solid var(--gold);animation:pingP 1.5s ease-in-out infinite}
+.turn-pill.theirs{background:rgba(248,81,73,.1);color:#f85149;border:1px solid #f85149}
+@keyframes pingP{0%,100%{box-shadow:0 0 0 0 rgba(255,215,0,.4)}50%{box-shadow:0 0 0 8px rgba(255,215,0,0)}}
 
-  .menu-bg {
-    position: absolute; inset: 0;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cdefs%3E%3Cpattern id='g' width='100' height='100' patternUnits='userSpaceOnUse'%3E%3Ccircle cx='50' cy='50' r='1' fill='%232a3a6a' opacity='0.4'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='100' height='100' fill='url(%23g)'/%3E%3C/svg%3E");
-    opacity: 0.5;
-    pointer-events: none;
-  }
+/* Stage */
+.stage{
+  flex:1;position:relative;overflow:hidden;min-height:0;
+  background:linear-gradient(180deg,#060d1c 0%,#0d1b2e 55%,#0e1f0e 55%,#0a170a 100%);
+}
+.stage-sky{position:absolute;inset:0 0 43% 0;pointer-events:none}
+.stage-ground{
+  position:absolute;bottom:0;left:0;right:0;height:43%;
+  background:linear-gradient(180deg,#162616 0%,#0e1a0e 100%);
+  border-top:2px solid rgba(100,180,100,.2);pointer-events:none;
+}
+.platform{
+  position:absolute;z-index:1;width:90px;height:10px;
+  background:radial-gradient(ellipse,rgba(255,255,255,.18) 0%,transparent 70%);border-radius:50%;
+}
+.plat-enemy{bottom:43%;left:58%;transform:translateX(-50%)}
+.plat-player{bottom:43%;left:22%;transform:translateX(-50%)}
 
-  .game-title {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(2.5rem, 6vw, 5rem);
-    font-weight: 900;
-    background: linear-gradient(135deg, var(--gold), var(--gold2), #ff6b35, var(--dark));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-shadow: none;
-    letter-spacing: 0.05em;
-    animation: titlePulse 3s ease-in-out infinite;
-    position: relative;
-  }
+/* Sprite containers */
+.spr-wrap{
+  position:absolute;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+}
+.spr-enemy{bottom:42%;left:58%;transform:translateX(-50%)}
+.spr-player{bottom:42%;left:22%;transform:translateX(-50%)}
 
-  @keyframes titlePulse {
-    0%,100% { filter: drop-shadow(0 0 20px rgba(255,215,0,0.3)); }
-    50% { filter: drop-shadow(0 0 40px rgba(255,215,0,0.6)); }
-  }
+/* HP panel above sprite */
+.spr-hp{
+  background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.12);border-radius:5px;
+  padding:.22rem .5rem;margin-bottom:.25rem;min-width:105px;
+}
+.spr-name{font-family:'Press Start 2P',monospace;font-size:.36rem;text-align:center;margin-bottom:.2rem;color:var(--text)}
+.hp-track{width:100%;height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;margin-bottom:.18rem}
+.hp-fill{height:100%;border-radius:3px;transition:width .6s ease,background .3s}
+.hp-nums{font-family:'Press Start 2P',monospace;font-size:.3rem;text-align:center;color:var(--text2)}
+.spr-statuses{font-size:.55rem;text-align:center;min-height:.75rem;margin-top:.12rem}
 
-  .game-subtitle {
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    color: var(--text2);
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    margin-top: -1rem;
-  }
+/* Creature SVG */
+.csvg{
+  display:block;image-rendering:pixelated;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.6));
+  animation:idle 2s ease-in-out infinite;transform-origin:center bottom;
+}
+.spr-enemy .csvg{transform:scaleX(-1);animation:idleE 2.2s ease-in-out infinite}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes idleE{0%,100%{transform:scaleX(-1) translateY(0)}50%{transform:scaleX(-1) translateY(-7px)}}
 
-  .creature-parade {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 1rem;
-  }
+/* Attack / hit animations */
+@keyframes lunge{
+  0%{transform:translateX(0) translateY(0) scale(1)}
+  35%{transform:translateX(65px) translateY(-18px) scale(1.12)}
+  60%{transform:translateX(55px) translateY(-12px) scale(1.06)}
+  100%{transform:translateX(0) translateY(0) scale(1)}
+}
+@keyframes lungeE{
+  0%{transform:scaleX(-1) translateX(0)}
+  35%{transform:scaleX(-1) translateX(65px) translateY(-18px) scale(1.12)}
+  60%{transform:scaleX(-1) translateX(55px) translateY(-12px)}
+  100%{transform:scaleX(-1) translateX(0)}
+}
+@keyframes hit{
+  0%{transform:translateX(0) rotate(0)}
+  18%{transform:translateX(-13px) rotate(-3deg)}
+  36%{transform:translateX(9px) rotate(2deg)}
+  55%{transform:translateX(-6px)}
+  73%{transform:translateX(3px)}
+  100%{transform:translateX(0) rotate(0)}
+}
+@keyframes hitE{
+  0%{transform:scaleX(-1)}
+  18%{transform:scaleX(-1) translateX(-13px)}
+  36%{transform:scaleX(-1) translateX(9px)}
+  55%{transform:scaleX(-1) translateX(-6px)}
+  100%{transform:scaleX(-1) translateX(0)}
+}
+@keyframes healPop{
+  0%{transform:scale(1)}
+  40%{transform:scale(1.1);filter:drop-shadow(0 0 18px rgba(105,219,124,.9))}
+  100%{transform:scale(1)}
+}
+@keyframes healPopE{
+  0%{transform:scaleX(-1) scale(1)}
+  40%{transform:scaleX(-1) scale(1.1)}
+  100%{transform:scaleX(-1) scale(1)}
+}
+@keyframes deathFall{
+  0%{transform:translateY(0) rotate(0) scale(1);opacity:1}
+  40%{transform:translateY(-12px) rotate(6deg) scale(1.08);opacity:.75}
+  100%{transform:translateY(32px) rotate(28deg) scale(.65);opacity:0}
+}
+@keyframes deathFallE{
+  0%{transform:scaleX(-1) rotate(0);opacity:1}
+  40%{transform:scaleX(-1) rotate(-6deg) translateY(-12px);opacity:.75}
+  100%{transform:scaleX(-1) rotate(-28deg) translateY(32px) scale(.65);opacity:0}
+}
 
-  .creature-icon {
-    font-size: 3rem;
-    animation: float 3s ease-in-out infinite;
-    filter: drop-shadow(0 0 15px currentColor);
-  }
-  .creature-icon:nth-child(2) { animation-delay: 0.5s; }
-  .creature-icon:nth-child(3) { animation-delay: 1s; }
-  .creature-icon:nth-child(4) { animation-delay: 1.5s; }
-  .creature-icon:nth-child(5) { animation-delay: 2s; }
-  .creature-icon:nth-child(6) { animation-delay: 2.5s; }
+/* Spell & float overlays */
+.spell-fx{
+  position:absolute;pointer-events:none;z-index:5;font-size:2.8rem;
+  animation:spellPop .65s ease forwards;
+}
+@keyframes spellPop{
+  0%{transform:scale(0) rotate(-25deg);opacity:1}
+  50%{transform:scale(1.6) rotate(8deg);opacity:1}
+  100%{transform:scale(2.2) rotate(0);opacity:0}
+}
+.fnum{
+  position:absolute;pointer-events:none;z-index:6;
+  font-family:'Press Start 2P',monospace;font-size:.85rem;
+  animation:numUp 1.4s ease forwards;text-shadow:0 2px 6px rgba(0,0,0,.9);
+}
+@keyframes numUp{
+  0%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+  35%{opacity:1;transform:translateX(-50%) translateY(-44px) scale(1.25)}
+  100%{opacity:0;transform:translateX(-50%) translateY(-100px) scale(.7)}
+}
+.fnum.dmg{color:#ff5252} .fnum.heal{color:#69db7c}
+.fnum.shld{color:#90caf9} .fnum.buff{color:var(--gold)}
 
-  @keyframes float {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-  }
+/* Dialogue */
+.dialogue{
+  position:absolute;bottom:0;left:0;right:0;z-index:8;
+  background:rgba(8,12,24,.93);border-top:2px solid var(--border);
+  padding:.55rem 1.1rem;min-height:3.2rem;display:flex;align-items:center;gap:.4rem;
+}
+.dlg-txt{font-family:'Press Start 2P',monospace;font-size:.48rem;color:var(--text);line-height:2;flex:1}
+.dlg-ind{font-size:.75rem;color:var(--gold);animation:blink .7s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
-  .name-input-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
-  }
+/* Opponent overlay top-right */
+.opp-panel{
+  position:absolute;top:.7rem;right:.8rem;z-index:3;
+  background:rgba(0,0,0,.65);border:1px solid var(--border);border-radius:6px;
+  padding:.35rem .6rem;text-align:center;
+}
+.opp-panel-lbl{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--text2)}
+.opp-panel-val{font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--text)}
+.opp-panel-e{font-family:'Press Start 2P',monospace;font-size:.3rem;color:var(--energy);margin-top:.15rem}
 
-  .name-input-wrap label {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-    color: var(--text2);
-  }
+/* ACTION PANEL */
+.act-panel{
+  background:var(--panel);border-top:1px solid var(--border);
+  padding:.55rem .75rem;flex-shrink:0;
+}
+.e-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem}
+.e-lbl{font-family:'Press Start 2P',monospace;font-size:.36rem;color:var(--energy)}
+.e-gems{display:flex;gap:3px;flex:1;flex-wrap:wrap}
+.e-gem{width:13px;height:13px;border-radius:3px;border:1px solid rgba(88,166,255,.3);background:rgba(88,166,255,.05);transition:all .2s}
+.e-gem.lit{background:var(--energy);border-color:var(--energy);box-shadow:0 0 6px rgba(88,166,255,.6)}
+.e-cnt{font-family:'Press Start 2P',monospace;font-size:.52rem;color:var(--energy)}
 
-  input[type="text"] {
-    background: var(--panel2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    text-align: center;
-    outline: none;
-    width: 280px;
-    transition: border-color 0.2s;
-  }
-  input:focus { border-color: var(--gold); }
+.moves-row{display:flex;gap:.45rem;flex-wrap:wrap}
+.mv-btn{
+  flex:1;min-width:90px;max-width:150px;
+  background:var(--panel2);border:2px solid var(--border);border-radius:7px;
+  padding:.45rem .55rem;cursor:pointer;transition:all .15s;text-align:left;position:relative;overflow:hidden;
+}
+.mv-btn:hover{border-color:var(--gold);transform:translateY(-2px)}
+.mv-btn.sel{border-color:var(--gold);background:rgba(255,215,0,.07)}
+.mv-btn.nrg{opacity:.32;cursor:not-allowed;pointer-events:none}
+.mv-cost{
+  position:absolute;top:.28rem;right:.38rem;background:var(--energy);color:#0d1117;
+  font-family:'Press Start 2P',monospace;font-size:.36rem;width:15px;height:15px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+}
+.mv-emoji{font-size:1.1rem;display:block;margin-bottom:.18rem}
+.mv-name{font-family:'Press Start 2P',monospace;font-size:.34rem;color:var(--text);margin-bottom:.12rem;line-height:1.3}
+.mv-desc{font-size:.58rem;color:var(--text2);font-weight:600}
+.mv-pow{font-family:'Press Start 2P',monospace;font-size:.36rem;color:var(--gold);margin-top:.12rem}
+.bot-row{display:flex;justify-content:flex-end;margin-top:.4rem}
 
-  .btn-group {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
+/* GAMEOVER */
+#gameoverScreen{align-items:center;justify-content:center;gap:1.4rem;text-align:center}
+.go-title{font-family:'Press Start 2P',monospace;font-size:clamp(.9rem,3.5vw,1.8rem);filter:drop-shadow(0 0 28px currentColor)}
+.go-title.win{color:var(--gold)} .go-title.lose{color:#f85149}
+.go-sub{font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--text2);letter-spacing:.1em}
+.go-stats{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:.9rem 1.4rem;text-align:left;min-width:230px}
+.sr{display:flex;justify-content:space-between;padding:.28rem 0;font-size:.75rem;border-bottom:1px solid rgba(255,255,255,.04)}
+.sr:last-child{border:none}
+.sr .lbl{color:var(--text2)} .sr .val{color:var(--gold);font-family:'Press Start 2P',monospace;font-size:.45rem}
 
-  .btn {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    padding: 0.9rem 2rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase;
-    position: relative;
-    overflow: hidden;
-  }
-  .btn::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: rgba(255,255,255,0.1);
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .btn:hover::before { opacity: 1; }
-  .btn:active { transform: scale(0.97); }
+/* TOAST */
+.toast{
+  position:fixed;top:3.5rem;left:50%;transform:translateX(-50%);
+  background:var(--panel);border:1px solid var(--border);border-radius:6px;
+  padding:.45rem 1.1rem;font-family:'Press Start 2P',monospace;font-size:.42rem;color:var(--text2);
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:300;white-space:nowrap;
+}
+.toast.show{opacity:1}
 
-  .btn-primary {
-    background: linear-gradient(135deg, var(--gold2), var(--fire));
-    color: #0a0a1a;
-    box-shadow: 0 4px 20px rgba(255,170,0,0.3);
-  }
-  .btn-primary:hover { box-shadow: 0 4px 30px rgba(255,170,0,0.5); transform: translateY(-2px); }
+/* CPU OVERLAY */
+.cpu-ov{
+  position:fixed;inset:0;background:rgba(0,0,0,.22);z-index:200;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.cpu-ov.show{opacity:1;pointer-events:all}
+.cpu-box{
+  background:var(--panel);border:1px solid var(--gold);border-radius:7px;
+  padding:.7rem 1.4rem;font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--gold);
+  display:flex;align-items:center;gap:.5rem;
+}
+.dots span{animation:dotB .8s ease-in-out infinite}
+.dots span:nth-child(2){animation-delay:.25s} .dots span:nth-child(3){animation-delay:.5s}
+@keyframes dotB{0%,100%{opacity:.12}50%{opacity:1}}
 
-  .btn-secondary {
-    background: var(--panel2);
-    color: var(--text);
-    border: 1px solid var(--border);
-  }
-  .btn-secondary:hover { border-color: var(--gold); }
-
-  .btn-danger {
-    background: linear-gradient(135deg, #ef4444, #7c3aed);
-    color: white;
-    box-shadow: 0 4px 20px rgba(239,68,68,0.3);
-  }
-
-  .btn-sm {
-    font-size: 0.7rem;
-    padding: 0.5rem 1rem;
-  }
-
-  /* ─── TEAM SELECT ─── */
-  #teamScreen { padding: 1.5rem; gap: 1.5rem; }
-
-  .screen-title {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: 1.8rem;
-    color: var(--gold);
-    text-align: center;
-    filter: drop-shadow(0 0 10px rgba(255,215,0,0.4));
-  }
-
-  .creature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 1rem;
-    max-width: 1100px;
-    width: 100%;
-  }
-
-  .creature-card {
-    background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 1.2rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .creature-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--accent);
-    opacity: 0.7;
-  }
-  .creature-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-  }
-  .creature-card.selected {
-    border-color: var(--gold);
-    background: var(--panel2);
-    box-shadow: 0 0 20px rgba(255,215,0,0.2);
-  }
-  .creature-card.selected::after {
-    content: '✓';
-    position: absolute;
-    top: 0.5rem; right: 0.7rem;
-    color: var(--gold);
-    font-size: 1.2rem;
-    font-weight: 900;
-  }
-
-  .creature-card .icon { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; text-align: center; }
-  .creature-card .cname {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-align: center;
-    color: var(--text);
-    margin-bottom: 0.2rem;
-  }
-  .creature-card .ctype {
-    font-size: 0.75rem;
-    text-align: center;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-  }
-  .creature-card .stats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.75rem;
-    color: var(--text2);
-  }
-  .creature-card .stat span { color: var(--text); font-weight: 600; }
-
-  .team-preview {
-    display: flex;
-    gap: 0.75rem;
-    align-items: center;
-    background: var(--panel);
-    padding: 1rem 1.5rem;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    min-width: 300px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .team-preview-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.7rem;
-    color: var(--text2);
-    letter-spacing: 0.2em;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 0.25rem;
-  }
-  .team-slot {
-    width: 60px; height: 60px;
-    border: 2px dashed var(--border);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    background: var(--panel2);
-    transition: all 0.2s;
-  }
-  .team-slot.filled {
-    border-color: var(--gold);
-    border-style: solid;
-    animation: slotFill 0.3s ease;
-  }
-  @keyframes slotFill {
-    0% { transform: scale(0.8); }
-    100% { transform: scale(1); }
-  }
-
-  /* ─── BATTLE SCREEN ─── */
-  #battleScreen {
-    padding: 0;
-    justify-content: stretch;
-    min-height: 100vh;
-    display: grid;
-    grid-template-rows: auto 1fr auto auto;
-    gap: 0;
-  }
-
-  .battle-header {
-    background: var(--panel);
-    border-bottom: 1px solid var(--border);
-    padding: 0.75rem 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .battle-info {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.75rem;
-    color: var(--text2);
-  }
-  .battle-info strong { color: var(--gold); font-size: 0.9rem; }
-
-  .turn-indicator {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.8rem;
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-    font-weight: 700;
-    transition: all 0.3s;
-  }
-  .turn-indicator.my-turn {
-    background: rgba(255,215,0,0.15);
-    color: var(--gold);
-    border: 1px solid var(--gold);
-    animation: myTurnPulse 1.5s ease-in-out infinite;
-  }
-  .turn-indicator.their-turn {
-    background: rgba(239,68,68,0.1);
-    color: #ef4444;
-    border: 1px solid #ef4444;
-  }
-  @keyframes myTurnPulse {
-    0%,100% { box-shadow: 0 0 0 0 rgba(255,215,0,0.3); }
-    50% { box-shadow: 0 0 0 8px rgba(255,215,0,0); }
-  }
-
-  .battle-arena {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 0;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .arena-half {
-    padding: 1rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    position: relative;
-  }
-
-  .arena-half.opponent {
-    background: linear-gradient(180deg, rgba(239,68,68,0.05) 0%, transparent 100%);
-    border-bottom: 1px solid var(--border);
-    align-items: flex-start;
-    padding-top: 1.5rem;
-  }
-
-  .arena-half.player {
-    background: linear-gradient(0deg, rgba(78,205,196,0.05) 0%, transparent 100%);
-    align-items: flex-end;
-    padding-bottom: 1.5rem;
-  }
-
-  .arena-label {
-    position: absolute;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    color: var(--text2);
-    opacity: 0.7;
-  }
-  .opponent .arena-label { top: 0.4rem; left: 1.5rem; }
-  .player .arena-label { bottom: 0.4rem; left: 1.5rem; }
-
-  .battle-creature {
-    background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem;
-    width: 140px;
-    flex-shrink: 0;
-    transition: all 0.2s;
-    position: relative;
-    cursor: default;
-  }
-  .battle-creature.targetable {
-    border-color: rgba(239,68,68,0.5);
-    cursor: crosshair;
-  }
-  .battle-creature.targetable:hover {
-    border-color: #ef4444;
-    box-shadow: 0 0 20px rgba(239,68,68,0.3);
-    transform: translateY(-4px);
-  }
-  .battle-creature.dead {
-    opacity: 0.35;
-    filter: grayscale(1);
-    border-color: #333;
-  }
-  .battle-creature.hit {
-    animation: hitAnim 0.4s ease;
-  }
-  .battle-creature.healed {
-    animation: healAnim 0.4s ease;
-  }
-  @keyframes hitAnim {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-8px); background: rgba(239,68,68,0.2); }
-    75% { transform: translateX(8px); }
-    100% { transform: translateX(0); background: var(--panel); }
-  }
-  @keyframes healAnim {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); background: rgba(34,197,94,0.15); }
-    100% { transform: scale(1); background: var(--panel); }
-  }
-
-  .bc-icon { font-size: 2rem; text-align: center; display: block; margin-bottom: 0.3rem; }
-  .bc-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.6rem;
-    text-align: center;
-    color: var(--text2);
-    margin-bottom: 0.5rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .bc-shield {
-    font-size: 0.65rem;
-    text-align: center;
-    color: #93c5fd;
-    margin-bottom: 0.3rem;
-    min-height: 1rem;
-  }
-
-  .hp-bar-wrap {
-    width: 100%;
-    height: 6px;
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 0.25rem;
-  }
-  .hp-bar {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.5s ease, background 0.3s;
-  }
-  .hp-text {
-    font-size: 0.65rem;
-    text-align: center;
-    color: var(--text2);
-    font-weight: 600;
-  }
-
-  /* ─── ENERGY BAR ─── */
-  .energy-panel {
-    background: var(--panel);
-    border-top: 1px solid var(--border);
-    padding: 0.6rem 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .energy-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    color: var(--energy);
-    letter-spacing: 0.15em;
-    flex-shrink: 0;
-  }
-
-  .energy-gems {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    flex: 1;
-  }
-
-  .energy-gem {
-    width: 18px; height: 18px;
-    border-radius: 4px;
-    border: 1px solid rgba(56,189,248,0.3);
-    background: rgba(56,189,248,0.05);
-    transition: all 0.2s;
-  }
-  .energy-gem.filled {
-    background: var(--energy);
-    border-color: var(--energy);
-    box-shadow: 0 0 8px rgba(56,189,248,0.5);
-  }
-
-  .energy-count {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.9rem;
-    color: var(--energy);
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  /* ─── HAND ─── */
-  .hand-area {
-    background: var(--panel2);
-    border-top: 1px solid var(--border);
-    padding: 0.75rem 1rem;
-    min-height: 140px;
-    max-height: 180px;
-    overflow-x: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .hand-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-
-  .hand-label {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    color: var(--text2);
-    letter-spacing: 0.2em;
-  }
-
-  .hand-cards {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 0.25rem;
-  }
-  .hand-cards::-webkit-scrollbar { height: 3px; }
-  .hand-cards::-webkit-scrollbar-track { background: var(--panel); }
-  .hand-cards::-webkit-scrollbar-thumb { background: var(--border); }
-
-  .hand-card {
-    background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    padding: 0.6rem 0.7rem;
-    cursor: pointer;
-    flex-shrink: 0;
-    width: 110px;
-    transition: all 0.15s;
-    position: relative;
-    user-select: none;
-  }
-  .hand-card:hover {
-    border-color: var(--gold);
-    transform: translateY(-6px);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    z-index: 10;
-  }
-  .hand-card.selected-card {
-    border-color: var(--gold);
-    background: rgba(255,215,0,0.08);
-    transform: translateY(-8px);
-    box-shadow: 0 10px 25px rgba(255,215,0,0.2);
-  }
-  .hand-card.cant-afford {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-  .hand-card.cant-afford:hover { transform: none; border-color: var(--border); box-shadow: none; }
-
-  .card-cost {
-    position: absolute;
-    top: 0.3rem; right: 0.4rem;
-    background: var(--energy);
-    color: #0a0a1a;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    font-weight: 900;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .card-emoji { font-size: 1.4rem; display: block; text-align: center; margin-bottom: 0.3rem; }
-  .card-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.55rem;
-    font-weight: 700;
-    text-align: center;
-    color: var(--text);
-    margin-bottom: 0.2rem;
-    line-height: 1.2;
-  }
-  .card-type {
-    font-size: 0.6rem;
-    text-align: center;
-    color: var(--text2);
-    font-weight: 600;
-  }
-  .card-power {
-    font-size: 0.65rem;
-    text-align: center;
-    color: var(--gold);
-    font-weight: 700;
-    margin-top: 0.2rem;
-  }
-
-  /* ─── LOG / ACTIONS ─── */
-  .action-hint {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    color: var(--text2);
-    text-align: center;
-    padding: 0.3rem;
-  }
-
-  /* ─── FLOATING DAMAGE ─── */
-  .float-text {
-    position: fixed;
-    pointer-events: none;
-    font-family: 'Orbitron', monospace;
-    font-size: 1.4rem;
-    font-weight: 900;
-    z-index: 1000;
-    animation: floatUp 1.2s ease forwards;
-  }
-  .float-text.dmg { color: #ef4444; }
-  .float-text.heal { color: #22c55e; }
-  .float-text.shield { color: #93c5fd; }
-
-  @keyframes floatUp {
-    0% { opacity: 1; transform: translateY(0) scale(1); }
-    50% { opacity: 1; transform: translateY(-40px) scale(1.3); }
-    100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
-  }
-
-  /* ─── GAME OVER ─── */
-  #gameoverScreen {
-    gap: 2rem;
-    text-align: center;
-  }
-
-  .gameover-title {
-    font-family: 'Cinzel Decorative', cursive;
-    font-size: clamp(2rem, 5vw, 4rem);
-    filter: drop-shadow(0 0 30px currentColor);
-  }
-  .gameover-title.win { color: var(--gold); }
-  .gameover-title.lose { color: #ef4444; }
-
-  .gameover-sub {
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    color: var(--text2);
-    letter-spacing: 0.2em;
-  }
-
-  /* ─── WAITING ─── */
-  #waitingScreen { gap: 1.5rem; text-align: center; }
-  .spinner {
-    width: 60px; height: 60px;
-    border: 3px solid var(--border);
-    border-top-color: var(--gold);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .waiting-text {
-    font-family: 'Orbitron', monospace;
-    font-size: 0.9rem;
-    color: var(--text2);
-    letter-spacing: 0.2em;
-  }
-
-  /* ─── TOOLTIPS ─── */
-  .tooltip {
-    position: fixed;
-    background: var(--panel);
-    border: 1px solid var(--gold);
-    border-radius: 8px;
-    padding: 0.6rem 0.8rem;
-    font-size: 0.75rem;
-    color: var(--text);
-    pointer-events: none;
-    z-index: 999;
-    max-width: 180px;
-    display: none;
-  }
-
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 600px) {
-    .creature-grid { grid-template-columns: repeat(2, 1fr); }
-    .battle-creature { width: 100px; padding: 0.7rem; }
-    .bc-icon { font-size: 1.5rem; }
-  }
-
-  /* ─── MISC ─── */
-  .divider {
-    position: absolute;
-    left: 0; right: 0;
-    top: 50%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border), var(--gold2), var(--border), transparent);
-    opacity: 0.6;
-    pointer-events: none;
-  }
-
-  .vs-badge {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    top: 50%;
-    z-index: 10;
-    background: var(--panel);
-    border: 2px solid var(--gold);
-    border-radius: 50%;
-    width: 36px; height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.65rem;
-    font-weight: 900;
-    color: var(--gold);
-    box-shadow: 0 0 20px rgba(255,215,0,0.3);
-  }
-
-  .status-msg {
-    position: fixed;
-    top: 5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.6rem 1.5rem;
-    font-family: 'Orbitron', monospace;
-    font-size: 0.75rem;
-    color: var(--text2);
-    opacity: 0;
-    transition: opacity 0.3s;
-    pointer-events: none;
-    z-index: 100;
-    white-space: nowrap;
-  }
-  .status-msg.show { opacity: 1; }
+@media(max-width:600px){
+  .creature-grid{grid-template-columns:repeat(3,1fr)}
+  .moves-row{flex-wrap:wrap}
+  .mv-btn{min-width:80px}
+  .spr-enemy{left:62%} .spr-player{left:18%}
+  .plat-enemy{left:62%} .plat-player{left:18%}
+}
 </style>
 </head>
 <body>
 
 <!-- MENU -->
 <div id="menuScreen" class="screen active">
-  <div class="menu-bg"></div>
-  <div class="game-title">⚔️ Axiom Clash</div>
-  <div class="game-subtitle">Creature Battle Arena</div>
-
-  <div class="creature-parade">
-    <span class="creature-icon" style="color:#ff6b35">🔥</span>
-    <span class="creature-icon" style="color:#4ecdc4">🌊</span>
-    <span class="creature-icon" style="color:#56ab2f">🌿</span>
-    <span class="creature-icon" style="color:#f7971e">⚡</span>
-    <span class="creature-icon" style="color:#a8edea">❄️</span>
-    <span class="creature-icon" style="color:#7c3aed">🌑</span>
+  <div class="stars" id="starsEl"></div>
+  <div class="game-title">AXIOM CLASH</div>
+  <div style="font-family:'Press Start 2P',monospace;font-size:.42rem;color:var(--text2);letter-spacing:.18em;position:relative;z-index:1">CREATURE BATTLE ARENA</div>
+  <div class="menu-creatures" id="menuCreatures"></div>
+  <div class="name-wrap">
+    <label>YOUR NAME</label>
+    <input type="text" id="playerName" placeholder="Trainer..." maxlength="12" value="Trainer">
   </div>
-
-  <div class="name-input-wrap">
-    <label>YOUR TRAINER NAME</label>
-    <input type="text" id="playerName" placeholder="Enter name..." maxlength="16" value="Trainer">
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="startGame()">▶ START BATTLE</button>
   </div>
-
-  <div class="btn-group">
-    <button class="btn btn-primary" onclick="startSingle()">⚔️ vs CPU</button>
-    <button class="btn btn-secondary" onclick="joinQueue()">👥 vs Player</button>
+  <div style="font-family:'Press Start 2P',monospace;font-size:.36rem;color:var(--text2);line-height:2.2;text-align:center;max-width:360px;position:relative;z-index:1">
+    PICK 3 · USE MOVES · DEFEAT ALL ENEMIES
   </div>
-
-  <div style="color:var(--text2);font-size:0.8rem;font-family:'Rajdhani',sans-serif;text-align:center;max-width:400px;line-height:1.6;">
-    Pick 3 creatures. Play skill cards using energy. Defeat all enemy creatures to win!
-  </div>
-</div>
-
-<!-- WAITING -->
-<div id="waitingScreen" class="screen">
-  <div class="spinner"></div>
-  <div class="game-title" style="font-size:2rem;">Axiom Clash</div>
-  <div class="waiting-text">Searching for opponent...</div>
-  <button class="btn btn-secondary btn-sm" onclick="cancelQueue()">Cancel</button>
 </div>
 
 <!-- TEAM SELECT -->
 <div id="teamScreen" class="screen">
-  <div class="screen-title">⚔️ Choose Your Team</div>
-  <div style="font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--text2);letter-spacing:0.2em;">SELECT 3 CREATURES</div>
-
-  <div class="creature-grid" id="creatureGrid"></div>
-
-  <div class="team-preview" id="teamPreview">
-    <div class="team-preview-label">YOUR TEAM</div>
-    <div class="team-slot" id="slot0">?</div>
-    <div class="team-slot" id="slot1">?</div>
-    <div class="team-slot" id="slot2">?</div>
-    <button class="btn btn-primary" id="confirmTeamBtn" onclick="confirmTeam()" disabled>Confirm Team →</button>
+  <div class="inner">
+    <div class="screen-title">CHOOSE YOUR TEAM</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:.4rem;color:var(--text2)">SELECT 3 CREATURES</div>
+    <div class="creature-grid" id="creatureGrid"></div>
+    <div class="team-preview">
+      <div class="tp-label">YOUR TEAM</div>
+      <div class="team-slot" id="slot0"><span style="opacity:.3;font-size:.8rem">?</span></div>
+      <div class="team-slot" id="slot1"><span style="opacity:.3;font-size:.8rem">?</span></div>
+      <div class="team-slot" id="slot2"><span style="opacity:.3;font-size:.8rem">?</span></div>
+      <button class="btn btn-primary btn-sm" id="confirmBtn" onclick="confirmTeam()" disabled>FIGHT! →</button>
+    </div>
   </div>
 </div>
 
 <!-- BATTLE -->
 <div id="battleScreen" class="screen">
-  <div class="battle-header">
-    <div class="battle-info">Round <strong id="roundNum">1</strong></div>
-    <div class="turn-indicator" id="turnIndicator">—</div>
-    <div class="battle-info" id="opponentName">Opponent</div>
+  <div class="b-hud">
+    <div class="b-hud-name" id="hudPlayer">YOU</div>
+    <div class="turn-pill" id="turnPill">—</div>
+    <div class="b-hud-name" id="hudCPU">CPU</div>
   </div>
 
-  <div class="battle-arena">
-    <!-- Opponent half -->
-    <div class="arena-half opponent">
-      <span class="arena-label" id="opNameLabel">OPPONENT</span>
-      <div id="opponentField" style="display:flex;gap:0.75rem;flex-wrap:wrap;"></div>
-      <div style="margin-left:auto;display:flex;flex-direction:column;gap:0.5rem;align-items:flex-end;">
-        <div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--text2);">CARDS IN HAND</div>
-        <div id="opponentCardCount" style="font-family:'Orbitron',monospace;font-size:1.5rem;color:var(--text2);">0</div>
-        <div style="font-family:'Orbitron',monospace;font-size:0.65rem;color:var(--energy);" id="opponentEnergyDisplay">⚡ 0</div>
+  <div class="stage" id="stage">
+    <div class="stage-sky"></div>
+    <div class="stage-ground"></div>
+
+    <div class="platform plat-enemy"></div>
+    <div class="platform plat-player"></div>
+
+    <!-- Enemy sprite -->
+    <div class="spr-wrap spr-enemy" id="enemyWrap">
+      <div class="spr-hp" id="enemyHpBox">
+        <div class="spr-name" id="enemyName">—</div>
+        <div class="hp-track"><div class="hp-fill" id="enemyFill" style="width:100%"></div></div>
+        <div class="hp-nums" id="enemyNums">—</div>
+        <div class="spr-statuses" id="enemyStat"></div>
       </div>
+      <svg id="enemySvg" class="csvg" width="88" height="88" viewBox="0 0 32 32"></svg>
     </div>
 
-    <div class="divider"></div>
-    <div class="vs-badge">VS</div>
-
-    <!-- Player half -->
-    <div class="arena-half player">
-      <span class="arena-label">YOU</span>
-      <div id="playerField" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;"></div>
-    </div>
-  </div>
-
-  <!-- Energy -->
-  <div class="energy-panel">
-    <div class="energy-label">⚡ ENERGY</div>
-    <div class="energy-gems" id="energyGems"></div>
-    <div class="energy-count" id="energyCount">3/10</div>
-  </div>
-
-  <!-- Hand -->
-  <div class="hand-area">
-    <div class="hand-header">
-      <div class="hand-label">YOUR HAND</div>
-      <div style="display:flex;gap:0.5rem;">
-        <div class="action-hint" id="actionHint">Select a card, then click a target</div>
-        <button class="btn btn-secondary btn-sm" id="endTurnBtn" onclick="endTurn()">End Turn</button>
+    <!-- Player sprite -->
+    <div class="spr-wrap spr-player" id="playerWrap">
+      <div class="spr-hp" id="playerHpBox">
+        <div class="spr-name" id="playerCName">—</div>
+        <div class="hp-track"><div class="hp-fill" id="playerFill" style="width:100%"></div></div>
+        <div class="hp-nums" id="playerNums">—</div>
+        <div class="spr-statuses" id="playerStat"></div>
       </div>
+      <svg id="playerSvg" class="csvg" width="88" height="88" viewBox="0 0 32 32"></svg>
     </div>
-    <div class="hand-cards" id="handCards"></div>
+
+    <!-- CPU info top-right -->
+    <div class="opp-panel">
+      <div class="opp-panel-lbl">HAND</div>
+      <div class="opp-panel-val" id="cpuHand">3</div>
+      <div class="opp-panel-e" id="cpuEn">⚡3</div>
+    </div>
+
+    <!-- Dialogue bottom -->
+    <div class="dialogue">
+      <div class="dlg-txt" id="dlgTxt">Battle begins!</div>
+      <div class="dlg-ind">▼</div>
+    </div>
+  </div>
+
+  <!-- Action panel -->
+  <div class="act-panel">
+    <div class="e-row">
+      <div class="e-lbl">⚡ ENERGY</div>
+      <div class="e-gems" id="eGems"></div>
+      <div class="e-cnt" id="eCnt">3/3</div>
+    </div>
+    <div class="moves-row" id="movesRow"></div>
+    <div class="bot-row">
+      <button class="btn btn-secondary btn-sm" id="endTurnBtn" onclick="playerEndTurn()">END TURN ▶</button>
+    </div>
   </div>
 </div>
 
 <!-- GAME OVER -->
 <div id="gameoverScreen" class="screen">
-  <div class="gameover-title" id="gameoverTitle">—</div>
-  <div class="gameover-sub" id="gameoverSub">Battle complete</div>
-  <div class="btn-group">
-    <button class="btn btn-primary" onclick="playAgain()">Play Again</button>
-    <button class="btn btn-secondary" onclick="goMenu()">Main Menu</button>
+  <div class="go-title" id="goTitle">—</div>
+  <div class="go-sub" id="goSub">—</div>
+  <div class="go-stats" id="goStats"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="playAgain()">▶ PLAY AGAIN</button>
+    <button class="btn btn-secondary" onclick="goMenu()">MENU</button>
   </div>
 </div>
 
-<div class="tooltip" id="tooltip"></div>
-<div class="status-msg" id="statusMsg"></div>
+<div class="toast" id="toast"></div>
+<div class="cpu-ov" id="cpuOv">
+  <div class="cpu-box">🤖 CPU Thinking <div class="dots"><span>.</span><span>.</span><span>.</span></div></div>
+</div>
 
 <script>
-// ─── STATE ───
-const CREATURES = [
-  { id:0, name:'Emberwing', type:'Fire', maxHp:420, atk:10, spd:8, emoji:'🔥', color:'#ff6b35',
-    cards:[
-      {id:'0_0',name:'Flame Slash',type:'attack',cost:1,power:80,emoji:'⚔️'},
-      {id:'0_1',name:'Inferno',type:'attack',cost:2,power:130,emoji:'🔥'},
-      {id:'0_2',name:'Dragon Scale',type:'shield',cost:1,power:60,emoji:'🛡️'}
-    ]},
-  { id:1, name:'Tidecaller', type:'Water', maxHp:380, atk:5, spd:6, emoji:'🌊', color:'#4ecdc4',
-    cards:[
-      {id:'1_0',name:'Tidal Wave',type:'attack',cost:2,power:100,emoji:'💧'},
-      {id:'1_1',name:'Healing Spring',type:'heal',cost:1,power:80,emoji:'💚'},
-      {id:'1_2',name:'Aqua Barrier',type:'shield',cost:1,power:50,emoji:'🛡️'}
-    ]},
-  { id:2, name:'Thornback', type:'Plant', maxHp:500, atk:0, spd:4, emoji:'🌿', color:'#56ab2f',
-    cards:[
-      {id:'2_0',name:'Vine Whip',type:'attack',cost:1,power:70,emoji:'🌱'},
-      {id:'2_1',name:"Nature's Grasp",type:'aoe',cost:3,power:50,emoji:'🌲'},
-      {id:'2_2',name:'Photosynthesis',type:'heal',cost:1,power:100,emoji:'💚'}
-    ]},
-  { id:3, name:'Stormclaw', type:'Lightning', maxHp:360, atk:15, spd:10, emoji:'⚡', color:'#f7971e',
-    cards:[
-      {id:'3_0',name:'Thunder Strike',type:'attack',cost:1,power:90,emoji:'⚡'},
-      {id:'3_1',name:'Volt Chain',type:'aoe',cost:2,power:40,emoji:'🌩️'},
-      {id:'3_2',name:'Power Surge',type:'buff',cost:1,power:0,atkBoost:20,emoji:'💪'}
-    ]},
-  { id:4, name:'Frostmane', type:'Ice', maxHp:440, atk:8, spd:5, emoji:'❄️', color:'#a8edea',
-    cards:[
-      {id:'4_0',name:'Blizzard',type:'aoe',cost:2,power:55,emoji:'❄️'},
-      {id:'4_1',name:'Ice Fang',type:'attack',cost:1,power:85,emoji:'🐺'},
-      {id:'4_2',name:'Frost Armor',type:'shield',cost:1,power:80,emoji:'🛡️'}
-    ]},
-  { id:5, name:'Shadowpounce', type:'Dark', maxHp:340, atk:20, spd:12, emoji:'🌑', color:'#7c3aed',
-    cards:[
-      {id:'5_0',name:'Dark Slash',type:'attack',cost:1,power:110,emoji:'🌑'},
-      {id:'5_1',name:'Soul Drain',type:'heal',cost:2,power:60,emoji:'💜'},
-      {id:'5_2',name:'Nightmare',type:'attack',cost:2,power:150,emoji:'👁️'}
-    ]}
-];
-
-let ws = null;
-let state = {
-  screen: 'menu',
-  playerIndex: -1,
-  selectedTeam: [],
-  selectedCard: null,
-  gameData: null,
-  isMyTurn: false,
-  gameId: null
+// ═══ SVG SPRITES ═══
+const SVG = {
+  // Fire lizard
+  0:`<g>
+    <rect x="11" y="14" width="10" height="10" fill="#cc4400" rx="2"/>
+    <rect x="12" y="16" width="8" height="7" fill="#ff7744" rx="1"/>
+    <rect x="10" y="7" width="12" height="9" fill="#cc4400" rx="3"/>
+    <rect x="18" y="11" width="5" height="4" fill="#aa3300" rx="1"/>
+    <rect x="12" y="9" width="3" height="3" fill="#ffee00" rx="1"/>
+    <rect x="13" y="10" width="1" height="1" fill="#000"/>
+    <polygon points="14,7 16,2 18,7" fill="#ff9900"/>
+    <polygon points="10,7 12,3 14,7" fill="#ffcc00"/>
+    <polygon points="5,12 11,14 8,22" fill="#ff5500" opacity=".8"/>
+    <polygon points="27,12 21,14 24,22" fill="#ff5500" opacity=".8"/>
+    <line x1="7" y1="13" x2="9" y2="20" stroke="#ff9900" stroke-width=".8" opacity=".6"/>
+    <line x1="25" y1="13" x2="23" y2="20" stroke="#ff9900" stroke-width=".8" opacity=".6"/>
+    <path d="M21,23 Q26,26 24,30 Q22,32 20,30" fill="none" stroke="#cc4400" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="22" cy="30" r="2" fill="#ff9900"/>
+    <circle cx="22" cy="30" r="1" fill="#ffee00"/>
+    <rect x="11" y="23" width="3" height="5" fill="#aa3300" rx="1"/>
+    <rect x="18" y="23" width="3" height="5" fill="#aa3300" rx="1"/>
+    <rect x="10" y="27" width="5" height="2" fill="#882200" rx="1"/>
+    <rect x="17" y="27" width="5" height="2" fill="#882200" rx="1"/>
+  </g>`,
+  // Water serpent
+  1:`<g>
+    <ellipse cx="16" cy="19" rx="7" ry="5" fill="#0077aa"/>
+    <ellipse cx="16" cy="19" rx="5" ry="3.5" fill="#00aadd"/>
+    <rect x="13" y="11" width="6" height="9" fill="#0077aa" rx="2"/>
+    <ellipse cx="16" cy="9" rx="6" ry="5" fill="#0077aa"/>
+    <ellipse cx="22" cy="10" rx="3" ry="2" fill="#005588"/>
+    <circle cx="14" cy="8" r="2" fill="#00ffcc"/>
+    <circle cx="14" cy="8" r="1" fill="#003355"/>
+    <circle cx="14.4" cy="7.6" r=".4" fill="#fff"/>
+    <polygon points="10,6 8,2 12,5" fill="#00ccff" opacity=".9"/>
+    <polygon points="16,4 16,0 20,4" fill="#00ccff" opacity=".9"/>
+    <rect x="14" y="13" width="4" height="6" fill="#00ddff" rx="1"/>
+    <path d="M22,20 Q28,22 26,27 Q24,30 20,28" fill="none" stroke="#0077aa" stroke-width="3" stroke-linecap="round"/>
+    <polygon points="19,28 22,31 25,27" fill="#00aadd" opacity=".8"/>
+    <polygon points="9,15 6,12 9,20" fill="#0099cc" opacity=".8"/>
+    <polygon points="23,15 26,12 23,20" fill="#0099cc" opacity=".8"/>
+    <circle cx="6" cy="10" r="1" fill="#00ccff" opacity=".5"/>
+    <circle cx="5" cy="7" r=".7" fill="#00ccff" opacity=".4"/>
+  </g>`,
+  // Plant turtle
+  2:`<g>
+    <ellipse cx="16" cy="19" rx="9" ry="7" fill="#2d6a1f"/>
+    <polygon points="16,13 20,16 20,21 16,24 12,21 12,16" fill="none" stroke="#4a9a30" stroke-width=".8"/>
+    <line x1="16" y1="13" x2="16" y2="24" stroke="#4a9a30" stroke-width=".5" opacity=".6"/>
+    <line x1="12" y1="16" x2="20" y2="21" stroke="#4a9a30" stroke-width=".5" opacity=".6"/>
+    <line x1="20" y1="16" x2="12" y2="21" stroke="#4a9a30" stroke-width=".5" opacity=".6"/>
+    <ellipse cx="14" cy="16" rx="2" ry="1.5" fill="#6abf45" opacity=".3"/>
+    <ellipse cx="16" cy="11" rx="5" ry="4" fill="#3d8a2a"/>
+    <rect x="19" y="11" width="4" height="3" fill="#2d6a1f" rx="1"/>
+    <circle cx="14" cy="10" r="1.8" fill="#ffcc00"/>
+    <circle cx="14" cy="10" r=".9" fill="#1a3d10"/>
+    <circle cx="14.5" cy="9.5" r=".4" fill="#fff" opacity=".7"/>
+    <polygon points="13,12 12,9 15,12" fill="#1a5c10"/>
+    <polygon points="17,12 16,8 19,12" fill="#1a5c10"/>
+    <polygon points="21,15 22,11 24,15" fill="#1a5c10"/>
+    <polygon points="11,15 10,11 8,16" fill="#1a5c10"/>
+    <path d="M7,17 Q4,14 5,10 Q6,7 8,8" fill="none" stroke="#4a9a30" stroke-width="1.2" stroke-linecap="round"/>
+    <circle cx="8" cy="8" r="1.5" fill="#69db7c"/>
+    <ellipse cx="10" cy="24" rx="3" ry="2" fill="#3d8a2a"/>
+    <ellipse cx="22" cy="24" rx="3" ry="2" fill="#3d8a2a"/>
+    <rect x="13" y="25" width="3" height="3" fill="#3d8a2a" rx="1"/>
+    <rect x="16" y="25" width="3" height="3" fill="#3d8a2a" rx="1"/>
+  </g>`,
+  // Lightning wolf
+  3:`<g>
+    <ellipse cx="15" cy="19" rx="8" ry="6" fill="#3d3d00"/>
+    <ellipse cx="15" cy="18" rx="6" ry="4.5" fill="#5a5500"/>
+    <path d="M10,16 L13,19 L11,22 L14,20 L12,23" fill="none" stroke="#ffd60a" stroke-width="1" opacity=".8"/>
+    <path d="M18,15 L20,18 L18,21" fill="none" stroke="#ffd60a" stroke-width=".8" opacity=".6"/>
+    <rect x="12" y="11" width="7" height="9" fill="#4a4a00" rx="2"/>
+    <ellipse cx="16" cy="10" rx="7" ry="6" fill="#3d3d00"/>
+    <polygon points="10,6 8,1 13,6" fill="#3d3d00"/>
+    <polygon points="11,5 10,2 13,5" fill="#ffd60a" opacity=".5"/>
+    <polygon points="22,6 24,1 19,6" fill="#3d3d00"/>
+    <polygon points="21,5 22,2 19,5" fill="#ffd60a" opacity=".5"/>
+    <circle cx="13" cy="9" r="2.5" fill="#ffd60a"/>
+    <circle cx="13" cy="9" r="1.2" fill="#2a2a00"/>
+    <circle cx="13.5" cy="8.5" r=".5" fill="#fff" opacity=".8"/>
+    <ellipse cx="20" cy="11" rx="3.5" ry="2.5" fill="#2a2a00"/>
+    <ellipse cx="20" cy="10.5" rx="2" ry="1.2" fill="#4a4a00"/>
+    <circle cx="21" cy="10" r=".6" fill="#1a0000"/>
+    <path d="M6,8 L8,5 L7,9 L9,6" fill="none" stroke="#ffd60a" stroke-width=".8" opacity=".7"/>
+    <path d="M26,8 L24,5 L25,9 L23,6" fill="none" stroke="#ffd60a" stroke-width=".8" opacity=".7"/>
+    <path d="M23,22 Q28,20 27,25 Q26,28 23,27" fill="none" stroke="#4a4a00" stroke-width="2.5" stroke-linecap="round"/>
+    <polygon points="25,22 23,25 25,24 23,27" fill="#ffd60a" opacity=".9"/>
+    <rect x="10" y="23" width="3" height="5" fill="#3d3d00" rx="1"/>
+    <rect x="19" y="23" width="3" height="5" fill="#3d3d00" rx="1"/>
+    <rect x="9" y="27" width="5" height="2" fill="#2a2a00" rx="1"/>
+    <rect x="18" y="27" width="5" height="2" fill="#2a2a00" rx="1"/>
+    <path d="M9,29 L8,31 M11,29 L10,31 M13,29 L12,31" stroke="#ffd60a" stroke-width=".7"/>
+  </g>`,
+  // Ice bear
+  4:`<g>
+    <ellipse cx="16" cy="20" rx="9" ry="7" fill="#b0d8e8"/>
+    <ellipse cx="16" cy="21" rx="6" ry="5" fill="#d8f0f8"/>
+    <polygon points="10,13 9,9 12,13" fill="#88ccee" opacity=".8"/>
+    <polygon points="15,12 14,7 18,12" fill="#aaddff" opacity=".9"/>
+    <polygon points="20,13 21,8 23,13" fill="#88ccee" opacity=".8"/>
+    <rect x="12" y="12" width="8" height="9" fill="#b0d8e8" rx="2"/>
+    <ellipse cx="16" cy="11" rx="7.5" ry="6" fill="#c8e8f5"/>
+    <circle cx="10" cy="7" r="3" fill="#b0d8e8"/>
+    <circle cx="10" cy="7" r="1.5" fill="#d8f0f8"/>
+    <circle cx="22" cy="7" r="3" fill="#b0d8e8"/>
+    <circle cx="22" cy="7" r="1.5" fill="#d8f0f8"/>
+    <circle cx="13" cy="10" r="2" fill="#003355"/>
+    <circle cx="13" cy="10" r="1" fill="#0066aa"/>
+    <circle cx="13.4" cy="9.5" r=".5" fill="#fff"/>
+    <ellipse cx="20" cy="12" rx="3" ry="2" fill="#a0c8e0"/>
+    <ellipse cx="20" cy="11.5" rx="1.8" ry="1.2" fill="#b8d8f0"/>
+    <circle cx="20.5" cy="11" r=".8" fill="#003355"/>
+    <circle cx="25" cy="11" r="1.5" fill="#d8f0f8" opacity=".7"/>
+    <circle cx="27" cy="10" r="1" fill="#d8f0f8" opacity=".5"/>
+    <path d="M14,20 Q16,18 18,20" fill="none" stroke="#88ccee" stroke-width=".8" opacity=".5"/>
+    <ellipse cx="10" cy="25" rx="3.5" ry="2.5" fill="#b0d8e8"/>
+    <ellipse cx="22" cy="25" rx="3.5" ry="2.5" fill="#b0d8e8"/>
+    <rect x="12" y="25" width="4" height="4" fill="#a0c8e0" rx="1"/>
+    <rect x="16" y="25" width="4" height="4" fill="#a0c8e0" rx="1"/>
+    <path d="M12,29 L11,31 M14,29 L13,31" stroke="#668899" stroke-width=".7"/>
+    <path d="M18,29 L19,31 M20,29 L21,31" stroke="#668899" stroke-width=".7"/>
+  </g>`,
+  // Shadow cat
+  5:`<g>
+    <ellipse cx="16" cy="22" rx="10" ry="4" fill="#6600aa" opacity=".2"/>
+    <ellipse cx="15" cy="19" rx="7" ry="5.5" fill="#1a0033"/>
+    <ellipse cx="15" cy="20" rx="4.5" ry="3.5" fill="#2d0055"/>
+    <path d="M12,17 Q15,15 18,17" fill="none" stroke="#9933cc" stroke-width=".8" opacity=".7"/>
+    <circle cx="15" cy="21" r="1" fill="#9933cc" opacity=".5"/>
+    <rect x="12" y="10" width="6" height="10" fill="#1a0033" rx="2"/>
+    <ellipse cx="15" cy="9" rx="7" ry="6" fill="#1a0033"/>
+    <polygon points="9,5 7,0 12,5" fill="#1a0033"/>
+    <polygon points="10,4 9,1 12,4" fill="#6600aa" opacity=".6"/>
+    <polygon points="21,5 23,0 18,5" fill="#1a0033"/>
+    <polygon points="20,4 21,1 18,4" fill="#6600aa" opacity=".6"/>
+    <ellipse cx="12" cy="9" rx="3" ry="2.5" fill="#cc33ff"/>
+    <ellipse cx="12" cy="9" rx="1.5" ry="2" fill="#220033"/>
+    <ellipse cx="12.3" cy="8.3" rx=".6" ry=".8" fill="#ee66ff" opacity=".8"/>
+    <ellipse cx="19" cy="9" rx="3" ry="2.5" fill="#cc33ff"/>
+    <ellipse cx="19" cy="9" rx="1.5" ry="2" fill="#220033"/>
+    <ellipse cx="19.3" cy="8.3" rx=".6" ry=".8" fill="#ee66ff" opacity=".8"/>
+    <line x1="8" y1="11" x2="3" y2="10" stroke="#9933cc" stroke-width=".6" opacity=".7"/>
+    <line x1="8" y1="12" x2="3" y2="13" stroke="#9933cc" stroke-width=".6" opacity=".7"/>
+    <line x1="22" y1="11" x2="27" y2="10" stroke="#9933cc" stroke-width=".6" opacity=".7"/>
+    <line x1="22" y1="12" x2="27" y2="13" stroke="#9933cc" stroke-width=".6" opacity=".7"/>
+    <circle cx="5" cy="8" r="1.2" fill="#6600aa" opacity=".5"/>
+    <circle cx="4" cy="5" r=".8" fill="#6600aa" opacity=".4"/>
+    <path d="M22,21 Q28,19 27,24 Q26,28 22,27 Q20,26 21,24" fill="none" stroke="#1a0033" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="22" cy="27" r="2.5" fill="#6600aa"/>
+    <circle cx="22" cy="27" r="1.2" fill="#cc33ff"/>
+    <rect x="11" y="23" width="3" height="5" fill="#1a0033" rx="1"/>
+    <rect x="18" y="23" width="3" height="5" fill="#1a0033" rx="1"/>
+    <ellipse cx="12.5" cy="28" rx="2.5" ry="1.5" fill="#110022"/>
+    <ellipse cx="19.5" cy="28" rx="2.5" ry="1.5" fill="#110022"/>
+  </g>`,
 };
 
-// ─── WS ───
-function connect(onopen) {
-  const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  ws = new WebSocket(`${protocol}//${location.host}`);
-  ws.onopen = onopen;
-  ws.onmessage = e => handleMsg(JSON.parse(e.data));
-  ws.onerror = () => showStatus('Connection error!');
-  ws.onclose = () => { if(state.screen==='battle') showStatus('Disconnected!'); };
-}
+// ═══ CREATURE DATA ═══
+const CREATURES = [
+  { id:0, name:'Emberwing',    type:'Fire',      color:'#ff6b35', maxHp:420, atk:10, spd:8,
+    moves:[
+      {id:'0_0',name:'Flame Slash', type:'attack',cost:1,power:80,  emoji:'⚔️',desc:'80 fire dmg'},
+      {id:'0_1',name:'Inferno',     type:'attack',cost:3,power:160, emoji:'🔥',desc:'160 blast'},
+      {id:'0_2',name:'Dragonscale', type:'shield', cost:1,power:60,  emoji:'🛡️',desc:'+60 shield'},
+      {id:'0_3',name:'Ember Surge', type:'aoe',   cost:2,power:45,  emoji:'💥',desc:'45 AOE dmg'},
+    ]},
+  { id:1, name:'Tidecaller',  type:'Water',     color:'#4ecdc4', maxHp:380, atk:5,  spd:6,
+    moves:[
+      {id:'1_0',name:'Tidal Wave',   type:'attack',cost:2,power:110,emoji:'🌊',desc:'110 wave dmg'},
+      {id:'1_1',name:'Heal Spring',  type:'heal',  cost:1,power:90, emoji:'💚',desc:'+90 HP'},
+      {id:'1_2',name:'Aqua Barrier', type:'shield',cost:1,power:55, emoji:'🛡️',desc:'+55 shield'},
+      {id:'1_3',name:'Flood',        type:'aoe',   cost:3,power:55, emoji:'💦',desc:'55 AOE dmg'},
+    ]},
+  { id:2, name:'Thornback',   type:'Plant',     color:'#56ab2f', maxHp:520, atk:0,  spd:4,
+    moves:[
+      {id:'2_0',name:'Vine Whip',     type:'attack',cost:1,power:70, emoji:'🌱',desc:'70 dmg'},
+      {id:'2_1',name:'Natures Grasp', type:'aoe',   cost:3,power:55, emoji:'🌲',desc:'55 AOE dmg'},
+      {id:'2_2',name:'Photosynthesis',type:'heal',  cost:1,power:120,emoji:'💚',desc:'+120 HP'},
+      {id:'2_3',name:'Thorn Armor',   type:'shield',cost:2,power:90, emoji:'🛡️',desc:'+90 shield'},
+    ]},
+  { id:3, name:'Stormclaw',   type:'Lightning', color:'#f7971e', maxHp:360, atk:15, spd:10,
+    moves:[
+      {id:'3_0',name:'Thunder Strike',type:'attack',cost:1,power:95, emoji:'⚡',desc:'95 dmg'},
+      {id:'3_1',name:'Volt Chain',    type:'aoe',   cost:2,power:45, emoji:'🌩️',desc:'45 AOE dmg'},
+      {id:'3_2',name:'Power Surge',   type:'buff',  cost:1,power:0,  emoji:'💪',atkBoost:25,desc:'+25 ATK'},
+      {id:'3_3',name:'Overcharge',    type:'attack',cost:3,power:180,emoji:'🔱',desc:'180 dmg'},
+    ]},
+  { id:4, name:'Frostmane',   type:'Ice',       color:'#a8edea', maxHp:460, atk:8,  spd:5,
+    moves:[
+      {id:'4_0',name:'Blizzard',  type:'aoe',   cost:2,power:60, emoji:'❄️',desc:'60 AOE dmg'},
+      {id:'4_1',name:'Ice Fang',  type:'attack',cost:1,power:90, emoji:'🐺',desc:'90 dmg'},
+      {id:'4_2',name:'Frost Armor',type:'shield',cost:1,power:85, emoji:'🛡️',desc:'+85 shield'},
+      {id:'4_3',name:'Glacial Ray',type:'attack',cost:3,power:150,emoji:'🌨️',desc:'150 dmg'},
+    ]},
+  { id:5, name:'Shadowpounce',type:'Dark',      color:'#7c3aed', maxHp:340, atk:20, spd:12,
+    moves:[
+      {id:'5_0',name:'Dark Slash', type:'attack',cost:1,power:115,emoji:'🌑',desc:'115 dmg'},
+      {id:'5_1',name:'Soul Drain', type:'heal',  cost:2,power:70, emoji:'💜',desc:'+70 HP'},
+      {id:'5_2',name:'Nightmare',  type:'attack',cost:3,power:170,emoji:'👁️',desc:'170 dmg'},
+      {id:'5_3',name:'Void Shield',type:'shield',cost:1,power:50, emoji:'🛡️',desc:'+50 shield'},
+    ]},
+];
 
-function handleMsg(msg) {
-  switch(msg.type) {
-    case 'CONNECTED': break;
-    case 'WAITING': showScreen('waiting'); break;
-    case 'GAME_START':
-      state.playerIndex = msg.playerIndex;
-      state.gameId = msg.gameId;
-      document.getElementById('opponentName').textContent = msg.opponentName;
-      document.getElementById('opNameLabel').textContent = msg.opponentName.toUpperCase();
-      showScreen('team');
-      break;
-    case 'BATTLE_START':
-    case 'CARD_PLAYED':
-    case 'TURN_CHANGE':
-      state.gameData = msg;
-      state.isMyTurn = msg.isMyTurn;
-      updateBattleUI(msg);
-      if(state.screen !== 'battle') showScreen('battle');
-      break;
-    case 'GAME_OVER':
-      state.gameData = msg;
-      updateBattleUI(msg);
-      setTimeout(() => showGameOver(msg.winner === state.playerIndex), 1000);
-      break;
-    case 'OPPONENT_DISCONNECTED':
-      showStatus('Opponent disconnected!');
-      setTimeout(() => showGameOver(true), 1500);
-      break;
-    case 'ERROR':
-      showStatus(msg.message);
-      break;
+// ═══ STATE ═══
+let G={};
+let isAnimating=false;
+let cpuQueue=[];
+let bStats={pm:0,cm:0,dmg:0,rounds:0};
+
+// ═══ UTILS ═══
+const clone=x=>JSON.parse(JSON.stringify(x));
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}; return a;};
+
+function buildCreature(base){
+  return{...clone(base),currentHp:base.maxHp,shield:0,atkBonus:0,alive:true};
+}
+function buildDeck(c){
+  let d=[];
+  c.moves.forEach(m=>{for(let i=0;i<4;i++)d.push(clone(m))});
+  return shuffle(d);
+}
+function drawCards(st,n=1){
+  for(let i=0;i<n;i++){
+    if(st.deck.length===0){st.deck=shuffle([...st.discard]);st.discard=[];}
+    if(st.deck.length>0&&st.hand.length<6)st.hand.push(st.deck.shift());
   }
 }
+function aliveOf(team){return team.filter(c=>c.currentHp>0);}
 
-// ─── MENU ACTIONS ───
-function startSingle() {
-  const name = document.getElementById('playerName').value.trim() || 'Trainer';
-  connect(() => {
-    ws.send(JSON.stringify({ type:'SINGLE_PLAYER', name }));
+// ═══ INIT ═══
+function startGame(){
+  G.playerName=document.getElementById('playerName').value.trim()||'Trainer';
+  G.selectedTeam=[];
+  showScreen('team');
+  renderTeamSelect();
+}
+
+function confirmTeam(){
+  if(G.selectedTeam.length!==3)return;
+  const cpuIds=getCpuTeam(G.selectedTeam);
+  initBattle(G.selectedTeam,cpuIds);
+  showScreen('battle');
+}
+
+function getCpuTeam(pIds){
+  const o=CREATURES.filter(c=>!pIds.includes(c.id)).map(c=>c.id);
+  return shuffle(o.length>=3?o:CREATURES.map(c=>c.id)).slice(0,3);
+}
+
+function initBattle(pIds,cIds){
+  const mk=ids=>{
+    const team=ids.map(id=>buildCreature(CREATURES[id]));
+    const active=team[0];
+    return{team,active,deck:buildDeck(active),hand:[],discard:[],energy:3,maxEnergy:3};
+  };
+  G.p=mk(pIds); G.c=mk(cIds);
+  G.round=1; G.turn='player'; G.over=false;
+  bStats={pm:0,cm:0,dmg:0,rounds:0};
+  G.cpuName=['Rival Zed','Shadow Kai','Storm Nova','Chaos Rex'][rnd(0,3)];
+
+  drawCards(G.p,3); drawCards(G.c,3);
+
+  document.getElementById('hudPlayer').innerHTML=`YOU · <strong>${G.playerName}</strong>`;
+  document.getElementById('hudCPU').innerHTML=`CPU · <strong>${G.cpuName}</strong>`;
+
+  setSprite('playerSvg',G.p.active.id);
+  setSprite('enemySvg',G.c.active.id);
+  renderBattleUI();
+  say(`Go ${G.p.active.name}! Wild ${G.c.active.name} appeared!`);
+}
+
+// ═══ SPRITE ═══
+function setSprite(svgId,cid){
+  const svg=document.getElementById(svgId);
+  svg.innerHTML=SVG[cid]||'';
+  svg.style.filter=`drop-shadow(0 4px 14px ${CREATURES[cid].color}aa)`;
+}
+
+// ═══ UI ═══
+function renderBattleUI(){
+  if(!G.p)return;
+  const isMine=G.turn==='player'&&!G.over;
+  const pill=document.getElementById('turnPill');
+  pill.textContent=isMine?'⚡ YOUR TURN':"⏳ CPU TURN";
+  pill.className='turn-pill '+(isMine?'mine':'theirs');
+
+  // Energy gems
+  const gems=document.getElementById('eGems'); gems.innerHTML='';
+  const show=Math.min(G.p.maxEnergy,10);
+  for(let i=0;i<show;i++){const g=document.createElement('div');g.className='e-gem'+(i<G.p.energy?' lit':'');gems.appendChild(g);}
+  document.getElementById('eCnt').textContent=`${G.p.energy}/${G.p.maxEnergy}`;
+
+  // Moves
+  renderMoves(G.p.hand,G.p.energy,isMine);
+
+  document.getElementById('endTurnBtn').disabled=!isMine||isAnimating;
+  document.getElementById('cpuHand').textContent=G.c.hand.length;
+  document.getElementById('cpuEn').textContent=`⚡${G.c.energy}`;
+  updateHpBars();
+}
+
+function updateHpBars(){
+  const p=G.p.active,e=G.c.active;
+  const col=pct=>pct>60?'var(--hp-green)':pct>25?'var(--hp-yellow)':'var(--hp-red)';
+  const pp=Math.max(0,p.currentHp/p.maxHp*100), ep=Math.max(0,e.currentHp/e.maxHp*100);
+
+  document.getElementById('playerCName').textContent=p.name;
+  document.getElementById('playerFill').style.cssText=`width:${pp}%;background:${col(pp)}`;
+  document.getElementById('playerNums').textContent=`${p.currentHp}/${p.maxHp}`;
+  let ps=''; if(p.shield>0)ps+=`<span style="color:#90caf9">🛡️${p.shield}</span> `;
+  if(p.atkBonus>0)ps+=`<span style="color:var(--gold)">+${p.atkBonus}ATK</span>`;
+  document.getElementById('playerStat').innerHTML=ps;
+
+  document.getElementById('enemyName').textContent=e.name;
+  document.getElementById('enemyFill').style.cssText=`width:${ep}%;background:${col(ep)}`;
+  document.getElementById('enemyNums').textContent=`${e.currentHp}/${e.maxHp}`;
+  let es=''; if(e.shield>0)es+=`<span style="color:#90caf9">🛡️${e.shield}</span> `;
+  if(e.atkBonus>0)es+=`<span style="color:var(--gold)">+${e.atkBonus}ATK</span>`;
+  document.getElementById('enemyStat').innerHTML=es;
+}
+
+function renderMoves(hand,energy,isMine){
+  const row=document.getElementById('movesRow'); row.innerHTML='';
+  if(!hand)return;
+  const seen=new Set();
+  hand.forEach(card=>{
+    if(seen.has(card.name))return; seen.add(card.name);
+    const ok=card.cost<=energy&&isMine;
+    const btn=document.createElement('button');
+    btn.className='mv-btn'+(ok?'':' nrg');
+    const c=CREATURES.find(cr=>cr.moves.find(m=>m.id===card.id));
+    const tc=c?c.color:'#aaa';
+    btn.innerHTML=`<div class="mv-cost">${card.cost}</div>
+      <span class="mv-emoji">${card.emoji||'⚔️'}</span>
+      <div class="mv-name">${card.name}</div>
+      <div class="mv-desc" style="color:${tc}">${card.desc}</div>
+      <div class="mv-pow">${card.power>0?card.power+(card.type==='heal'?' HP':card.type==='shield'?' DEF':' DMG'):card.atkBoost?'+'+card.atkBoost+' ATK':''}</div>`;
+    if(ok) btn.onclick=()=>playerUseMove(card);
+    row.appendChild(btn);
   });
 }
 
-function joinQueue() {
-  const name = document.getElementById('playerName').value.trim() || 'Trainer';
-  connect(() => {
-    ws.send(JSON.stringify({ type:'JOIN_QUEUE', name }));
-  });
+// ═══ TURN FLOW ═══
+function playerUseMove(card){
+  if(G.turn!=='player'||isAnimating||G.over)return;
+  if(card.cost>G.p.energy)return;
+  executeMove('player',card);
 }
 
-function cancelQueue() {
-  if(ws) ws.close();
-  showScreen('menu');
+function playerEndTurn(){
+  if(G.turn!=='player'||isAnimating||G.over)return;
+  G.turn='cpu';
+  say(`${G.p.active.name} holds position...`);
+  renderBattleUI();
+  setTimeout(()=>doCpuTurn(),700);
 }
 
-// ─── TEAM SELECT ───
-function renderTeamSelect() {
-  const grid = document.getElementById('creatureGrid');
-  grid.innerHTML = '';
-  CREATURES.forEach(c => {
-    const el = document.createElement('div');
-    el.className = 'creature-card';
-    el.style.setProperty('--accent', c.color);
-    el.dataset.id = c.id;
-    el.innerHTML = `
-      <span class="icon">${c.emoji}</span>
-      <div class="cname">${c.name}</div>
-      <div class="ctype" style="color:${c.color}">${c.type}</div>
-      <div class="stats">
-        <div class="stat">❤️ <span>${c.maxHp}</span></div>
-        <div class="stat">⚔️ <span>${c.atk}</span></div>
-        <div class="stat">💨 <span>${c.spd}</span></div>
+function startPlayerTurn(){
+  G.turn='player'; G.round++; bStats.rounds++;
+  G.p.maxEnergy=Math.min(G.p.maxEnergy+1,10);
+  G.p.energy=G.p.maxEnergy;
+  G.p.active.atkBonus=0; G.c.active.atkBonus=0;
+  drawCards(G.p,2);
+  say(`Round ${G.round} — Your move, ${G.playerName}!`);
+  renderBattleUI();
+  if(checkOver())return;
+}
+
+// ═══ MOVE EXECUTION ═══
+function executeMove(who,card){
+  isAnimating=true;
+  const isP=who==='player';
+  const actor=isP?G.p:G.c;
+  const enemy=isP?G.c:G.p;
+
+  actor.energy-=card.cost;
+  const idx=actor.hand.findIndex(c=>c.id===card.id);
+  if(idx!==-1){actor.discard.push(actor.hand.splice(idx,1)[0]);}
+  if(isP)bStats.pm++; else bStats.cm++;
+
+  const atkSvg=document.getElementById(isP?'playerSvg':'enemySvg');
+  const defSvg=document.getElementById(isP?'enemySvg':'playerSvg');
+
+  // Lunge on attacker
+  if(card.type==='attack'||card.type==='aoe'){
+    atkSvg.style.animation='none'; void atkSvg.offsetWidth;
+    atkSvg.style.animation=isP?'lunge .55s ease':'lungeE .55s ease';
+    setTimeout(()=>atkSvg.style.animation='',650);
+  }
+
+  setTimeout(()=>{
+    const stage=document.getElementById('stage');
+    const sr=stage.getBoundingClientRect();
+    let msg='';
+
+    if(card.type==='attack'){
+      const dmg=calcDmg(card.power+actor.active.atkBonus,enemy.active);
+      enemy.active.currentHp=Math.max(0,enemy.active.currentHp-dmg);
+      bStats.dmg+=dmg;
+      doHitAnim(defSvg,isP?'enemy':'player');
+      spawnNum(`-${dmg}`,defSvg,sr,'dmg');
+      spawnFx(card.emoji,defSvg,sr);
+      msg=`${actor.active.name} used ${card.name}! ${dmg} damage!`;
+    } else if(card.type==='aoe'){
+      const dmg=calcDmg(card.power+actor.active.atkBonus,enemy.active);
+      enemy.active.currentHp=Math.max(0,enemy.active.currentHp-dmg);
+      bStats.dmg+=dmg;
+      doHitAnim(defSvg,isP?'enemy':'player');
+      spawnNum(`-${dmg}`,defSvg,sr,'dmg');
+      spawnFx(card.emoji,defSvg,sr);
+      msg=`${actor.active.name} used ${card.name}! AOE ${dmg} dmg!`;
+    } else if(card.type==='heal'){
+      const old=actor.active.currentHp;
+      actor.active.currentHp=Math.min(actor.active.maxHp,actor.active.currentHp+card.power);
+      const actual=actor.active.currentHp-old;
+      doHealAnim(atkSvg,isP);
+      spawnNum(`+${actual}`,atkSvg,sr,'heal');
+      spawnFx(card.emoji,atkSvg,sr);
+      msg=`${actor.active.name} used ${card.name}! +${actual} HP!`;
+    } else if(card.type==='shield'){
+      actor.active.shield+=card.power;
+      doHealAnim(atkSvg,isP);
+      spawnNum(`🛡️+${card.power}`,atkSvg,sr,'shld');
+      spawnFx(card.emoji,atkSvg,sr);
+      msg=`${actor.active.name} put up a shield! +${card.power} DEF!`;
+    } else if(card.type==='buff'){
+      actor.active.atkBonus=(actor.active.atkBonus||0)+(card.atkBoost||0);
+      doHealAnim(atkSvg,isP);
+      spawnNum(`⚡+${card.atkBoost}`,atkSvg,sr,'buff');
+      spawnFx(card.emoji,atkSvg,sr);
+      msg=`${actor.active.name} powers up! +${card.atkBoost} ATK!`;
+    }
+
+    say(msg);
+    updateHpBars();
+
+    setTimeout(()=>{
+      isAnimating=false;
+      if(enemy.active.currentHp<=0){
+        handleFaint(enemy,isP?'enemy':'player');
+      } else {
+        renderBattleUI();
+        if(who==='cpu') setTimeout(()=>continueCpu(),600);
+      }
+    },480);
+  },330);
+}
+
+function calcDmg(power,target){
+  let d=power;
+  if(target.shield>0){const abs=Math.min(target.shield,d);target.shield-=abs;d-=abs;}
+  return Math.max(1,d);
+}
+
+// ═══ FAINT ═══
+function handleFaint(state,side){
+  const svgId=side==='enemy'?'enemySvg':'playerSvg';
+  const svg=document.getElementById(svgId);
+  svg.style.animation='none'; void svg.offsetWidth;
+  svg.style.animation=side==='enemy'?'deathFallE .9s ease forwards':'deathFall .9s ease forwards';
+  say(`${state.active.name} fainted!`);
+
+  setTimeout(()=>{
+    const next=state.team.find(c=>c.id!==state.active.id&&c.currentHp>0);
+    if(next){
+      state.active=next;
+      state.deck=buildDeck(next);
+      state.discard=[];
+      drawCards(state,2);
+      svg.style.animation='';
+      setSprite(svgId,next.id);
+      say(`${next.name} was sent out!`);
+      setTimeout(()=>{
+        if(checkOver())return;
+        renderBattleUI();
+        if(G.turn==='cpu')setTimeout(()=>continueCpu(),600);
+      },600);
+    } else {
+      checkOver();
+    }
+  },950);
+}
+
+// ═══ ANIMATIONS ═══
+function doHitAnim(svg,side){
+  svg.style.animation='none'; void svg.offsetWidth;
+  svg.style.animation=side==='enemy'?'hitE .5s ease':'hit .5s ease';
+  setTimeout(()=>svg.style.animation='',600);
+  const boxId=side==='enemy'?'enemyHpBox':'playerHpBox';
+  const box=document.getElementById(boxId);
+  box.style.background='rgba(255,82,82,.3)';
+  setTimeout(()=>box.style.background='',400);
+}
+
+function doHealAnim(svg,isPlayer){
+  svg.style.animation='none'; void svg.offsetWidth;
+  svg.style.animation=isPlayer?'healPop .5s ease':'healPopE .5s ease';
+  setTimeout(()=>svg.style.animation='',600);
+}
+
+function spawnNum(text,anchorSvg,stageRect,type){
+  const r=anchorSvg.getBoundingClientRect();
+  const el=document.createElement('div');
+  el.className='fnum '+type;
+  el.textContent=text;
+  el.style.left=(r.left+r.width/2-stageRect.left)+'px';
+  el.style.top=(r.top+r.height/3-stageRect.top)+'px';
+  document.getElementById('stage').appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+
+function spawnFx(emoji,anchorSvg,stageRect){
+  const r=anchorSvg.getBoundingClientRect();
+  const el=document.createElement('div');
+  el.className='spell-fx';
+  el.textContent=emoji;
+  el.style.left=(r.left+r.width/2-stageRect.left-18)+'px';
+  el.style.top=(r.top+r.height/2-stageRect.top-18)+'px';
+  document.getElementById('stage').appendChild(el);
+  setTimeout(()=>el.remove(),750);
+}
+
+// ═══ CPU AI ═══
+function doCpuTurn(){
+  showCpuThink(true);
+  G.c.maxEnergy=Math.min(G.c.maxEnergy+1,10);
+  G.c.energy=G.c.maxEnergy;
+  drawCards(G.c,2);
+  if(checkOver()){showCpuThink(false);return;}
+
+  cpuQueue=[];
+  const sorted=[...G.c.hand].sort((a,b)=>cpuPri(b)-cpuPri(a));
+  let sim=G.c.energy;
+  for(const c of sorted){if(c.cost<=sim){cpuQueue.push(c);sim-=c.cost;if(sim<=0)break;}}
+
+  setTimeout(()=>{showCpuThink(false);continueCpu();},900);
+}
+
+function cpuPri(card){
+  if(card.type==='aoe')return 4;
+  if(card.type==='attack')return 3;
+  if(card.type==='heal'){return G.c.active.currentHp/G.c.active.maxHp<.4?5:1;}
+  return 2;
+}
+
+function continueCpu(){
+  if(G.over)return;
+  if(cpuQueue.length===0){
+    say(`${G.c.active.name} waits...`);
+    setTimeout(()=>startPlayerTurn(),500);
+    return;
+  }
+  const card=cpuQueue.shift();
+  const idx=G.c.hand.findIndex(c=>c.id===card.id);
+  if(idx===-1){setTimeout(()=>continueCpu(),300);return;}
+  executeMove('cpu',card);
+}
+
+// ═══ GAME OVER ═══
+function checkOver(){
+  const pa=aliveOf(G.p.team).length, ca=aliveOf(G.c.team).length;
+  if(pa===0||ca===0){
+    G.over=true;
+    setTimeout(()=>showGameOver(ca===0),1500);
+    return true;
+  }
+  return false;
+}
+
+function showGameOver(won){
+  document.getElementById('goTitle').textContent=won?'🏆 VICTORY!':'💀 DEFEAT';
+  document.getElementById('goTitle').className='go-title '+(won?'win':'lose');
+  document.getElementById('goSub').textContent=won?`You defeated ${G.cpuName}!`:`${G.cpuName} won!`;
+  document.getElementById('goStats').innerHTML=`
+    <div class="sr"><span class="lbl">Rounds</span><span class="val">${G.round}</span></div>
+    <div class="sr"><span class="lbl">Moves played</span><span class="val">${bStats.pm}</span></div>
+    <div class="sr"><span class="lbl">Damage dealt</span><span class="val">${bStats.dmg}</span></div>
+    <div class="sr"><span class="lbl">Result</span><span class="val" style="color:${won?'var(--gold)':'#f85149'}">${won?'WIN':'LOSS'}</span></div>`;
+  showScreen('gameover');
+}
+
+// ═══ TEAM SELECT UI ═══
+function renderTeamSelect(){
+  G.selectedTeam=[];
+  const grid=document.getElementById('creatureGrid'); grid.innerHTML='';
+  CREATURES.forEach(c=>{
+    const el=document.createElement('div');
+    el.className='cc'; el.style.setProperty('--acc',c.color); el.dataset.id=c.id;
+    el.innerHTML=`
+      <div class="cc-sprite">
+        <svg width="60" height="60" viewBox="0 0 32 32" style="filter:drop-shadow(0 2px 8px ${c.color}88)">${SVG[c.id]}</svg>
       </div>
-    `;
-    el.onclick = () => toggleCreature(c.id);
+      <div class="cc-name">${c.name}</div>
+      <div class="cc-type" style="color:${c.color}">${c.type}</div>
+      <div class="cc-stats">
+        <div>❤️<span>${c.maxHp}</span></div>
+        <div>⚔️<span>${c.atk}</span></div>
+        <div>💨<span>${c.spd}</span></div>
+      </div>`;
+    el.onclick=()=>toggleCreature(c.id);
     grid.appendChild(el);
   });
 }
 
-function toggleCreature(id) {
-  const idx = state.selectedTeam.indexOf(id);
-  if(idx !== -1) {
-    state.selectedTeam.splice(idx, 1);
-  } else {
-    if(state.selectedTeam.length >= 3) {
-      showStatus('You can only pick 3 creatures!');
-      return;
-    }
-    state.selectedTeam.push(id);
-  }
+function toggleCreature(id){
+  const idx=G.selectedTeam.indexOf(id);
+  if(idx!==-1){G.selectedTeam.splice(idx,1);}
+  else{if(G.selectedTeam.length>=3){showToast('Max 3!');return;}G.selectedTeam.push(id);}
   updateTeamPreview();
 }
 
-function updateTeamPreview() {
-  document.querySelectorAll('.creature-card').forEach(el => {
-    const id = parseInt(el.dataset.id);
-    el.classList.toggle('selected', state.selectedTeam.includes(id));
-  });
-  for(let i=0;i<3;i++) {
-    const slot = document.getElementById('slot'+i);
-    const cid = state.selectedTeam[i];
-    if(cid !== undefined) {
-      const c = CREATURES[cid];
-      slot.textContent = c.emoji;
+function updateTeamPreview(){
+  document.querySelectorAll('.cc').forEach(el=>el.classList.toggle('selected',G.selectedTeam.includes(parseInt(el.dataset.id))));
+  for(let i=0;i<3;i++){
+    const slot=document.getElementById('slot'+i);
+    const cid=G.selectedTeam[i];
+    if(cid!==undefined){
+      slot.innerHTML=`<svg width="36" height="36" viewBox="0 0 32 32">${SVG[cid]}</svg>`;
       slot.classList.add('filled');
-      slot.title = c.name;
     } else {
-      slot.textContent = '?';
+      slot.innerHTML='<span style="opacity:.3;font-size:.8rem">?</span>';
       slot.classList.remove('filled');
     }
   }
-  document.getElementById('confirmTeamBtn').disabled = state.selectedTeam.length !== 3;
+  document.getElementById('confirmBtn').disabled=G.selectedTeam.length!==3;
 }
 
-function confirmTeam() {
-  if(state.selectedTeam.length !== 3) return;
-  ws.send(JSON.stringify({ type:'SELECT_TEAM', creatureIds: state.selectedTeam }));
-  showStatus('Waiting for opponent...');
+// ═══ MISC ═══
+function say(t){document.getElementById('dlgTxt').textContent=t;}
+function showCpuThink(s){document.getElementById('cpuOv').classList.toggle('show',s);}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);}
+function showScreen(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(n+'Screen').classList.add('active');
+  if(n==='battle')renderBattleUI();
 }
+function playAgain(){startGame();}
+function goMenu(){G={};showScreen('menu');}
 
-// ─── BATTLE UI ───
-function updateBattleUI(data) {
-  document.getElementById('roundNum').textContent = data.round || 1;
-
-  const indicator = document.getElementById('turnIndicator');
-  indicator.textContent = data.isMyTurn ? '⚡ YOUR TURN' : '⏳ OPPONENT\'S TURN';
-  indicator.className = 'turn-indicator ' + (data.isMyTurn ? 'my-turn' : 'their-turn');
-
-  // Fields
-  renderField('opponentField', data.opponentTeam, true, data);
-  renderField('playerField', data.myTeam, false, data);
-
-  // Opponent info
-  document.getElementById('opponentCardCount').textContent = data.opponentHandCount || 0;
-  document.getElementById('opponentEnergyDisplay').textContent = `⚡ ${data.opponentEnergy || 0}`;
-
-  // Energy
-  renderEnergy(data.myEnergy, data.myMaxEnergy);
-
-  // Hand
-  renderHand(data.myHand, data.myEnergy);
-
-  // Action buttons
-  document.getElementById('endTurnBtn').disabled = !data.isMyTurn;
-  document.getElementById('endTurnBtn').style.opacity = data.isMyTurn ? '1' : '0.4';
-
-  // Action hint
-  const hint = document.getElementById('actionHint');
-  if(!data.isMyTurn) hint.textContent = "Opponent's turn...";
-  else if(state.selectedCard) hint.textContent = 'Click an enemy to attack!';
-  else hint.textContent = 'Select a card to play';
-
-  // Handle last action animation
-  if(data.lastAction && data.lastAction.type === 'CARD_PLAYED') {
-    const la = data.lastAction;
-    if(la.result) {
-      if(la.result.damage > 0) {
-        // Show floating damage on opponent or player side
-        const isOppAttacking = la.playerIndex !== state.playerIndex;
-        showFloat(isOppAttacking ? la.result.damage : la.result.damage, isOppAttacking ? 'player' : 'opponent', 'dmg');
-      }
-      if(la.result.heal > 0) {
-        showFloat('+' + la.result.heal, la.playerIndex === state.playerIndex ? 'player' : 'opponent', 'heal');
-      }
-      if(la.result.shield > 0) {
-        showFloat('🛡️' + la.result.shield, la.playerIndex === state.playerIndex ? 'player' : 'opponent', 'shield');
-      }
-    }
+// Stars
+function makeStars(){
+  const el=document.getElementById('starsEl');
+  for(let i=0;i<120;i++){
+    const s=document.createElement('div'); s.className='star';
+    const sz=Math.random()*2+.6;
+    s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${2+Math.random()*4}s;--delay:${Math.random()*4}s`;
+    el.appendChild(s);
   }
 }
 
-function renderField(containerId, team, isOpponent, data) {
-  const container = document.getElementById(containerId);
-  container.innerHTML = '';
-  if(!team) return;
-
-  team.forEach(creature => {
-    const hpPct = Math.max(0, creature.currentHp / creature.maxHp * 100);
-    const hpColor = hpPct > 60 ? 'var(--hp-green)' : hpPct > 25 ? 'var(--hp-yellow)' : 'var(--hp-red)';
-    const isDead = creature.currentHp <= 0;
-    const isTargetable = isOpponent && !isDead && state.selectedCard && state.isMyTurn;
-
-    const el = document.createElement('div');
-    el.className = 'battle-creature' + (isDead ? ' dead' : '') + (isTargetable ? ' targetable' : '');
-    el.dataset.cid = creature.id;
-    el.innerHTML = `
-      <span class="bc-icon">${creature.emoji || '?'}</span>
-      <div class="bc-name">${creature.name}</div>
-      <div class="bc-shield">${creature.shield > 0 ? '🛡️ ' + creature.shield : ''}</div>
-      <div class="hp-bar-wrap">
-        <div class="hp-bar" style="width:${hpPct}%;background:${hpColor}"></div>
-      </div>
-      <div class="hp-text">${creature.currentHp}/${creature.maxHp}</div>
-    `;
-    if(isTargetable) el.onclick = () => playCardOnTarget(creature.id);
-    container.appendChild(el);
+// Menu creature previews
+function buildMenuCreatures(){
+  const wrap=document.getElementById('menuCreatures');
+  CREATURES.forEach((c,i)=>{
+    const w=document.createElement('div'); w.className='mc-wrap';
+    w.style.setProperty('--d2',`${i*0.4}s`);
+    w.innerHTML=`
+      <svg width="55" height="55" viewBox="0 0 32 32" style="filter:drop-shadow(0 0 8px ${c.color}99)">${SVG[c.id]}</svg>
+      <div class="mc-label" style="color:${c.color}">${c.name}</div>`;
+    wrap.appendChild(w);
   });
 }
 
-function renderEnergy(current, max) {
-  const gems = document.getElementById('energyGems');
-  gems.innerHTML = '';
-  const show = Math.min(max || 10, 10);
-  for(let i=0;i<show;i++) {
-    const gem = document.createElement('div');
-    gem.className = 'energy-gem' + (i < current ? ' filled' : '');
-    gems.appendChild(gem);
-  }
-  document.getElementById('energyCount').textContent = `${current}/${max}`;
-}
-
-function renderHand(hand, energy) {
-  const container = document.getElementById('handCards');
-  container.innerHTML = '';
-  if(!hand) return;
-
-  hand.forEach(card => {
-    const canAfford = card.cost <= energy;
-    const isSelected = state.selectedCard && state.selectedCard.id === card.id;
-    const el = document.createElement('div');
-    el.className = 'hand-card' + (!canAfford ? ' cant-afford' : '') + (isSelected ? ' selected-card' : '');
-    el.innerHTML = `
-      <div class="card-cost">${card.cost}</div>
-      <span class="card-emoji">${card.emoji || '⚔️'}</span>
-      <div class="card-name">${card.name}</div>
-      <div class="card-type">${card.type.toUpperCase()}</div>
-      <div class="card-power">${card.power > 0 ? card.power + (card.type==='heal'?' HP':' DMG') : card.atkBoost ? '+'+card.atkBoost+' ATK' : ''}</div>
-    `;
-    if(canAfford && state.isMyTurn) {
-      el.onclick = () => selectCard(card);
-    }
-    container.appendChild(el);
-  });
-}
-
-function selectCard(card) {
-  if(!state.isMyTurn) return;
-
-  if(state.selectedCard && state.selectedCard.id === card.id) {
-    state.selectedCard = null;
-  } else {
-    state.selectedCard = card;
-    // For buff/heal cards, auto-apply to own team
-    if(card.type === 'buff' || card.type === 'heal' || card.type === 'shield') {
-      // Pick first alive creature on player team
-      const data = state.gameData;
-      if(data && data.myTeam) {
-        const alive = data.myTeam.find(c => c.currentHp > 0);
-        if(alive) {
-          playCardOnTarget(alive.id);
-          return;
-        }
-      }
-    }
-  }
-  // Re-render to update selection state and targetable indicators
-  if(state.gameData) {
-    renderField('opponentField', state.gameData.opponentTeam, true, state.gameData);
-    renderHand(state.gameData.myHand, state.gameData.myEnergy);
-    document.getElementById('actionHint').textContent = state.selectedCard ? 'Click an enemy to attack!' : 'Select a card to play';
-  }
-}
-
-function playCardOnTarget(targetId) {
-  if(!state.selectedCard || !state.isMyTurn) return;
-  ws.send(JSON.stringify({
-    type: 'PLAY_CARD',
-    cardId: state.selectedCard.id,
-    targetId
-  }));
-  state.selectedCard = null;
-}
-
-function endTurn() {
-  if(!state.isMyTurn) return;
-  state.selectedCard = null;
-  ws.send(JSON.stringify({ type: 'END_TURN' }));
-}
-
-// ─── FLOAT TEXT ───
-function showFloat(text, side, type) {
-  const el = document.createElement('div');
-  el.className = 'float-text ' + type;
-  el.textContent = (type === 'dmg' ? '-' : '') + text;
-  document.body.appendChild(el);
-
-  const field = document.getElementById(side === 'player' ? 'playerField' : 'opponentField');
-  const rect = field.getBoundingClientRect();
-  el.style.left = (rect.left + rect.width / 2) + 'px';
-  el.style.top = (rect.top + rect.height / 2) + 'px';
-
-  setTimeout(() => el.remove(), 1300);
-}
-
-// ─── SCREENS ───
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(name + 'Screen').classList.add('active');
-  state.screen = name;
-  if(name === 'team') renderTeamSelect();
-}
-
-function showGameOver(won) {
-  const title = document.getElementById('gameoverTitle');
-  const sub = document.getElementById('gameoverSub');
-  title.textContent = won ? '🏆 VICTORY!' : '💀 DEFEAT';
-  title.className = 'gameover-title ' + (won ? 'win' : 'lose');
-  sub.textContent = won ? 'You defeated your opponent!' : 'Better luck next time!';
-  showScreen('gameover');
-}
-
-function playAgain() {
-  state.selectedTeam = [];
-  state.selectedCard = null;
-  if(ws) ws.close();
-  showScreen('menu');
-  setTimeout(() => startSingle(), 100);
-}
-
-function goMenu() {
-  state.selectedTeam = [];
-  state.selectedCard = null;
-  if(ws) ws.close();
-  showScreen('menu');
-}
-
-function showStatus(msg) {
-  const el = document.getElementById('statusMsg');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-// ─── INIT ───
+makeStars();
+buildMenuCreatures();
 showScreen('menu');
 </script>
 </body>
