@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Pixel Art Landscape</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c2c2c;
+        }
+
+        /* Container matching the aspect ratio of your images */
+        #scene-container {
+            position: relative;
+            width: 800px;
+            aspect-ratio: 16 / 9; /* Adjust if your image proportions are slightly different */
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background-color: #87CEEB; /* Fallback sky color */
+        }
+
+        /* Base class for all image layers */
+        .layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 100% 100% ensures all layers align perfectly on top of each other */
+            background-size: 100% 100%; 
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Assigning the images to their respective layers */
+        #layer-sky {
+            background-image: url('sky.png'); /* Image 5 */
+        }
+        
+        #layer-grass {
+            background-image: url('grass.png'); /* Image 4 */
+        }
+        
+        #layer-flowers {
+            background-image: url('flowers.png'); /* Image 3 */
+        }
+        
+        #layer-tree {
+            background-image: url('tree.png'); /* Image 1 */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="scene-container">
+        <!-- The layers must be ordered from back to front -->
+        <div id="layer-sky" class="layer"></div>      <!-- Image 5: Background -->
+        <div id="layer-grass" class="layer"></div>    <!-- Image 4: Midground hill -->
+        <div id="layer-tree" class="layer"></div>     <!-- Image 1: Foreground and Tree -->
+        <div id="layer-flowers" class="layer"></div>  <!-- Image 3: Flowers (Must be on top!) -->
+    </div>
+
+    <script>
+        // Grab the elements we want to animate
+        const skyLayer = document.getElementById('layer-sky');
+        const flowerLayer = document.getElementById('layer-flowers');
+
+        let startTime = null;
+
+        function animateScene(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+
+            // 1. Animate the Clouds (Sky Layer)
+            // We scale it slightly (1.05) so the edges don't show when we pan it horizontally.
+            // Math.sin creates a smooth, continuous ping-pong panning effect.
+            const skyPanAmount = Math.sin(elapsed * 0.0002) * 3; // 3% movement left and right
+            skyLayer.style.transform = `scale(1.05) translateX(${skyPanAmount}%)`;
+
+            // 2. Animate the Flowers
+            // We use Math.sin and Math.cos to create a subtle figure-8 rustling effect 
+            // simulating a gentle breeze without messing up the perspective.
+            const flowerX = Math.sin(elapsed * 0.0015) * 2; // Move slightly left/right (px)
+            const flowerY = Math.cos(elapsed * 0.002) * 1.5; // Move slightly up/down (px)
+            flowerLayer.style.transform = `translate(${flowerX}px, ${flowerY}px)`;
+
+            // Loop the animation for the next frame
+            requestAnimationFrame(animateScene);
+        }
+
+        // Kick off the animation loop
+        requestAnimationFrame(animateScene);
+    </script>
+
+</body>
+</html>

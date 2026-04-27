@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Clash - Dynamic Timeline</title>
+    <title>Axiom Clash - RPS Integrated</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,8 +13,17 @@
 <!-- Smooth Iris Transition Overlay -->
 <div id="transition-overlay" class="iris-overlay hidden"></div>
 
+<!-- PAUSE BUTTON -->
+<div id="pause-btn" class="hidden" onclick="togglePause()"></div>
+
 <!-- SCREEN 1: HOME MENU -->
 <div id="menuScreen" class="screen active">
+    <div id="menu-scene-container">
+        <div id="layer-sky" class="parallax-layer"></div>      
+        <div id="layer-grass" class="parallax-layer"></div>    
+        <div id="layer-tree" class="parallax-layer"></div>     
+        <div id="layer-flowers" class="parallax-layer"></div>  
+    </div>
     <div class="vignette"></div>
     <div class="title-container">
         <div class="game-title">AXIOM CLASH</div>
@@ -26,7 +36,7 @@
 <!-- SCREEN 2: TEAM SELECT -->
 <div id="teamScreen" class="screen">
     <div class="inner">
-        <div class="screen-title">CHOOSE YOUR HEROES</div>
+        <div class="screen-title">ASSEMBLE YOUR PARTY</div>
         <div class="screen-subtitle">SELECT 3 HEROES</div>
         <div class="creature-grid" id="creatureGrid"></div>
         <div class="team-preview">
@@ -34,21 +44,79 @@
             <div class="team-slot" id="slot0">?</div>
             <div class="team-slot" id="slot1">?</div>
             <div class="team-slot" id="slot2">?</div>
-            <button class="btn-start" id="confirmBtn" onclick="confirmTeam()" disabled>FIGHT! →</button>
+            <button class="btn-start" id="confirmBtn" onclick="confirmTeam()" disabled>BATTLE! →</button>
         </div>
     </div>
 </div>
 
-<!-- SCREEN 3: BATTLE -->
+<!-- SCREEN 2.5: YOUR ROCK PAPER SCISSORS GAME -->
+<div id="rpsScreen" class="screen">
+    <div class="pick-hand-menu">
+        <div class="pick-hand-container">
+            <div class="menu-head">
+                <h1>SELECT HAND</h1>
+            </div>
+            <div class="pick-hand-content">
+                <div id="pick-rock" class="pick-hand" data-hand="rock">
+                    <img src="assets/pick-rock-hand.png" alt="">
+                    <p>ROCK</p>
+                </div>
+                <div id="pick-paper" class="pick-hand" data-hand="paper">
+                    <img src="assets/pick-paper-hand.png" alt="">
+                    <p>PAPER</p>
+                </div>
+                <div id="pick-scissor" class="pick-hand" data-hand="scissor">
+                    <img src="assets/pick-scissor-hand.png" alt="">
+                    <p>SCISSOR</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="new-game-overlay hide-new-game-menu">
+        <div class="new-game-content">
+            <h1 id="rpsWinStatus">WINNER</h1>
+            <img class="win-display" src="assets/game-winner.png" alt="winning-hand">
+            <!-- This button now bridges to the main battle! -->
+            <button id="new-game-btn">START BATTLE! <span>></span></button>
+        </div>
+    </div>
+    <div id="rps-main">
+        <div class="player-container">
+            <h1>PLAYER</h1>
+            <div class="hand-wrap">
+                <img class="player-hand" src="assets/player-rock.png" alt="">
+            </div>
+            <div class="lives player-hearts">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+            </div>
+        </div>
+        <div class="cpu-container">
+            <h1>CPU</h1>
+            <div class="hand-wrap">
+                <img class="cpu-hand" src="assets/cpu-rock.png" alt="">
+            </div>
+            <div class="lives cpu-hearts">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+                <img src="assets/life-heart.svg" alt="">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCREEN 3: BATTLE (Old HUD Restored) -->
 <div id="battleScreen" class="screen">
     <div class="stage" id="stage">
-        
-        <!-- HORIZONTAL TIMELINE -->
         <div id="turn-timeline-container">
             <div class="timeline-bg"></div>
             <div id="turn-queue"></div>
         </div>
-
         <div id="targetMenuOverlay" class="hidden">
             <div class="target-msg">SELECT TARGET</div>
             <div class="cancel-target" onclick="cancelTargeting()">[ CANCEL ]</div>
@@ -56,21 +124,34 @@
         <div id="entitiesLayer"></div>
     </div>
 
-    <!-- 1:1 JRPG HUD -->
+    <!-- REVERTED CLASSIC JRPG HUD -->
     <div id="bottom-hud">
         <div id="party-panel" class="jrpg-window"></div>
         <div id="command-panel" class="jrpg-window">
-            <div id="commandMenu" class="menu-list">
+            <div id="mainMenuBox" class="menu-list">
                 <div class="menu-item" onclick="handleStrike()">Strike</div>
-                <div class="menu-item" id="skill-btn" onclick="handleSkill()">Skill</div>
-                <div class="menu-item" onclick="handleBrace()">Brace</div>
+                <div class="menu-item" id="skill-btn" onclick="showSkillsMenu()">Skills</div>
                 <div class="menu-item" onclick="showInfoModal()">Info</div>
+            </div>
+            <div id="skillsMenuBox" class="menu-list hidden">
+                <div id="skillsList"></div>
+                <div class="menu-item" onclick="showMainMenu()">Back</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- INFO MODAL -->
+<!-- PAUSE & INFO MODALS -->
+<div id="pauseScreen" class="modal-overlay hidden">
+    <div class="pause-box">
+        <div class="close-x" onclick="resumeGame()"></div>
+        <div class="pause-title">PAUSED</div>
+        <div class="pause-menu-item" onclick="resumeGame()">RESUME</div>
+        <div class="pause-menu-item" onclick="restartBattle()">RESTART</div>
+        <div class="pause-menu-item" onclick="quitToMenu()">QUIT</div>
+    </div>
+</div>
+
 <div id="infoModal" class="modal-overlay hidden">
     <div class="modal-box jrpg-window" style="width: 800px; max-width: 90%;">
         <div class="modal-header">BATTLEFIELD INFO</div>
@@ -83,8 +164,9 @@
 <div id="gameoverScreen" class="screen">
     <div class="go-title" id="goTitle">—</div>
     <div class="go-sub" id="goSub">—</div>
-    <div style="margin-top: 30px;">
-        <button class="btn-start" onclick="location.reload()">▶ PLAY AGAIN</button>
+    <div style="margin-top: 30px; display: flex; gap: 15px;">
+        <button class="btn-start" onclick="restartBattle()">▶ PLAY AGAIN</button>
+        <button class="btn-start" onclick="quitToMenu()">MENU</button>
     </div>
 </div>
 
