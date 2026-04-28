@@ -74,6 +74,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .entity-wrap.is-active .sprite { filter: drop-shadow(0 0 15px var(--pixel-gold)); }
 
 /* =======================================
+<<<<<<< HEAD
    DESCENDING VERTICAL TOP HUD
    ======================================= */
 #top-hud {
@@ -101,10 +102,39 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
+=======
+   NEW HORIZONTAL TOP HUD
+   ======================================= */
+#top-hud {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 120px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.side-hud {
+    display: flex;
+    gap: 15px;
+    width: 45%;
+}
+
+.side-hud.right-hud {
+    justify-content: flex-end;
+}
+
+.vs-text {
+>>>>>>> 167434ebdc60e72da5f8dac843462f6e3d52bbb5
     font-family: 'CustomPixelFont', sans-serif;
     font-size: 3rem;
     color: white;
     text-shadow: 4px 4px 0 #000;
+<<<<<<< HEAD
 }
 .entity-stats {
     position: relative;
@@ -118,6 +148,26 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .entity-stats.dead {
     opacity: 0.5;
 }
+=======
+    line-height: 1;
+}
+
+.entity-stats {
+    position: relative;
+    width: 200px; /* Increased width */
+    transform-origin: top left;
+    transition: opacity 0.3s;
+}
+
+.right-hud .entity-stats {
+    transform-origin: top right;
+}
+
+.entity-stats.dead {
+    opacity: 0.5;
+}
+
+>>>>>>> 167434ebdc60e72da5f8dac843462f6e3d52bbb5
 .entity-stat-name {
     font-family: 'CustomPixelFont', sans-serif;
     font-size: 1.2rem; 
@@ -126,6 +176,10 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     margin-bottom: 6px;
     letter-spacing: 0.5px;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 167434ebdc60e72da5f8dac843462f6e3d52bbb5
 .entity-stat-bar {
     position: relative;
     width: 200px;
@@ -136,12 +190,20 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     image-rendering: pixelated;
     overflow: hidden;
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 167434ebdc60e72da5f8dac843462f6e3d52bbb5
 .entity-stats.enemy .entity-stat-bar.mp { display: none; }
 .entity-stat-track { position: absolute; left: 14px; right: 14px; top: 9px; height: 8px; background: rgba(0, 0, 0, 0.45); }
 .entity-stat-fill { position: relative; height: 8px; width: 0%; transition: width 0.3s ease-out; border-right: 1px solid rgba(255, 255, 255, 0.85); }
 .entity-stat-fill.hp-fill { background: url('assets/hp_fill.png') repeat-x left center; background-size: auto 8px; }
 .entity-stat-fill.mp-fill { background: url('assets/mp_fill.png') repeat-x left center; background-size: auto 8px; }
+<<<<<<< HEAD
 .entity-stat-text { display: none; } /* This hides the numbers on the bars */
+=======
+.entity-stat-text { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-family: 'Press Start 2P', 'CustomPixelFont', monospace; font-size: 0.65rem; color: #fff; font-style: italic; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+>>>>>>> 167434ebdc60e72da5f8dac843462f6e3d52bbb5
 
 /* TARGETING */
 .entity-wrap.targetable { cursor: crosshair; }
@@ -173,7 +235,10 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .menu-item.disabled:hover { color: white; transform: none; text-shadow: 2px 2px 0 #000; }
 .skill-icon { width: 24px; height: 24px; image-rendering: pixelated; background: rgba(0,0,0,0.5); border-radius: 4px; border: 1px solid #000; }
 .skill-icon-placeholder { width: 24px; height: 24px; }
+<<<<<<< HEAD
 .skill-mp-cost { font-size: 1rem; color: var(--pixel-mp); text-shadow: 1px 1px 0 #000; margin-left: auto; padding-left: 15px; }
+=======
+>>>>>>> 167434ebdc60e72da5f8dac843462f6e3d52bbb5
 
 /* PAUSE & INFO MODALS */
 #pause-btn { position: absolute; top: 20px; right: 20px; width: 48px; height: 48px; background: url('assets/pause_icon.png') no-repeat center; background-size: contain; z-index: 1000; filter: drop-shadow(2px 2px 0 #000); transition: 0.1s;}

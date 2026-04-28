@@ -401,8 +401,9 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    const pPos =[{x: 35, y: 8}, {x: 22, y: 18}, {x: 9, y: 28}];
-    const cPos =[{x: 65, y: 8}, {x: 78, y: 18}, {x: 91, y: 28}];
+    const pPos =[{x: 22, y: 22}, {x: 14, y: 12}, {x: 24, y: 4}];
+    const cPos =[{x: 78, y: 22}, {x: 86, y: 12}, {x: 76, y: 4}];
+
     G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - pPos[i].y));
     G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - cPos[i].y));
 }
@@ -473,9 +474,7 @@ function showSkillsMenu() {
         const canUse = G.activeEnt.mp >= m.mpCost;
         const item = document.createElement('button');
         item.className = `menu-item ${!canUse ? 'disabled' : ''}`;
-        const iconHtml = m.icon ? `<img src="${m.icon}" class="skill-icon" alt="${m.name} icon">` : '<span class="skill-icon-placeholder"></span>';
-        // --- ADDED MANA COST DISPLAY TO SKILLS MENU ---
-        item.innerHTML = `${iconHtml}<span>${m.name}</span><span class="skill-mp-cost">${m.mpCost} MP</span>`;
+        item.innerHTML = `${m.name} <small>MP:${m.mpCost}</small>`;
         if (canUse) { item.onclick = () => { G.pendingMove = m; startTargeting(); }; }
         list.appendChild(item);
     });
@@ -546,7 +545,7 @@ function executeMove(actor, target, move) {
 
 function applyDamage(actor, target, move) {
     target.action = 'hurt';
-    let dmg = Math.floor(move.power + (actor.atk * 0.25));
+    let dmg = Math.floor(move.power + (actor.atk * 0.5));
     if (move.power === 0 && !move.isHeal) dmg = 0; 
     
     if (move.isHeal) {
@@ -578,22 +577,17 @@ function doHitAnim(uid, isPlayer) {
 }
 
 function updateBars() {
-    const updateEntityBars = (c) => {
-        const hpPct = Math.max(0, (c.currentHp / c.maxHp) * 100);
-        const mpPct = Math.max(0, (c.mp / c.maxMp) * 100);
-        const hB = document.getElementById(`hp_${c.uid}`), mB = document.getElementById(`mp_${c.uid}`);
-        const hpText = document.getElementById(`hp_txt_${c.uid}`), mpText = document.getElementById(`mp_txt_${c.uid}`);
-        const statsWrap = document.getElementById(`stats_${c.uid}`);
-        if (hB) hB.style.width = hpPct + '%';
-        if (mB) mB.style.width = mpPct + '%';
-        // --- REMOVED NUMBERS FROM BARS ---
-        if (hpText) hpText.innerText = ``;
-        if (mpText) mpText.innerText = ``;
-        if (statsWrap && c.currentHp <= 0) statsWrap.classList.add('dead');
-    };
-    if (!G.p || !G.c) return;
-    G.p.team.forEach(updateEntityBars);
-    G.c.team.forEach(updateEntityBars);
+    G.p.team.forEach(c => {
+        const hB = document.getElementById(`hp_${c.uid}`); if(hB) { hB.style.width = Math.max(0, (c.currentHp / c.maxHp)*100) + '%'; document.getElementById(`hp_txt_${c.uid}`).innerText = `${Math.ceil(Math.max(0, c.currentHp))}/${c.maxHp}`; }
+        const mB = document.getElementById(`mp_${c.uid}`); if(mB) { mB.style.width = Math.max(0, (c.mp / c.maxMp)*100) + '%'; document.getElementById(`mp_txt_${c.uid}`).innerText = `${Math.floor(c.mp)}/${c.maxMp}`; }
+    });
+    
+    G.c.team.forEach(c => {
+        const ehB = document.getElementById(`ehp_fill_${c.uid}`); 
+        const wrap = document.getElementById(`ehp_${c.uid}`);
+        if(ehB) ehB.style.width = Math.max(0, (c.currentHp / c.maxHp)*100) + '%';
+        if(wrap && c.currentHp <= 0) wrap.style.display = 'none';
+    });
 }
 
 function showInfoModal() {
