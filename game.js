@@ -85,6 +85,16 @@ let uidCounter = 0;
 let globalFrameCount = 0;
 let animTick = 0;
 const LOADED_IMAGES = {};
+const BOOK_ANIM_SEQUENCE = [
+    { src: 'assets/book_anim_01_open_book.png', frameW: 256, frameH: 256, frameMs: 60 },
+    { src: 'assets/book_anim_02_pages_appear.png', frameW: 128, frameH: 128, frameMs: 70 },
+    { src: 'assets/book_anim_03_turn_right.png', frameW: 256, frameH: 256, frameMs: 55 },
+    { src: 'assets/book_anim_04_turn_left.png', frameW: 256, frameH: 256, frameMs: 55 },
+    { src: 'assets/book_anim_05_pages_disappear.png', frameW: 128, frameH: 128, frameMs: 70 },
+    { src: 'assets/book_anim_06_close_book.png', frameW: 256, frameH: 256, frameMs: 60 }
+];
+const BOOK_ANIM_CACHE = {};
+let isBookAnimPlaying = false;
 let imagesToLoad = 0;
 let imagesLoaded = 0;
 
@@ -192,8 +202,8 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
         const dy = (canvas.height - dh) / 2;
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
-        // Reduced scale from 2.5 to 1.8 so the models are smaller
-        let scale = 1.8; 
+        // Keep battle sprites readable without crowding the stage.
+        let scale = 1.6;
         if (clipW * scale > canvas.width) scale = canvas.width / clipW;
         if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
         const dw = clipW * scale;
@@ -475,18 +485,28 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    const pPos =[{x: 35, y: 28}, {x: 22, y: 18}, {x: 9, y: 8}];
-    const cPos =[{x: 65, y: 28}, {x: 78, y: 18}, {x: 91, y: 8}];
+    const pPos =[{x: 12, y: 10}, {x: 26, y: 20}, {x: 40, y: 30}];
+    const cPos =[{x: 60, y: 30}, {x: 74, y: 20}, {x: 88, y: 10}];
     
     G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - pPos[i].y));
     G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - cPos[i].y));
 }
 
 function createEntityHTML(layer, c, x, y, z) {
-    let ehpHTML = '';
-    if (!c.isPlayer) { ehpHTML = `<div class="ehp-bar" id="ehp_${c.uid}"><div class="ehp-fill" id="ehp_fill_${c.uid}"></div></div>`; }
+    const cleanName = (c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '')).toUpperCase();
+    const statsHTML = `<div class="entity-stats ${c.isPlayer ? 'ally' : 'enemy'}" id="stats_${c.uid}">
+        <div class="entity-stat-name">${cleanName}</div>
+        <div class="entity-stat-bar hp">
+            <div class="entity-stat-track"><div class="entity-stat-fill hp-fill" id="hp_${c.uid}"></div></div>
+            <div class="entity-stat-text" id="hp_txt_${c.uid}"></div>
+        </div>
+        <div class="entity-stat-bar mp">
+            <div class="entity-stat-track"><div class="entity-stat-fill mp-fill" id="mp_${c.uid}"></div></div>
+            <div class="entity-stat-text" id="mp_txt_${c.uid}"></div>
+        </div>
+    </div>`;
     layer.innerHTML += `<div class="entity-wrap" id="wrap_${c.uid}" style="left:${x}%; bottom:${y}%; z-index:${z}; transform:translateX(-50%)">
-        ${ehpHTML}
+        ${statsHTML}
         <div class="platform"></div><canvas class="sprite" id="sprite_${c.uid}" width="350" height="350"></canvas>
     </div>`;
 }
@@ -494,23 +514,6 @@ function createEntityHTML(layer, c, x, y, z) {
 function renderHUD() {
     const panel = document.getElementById('party-panel');
     panel.innerHTML = '';
-    G.p.team.forEach((c, idx) => {
-        const coolTintClass = idx > 0 ? 'hud-cool' : '';
-        panel.innerHTML += `
-        <div class="hud-column ${coolTintClass}" id="hud_slot_${c.uid}">
-            <div class="hud-name">${c.name.toUpperCase()}</div>
-            <div class="hud-bars">
-                <div class="hud-bar-wrap hp-bar">
-                    <div class="hud-bar-bg"><div id="hp_${c.uid}" class="hud-bar-fill hp-fill"></div></div>
-                    <div class="hud-bar-text" id="hp_txt_${c.uid}"></div>
-                </div>
-                <div class="hud-bar-wrap mp-bar">
-                    <div class="hud-bar-bg"><div id="mp_${c.uid}" class="hud-bar-fill mp-fill"></div></div>
-                    <div class="hud-bar-text" id="mp_txt_${c.uid}"></div>
-                </div>
-            </div>
-        </div>`;
-    });
     updateBars();
 }
 
@@ -704,19 +707,25 @@ function doHitAnim(uid, isPlayer) {
 }
 
 function updateBars() {
-    G.p.team.forEach(c => {
-        const hB = document.getElementById(`hp_${c.uid}`); if(hB) { hB.style.width = Math.max(0, (c.currentHp / c.maxHp)*100) + '%'; document.getElementById(`hp_txt_${c.uid}`).innerText = `${Math.ceil(Math.max(0, c.currentHp))}/${c.maxHp}`; }
-        const mB = document.getElementById(`mp_${c.uid}`); if(mB) { mB.style.width = Math.max(0, (c.mp / c.maxMp)*100) + '%'; document.getElementById(`mp_txt_${c.uid}`).innerText = `${Math.floor(c.mp)}/${c.maxMp}`; }
-    });
-    G.c.team.forEach(c => {
-        const ehB = document.getElementById(`ehp_fill_${c.uid}`); 
-        const wrap = document.getElementById(`ehp_${c.uid}`);
-        if(ehB) ehB.style.width = Math.max(0, (c.currentHp / c.maxHp)*100) + '%';
-        if(wrap && c.currentHp <= 0) wrap.style.display = 'none';
-    });
+    const updateEntityBars = (c) => {
+        const hpPct = Math.max(0, (c.currentHp / c.maxHp) * 100);
+        const mpPct = Math.max(0, (c.mp / c.maxMp) * 100);
+        const hB = document.getElementById(`hp_${c.uid}`);
+        const mB = document.getElementById(`mp_${c.uid}`);
+        const hpText = document.getElementById(`hp_txt_${c.uid}`);
+        const mpText = document.getElementById(`mp_txt_${c.uid}`);
+        const statsWrap = document.getElementById(`stats_${c.uid}`);
+        if (hB) hB.style.width = hpPct + '%';
+        if (mB) mB.style.width = mpPct + '%';
+        if (hpText) hpText.innerText = `${Math.ceil(Math.max(0, c.currentHp))}/${c.maxHp}`;
+        if (mpText) mpText.innerText = `${Math.floor(c.mp)}/${c.maxMp}`;
+        if (statsWrap && c.currentHp <= 0) statsWrap.style.display = 'none';
+    };
+    G.p.team.forEach(updateEntityBars);
+    G.c.team.forEach(updateEntityBars);
 }
 
-function showInfoModal() {
+function openBattleInfoModal() {
     const renderCol = (title, team) => {
         let html = `<div class="info-col"><h3>${title}</h3>`;
         team.forEach(c => { html += `<div class="info-row"><strong>${c.name}</strong><br>HP: ${Math.ceil(c.currentHp)}/${c.maxHp} | MP: ${c.mp}/${c.maxMp}</div>`; });
@@ -726,7 +735,71 @@ function showInfoModal() {
     document.getElementById('infoModalBody').innerHTML = renderCol("YOUR PARTY", G.p.team) + renderCol("ENEMY TEAM", G.c.team);
     document.getElementById('infoModal').classList.remove('hidden');
 }
-function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
+function closeModals() {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+    const overlay = document.getElementById('bookAnimOverlay');
+    if (overlay) overlay.classList.add('hidden');
+}
+
+function runBookAnimation(onDone) {
+    const overlay = document.getElementById('bookAnimOverlay');
+    const sprite = document.getElementById('bookAnimSprite');
+    if (!overlay || !sprite || isBookAnimPlaying) {
+        onDone();
+        return;
+    }
+    const loadImage = (src) => new Promise((resolve, reject) => {
+        if (BOOK_ANIM_CACHE[src] && BOOK_ANIM_CACHE[src].complete) {
+            resolve(BOOK_ANIM_CACHE[src]);
+            return;
+        }
+        const img = new Image();
+        img.onload = () => { BOOK_ANIM_CACHE[src] = img; resolve(img); };
+        img.onerror = () => reject(new Error(`Missing: ${src}`));
+        img.src = src;
+    });
+    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const playSheet = async (cfg) => {
+        const img = await loadImage(cfg.src);
+        if (!img || img.naturalWidth === 0 || img.naturalHeight === 0) return;
+        const cols = Math.max(1, Math.floor(img.naturalWidth / cfg.frameW));
+        const rows = Math.max(1, Math.floor(img.naturalHeight / cfg.frameH));
+        const totalFrames = cols * rows;
+
+        sprite.style.width = `${cfg.frameW}px`;
+        sprite.style.height = `${cfg.frameH}px`;
+        sprite.style.backgroundImage = `url('${cfg.src}')`;
+        sprite.style.backgroundSize = `${img.naturalWidth}px ${img.naturalHeight}px`;
+
+        for (let frame = 0; frame < totalFrames; frame++) {
+            const col = frame % cols;
+            const row = Math.floor(frame / cols);
+            sprite.style.backgroundPosition = `${-col * cfg.frameW}px ${-row * cfg.frameH}px`;
+            await wait(cfg.frameMs);
+        }
+    };
+
+    isBookAnimPlaying = true;
+    overlay.classList.remove('hidden');
+    (async () => {
+        try {
+            for (const cfg of BOOK_ANIM_SEQUENCE) {
+                await playSheet(cfg);
+            }
+        } catch (err) {
+            console.warn(err.message || err);
+        } finally {
+            overlay.classList.add('hidden');
+            isBookAnimPlaying = false;
+            onDone();
+        }
+    })();
+}
+
+function showInfoModal() {
+    runBookAnimation(openBattleInfoModal);
+}
 
 function showCharacterInfoModal(id) {
     const c = CHARACTERS.find(x => x.id === id);

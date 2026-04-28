@@ -107,6 +107,70 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .entity-wrap.is-active { z-index: 50; } 
 .entity-wrap.is-active .sprite { filter: drop-shadow(0 0 15px var(--pixel-gold)); }
 
+.entity-stats {
+    position: absolute;
+    left: 50%;
+    bottom: 116px;
+    transform: translateX(-50%);
+    width: 150px;
+    z-index: 25;
+    pointer-events: none;
+}
+.entity-stat-name {
+    font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
+    font-size: 0.54rem;
+    color: #fff;
+    font-style: italic;
+    text-shadow: 2px 2px 0 #000;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+.entity-stat-bar {
+    position: relative;
+    width: 150px;
+    height: 26px;
+    margin-bottom: 3px;
+    background: url('assets/bar_frame.png') no-repeat center;
+    background-size: 150px 26px;
+    image-rendering: pixelated;
+    overflow: hidden;
+}
+.entity-stat-bar.mp { margin-left: 10px; }
+.entity-stat-track {
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    top: 9px;
+    height: 8px;
+    background: rgba(0, 0, 0, 0.45);
+}
+.entity-stat-fill {
+    position: relative;
+    height: 8px;
+    width: 0%;
+    transition: width 0.3s ease-out;
+    border-right: 1px solid rgba(255, 255, 255, 0.85);
+}
+.entity-stat-fill.hp-fill {
+    background: url('assets/hp_fill.png') repeat-x left center;
+    background-size: auto 8px;
+}
+.entity-stat-fill.mp-fill {
+    background: url('assets/mp_fill.png') repeat-x left center;
+    background-size: auto 8px;
+}
+.entity-stat-text {
+    position: absolute;
+    right: 9px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
+    font-size: 0.58rem;
+    color: #fff;
+    font-style: italic;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}
+
 /* TARGET RETICLE: Scale increased to 6.5 & Z-index explicitly forced OVER the sprite */
 .entity-wrap.targetable { cursor: crosshair; }
 .entity-wrap.targetable:hover::after {
@@ -131,9 +195,6 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     from { background-position: 0 0; }
     to   { background-position: -132px 0; }
 }
-
-.ehp-bar { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 6px; background: #222; border: 1px solid white; z-index: 10; display: block; }
-.ehp-fill { height: 100%; background: #e74c3c; width: 100%; transition: width 0.3s; }
 
 /* HORIZONTAL TIMELINE */
 #turn-timeline-container { 
@@ -190,9 +251,9 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 
 /* PIXEL HUD (MATCHES BAR SPRITE PROPORTIONS) */
 #bottom-hud { 
-    height: 112px;
+    height: 0;
     display: flex; 
-    padding: 0 18px 8px;
+    padding: 0;
     background: transparent; 
     z-index: 1000; 
     position: absolute; 
@@ -201,12 +262,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 }
 
 #party-panel { 
-    flex: 1; 
-    display: flex; 
-    justify-content: space-between;
-    align-items: flex-end;
-    padding-bottom: 0;
-    gap: 4px;
+    display: none;
 }
 
 .hud-column { 
@@ -217,7 +273,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     position: relative; 
     transition: 0.2s; 
     min-width: 0;
-    max-width: 280px;
+    max-width: 360px;
 }
 .hud-column.active-hud { transform: translateY(-6px); }
 
@@ -234,10 +290,10 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 
 .hud-name { 
     font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #fff;
     text-shadow: 2px 2px 0 #000;
-    margin-bottom: 5px;
+    margin-bottom: 7px;
     letter-spacing: 0.5px;
     text-transform: uppercase;
     white-space: nowrap;
@@ -249,14 +305,14 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     z-index: 1;
 }
 
-.hud-bars { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.hud-bars { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
 
 .hud-bar-wrap { 
     position: relative; 
-    width: 154px;
-    height: 26px; /* 2x of 13px frame sprite */
+    width: 210px;
+    height: 38px;
     background: url('assets/bar_frame.png') no-repeat center;
-    background-size: 154px 26px;
+    background-size: 210px 38px;
     border: none;
     outline: none;
     box-shadow: 2px 2px 0 rgba(0,0,0,0.55);
@@ -268,14 +324,14 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 
 .hud-bar-bg {
     position: absolute;
-    left: 11px;
-    right: 11px;
-    top: 9px;
-    bottom: 9px;
+    left: 15px;
+    right: 15px;
+    top: 13px;
+    bottom: 13px;
     background: rgba(0, 0, 0, 0.45);
 }
 .mp-bar {
-    margin-left: 14px;
+    margin-left: 24px;
 }
 .hud-bar-fill {
     height: 100%;
@@ -283,16 +339,16 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     border-right: 1px solid rgba(255,255,255,0.85);
     image-rendering: pixelated;
 }
-.hp-fill { background: url('assets/hp_fill.png') repeat-x left center; background-size: auto 8px; }
-.mp-fill { background: url('assets/mp_fill.png') repeat-x left center; background-size: auto 8px; }
+.hp-fill { background: url('assets/hp_fill.png') repeat-x left center; background-size: auto 12px; }
+.mp-fill { background: url('assets/mp_fill.png') repeat-x left center; background-size: auto 12px; }
 
 .hud-bar-text { 
     position: absolute; 
-    right: 8px;
+    right: 12px;
     top: 50%; 
     transform: translateY(-50%); 
     font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     color: #fff;
     text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
     z-index: 2; 
@@ -305,38 +361,54 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     font-style: italic;
 }
 
-/* COMMAND PANEL REPOSITIONED TO TOP LEFT */
+/* COMMAND PANEL AT BOTTOM CENTER */
 #command-panel { 
     position: fixed; 
-    top: 20px; 
-    left: 20px; 
-    width: 260px; 
-    background: #809c9e; 
-    padding: 12px; 
-    border: 4px solid #111; 
-    border-radius: 8px;
-    box-shadow: 4px 4px 0 #000;
+    left: 50%;
+    bottom: 6px;
+    transform: translateX(-50%);
+    width: 460px; 
+    background: rgba(14, 25, 41, 0.92);
+    padding: 7px 9px;
+    border: 4px solid #e2b74b; 
+    border-radius: 12px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.55), inset 0 0 0 3px #141924;
     z-index: 2000;
     pointer-events: none; 
     opacity: 0.5; 
     transition: 0.2s; 
 }
-#command-panel.active-turn { pointer-events: all; opacity: 1; border-color: #f1c40f; }
+#command-panel.active-turn { pointer-events: all; opacity: 1; }
 
 .menu-list { display: flex; flex-direction: column; gap: 8px; }
-.menu-item { 
-    font-size: 1.3rem; 
-    font-weight: 700; 
-    text-shadow: 1px 1px 0 #000; 
-    cursor: pointer; 
-    padding: 10px 10px; 
-    transition: 0.1s; 
-    color: white; 
-    background: #52757c;
-    border: 3px solid #111;
-    text-align: center;
+.menu-list.hidden { display: none !important; }
+#mainMenuBox.menu-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+#skillsMenuBox {
+    position: absolute;
+    left: 50%;
+    bottom: 76px;
+    transform: translateX(-50%);
+    width: 420px;
+    background: rgba(18, 27, 43, 0.96);
+    border: 3px solid #e2b74b;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
 }
-.menu-item:hover { color: var(--pixel-gold); background: #62888f; transform: translateX(5px); box-shadow: 2px 2px 0 #000;}
+.menu-item { 
+    font-size: 1rem; 
+    font-weight: 700; 
+    text-shadow: 1px 1px 0 #000;
+    cursor: pointer; 
+    padding: 8px 10px; 
+    transition: 0.1s; 
+    color: #e8efff; 
+    background: #2d4868;
+    border: 3px solid #13263e;
+    text-align: center;
+    border-radius: 6px;
+}
+.menu-item:hover { color: #fff5c2; background: #3c628e; transform: translateY(-1px); box-shadow: 2px 2px 0 #000;}
 .menu-item.disabled { opacity: 0.4; }
 .menu-item.disabled:hover { color: white; transform: none; text-shadow: 1px 1px 0 #000; cursor: not-allowed !important;}
 
@@ -358,6 +430,25 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .info-col { flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 2px; border: 2px solid #4a3728;}
 .info-col h3 { font-size: 0.6rem; color: var(--pixel-gold); margin-bottom: 10px; }
 .info-row { border-bottom: 1px solid rgba(0,0,0,0.2); padding: 8px 0; font-size: 0.9rem; }
+.book-anim-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.3);
+}
+.book-anim-sprite {
+    width: 64px;
+    height: 64px;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    transform: scale(3);
+    transform-origin: center center;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+}
 .fnum { position: absolute; pointer-events: none; z-index: 100; font-size: 1.2rem; animation: numUp 1.2s ease forwards; text-shadow: 3px 3px 0 #000; }
 .fnum.dmg { color: #ff5252; } .fnum.heal { color: #69db7c; } .fnum.shld { color: #90caf9; } .fnum.crit { color: #ffd700; font-weight: bold; }
 #gameoverScreen { background: var(--bg-dark); justify-content: center; align-items: center; text-align: center; z-index: 5000; }
