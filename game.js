@@ -160,11 +160,18 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
 
     if (isUI) {
         if (flipX) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-        const scale = Math.min(canvas.width / frameWidth, canvas.height / frameHeight);
+        
+        // UI SCALING FACTOR: Makes the idle animations 35% larger inside the frames
+        let scale = Math.min(canvas.width / frameWidth, canvas.height / frameHeight);
+        scale *= 1.35; 
+        
         const dw = clipW * scale;
         const dh = frameHeight * scale;
         const dx = (canvas.width - dw) / 2;
-        const dy = (canvas.height - dh) / 2;
+        
+        // Shifts the character down slightly to sit comfortably in the frame
+        const dy = (canvas.height - dh) / 2 + 8; 
+        
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
         let scale = 1.8;
@@ -252,10 +259,10 @@ function renderTeamSelect() {
     CHARACTERS.filter(c => !c.isEnemy).forEach(c => {
         const el = document.createElement('div');
         el.className = 'cc';
-        // ADDED PORTRAIT FRAME HERE
+        // Canvas size increased for higher resolution scaling inside the frame
         el.innerHTML = `
             <div class="portrait-frame">
-                <canvas id="select_sprite_${c.id}" width="65" height="65"></canvas>
+                <canvas id="select_sprite_${c.id}" width="90" height="90"></canvas>
             </div>
             <div class="cc-name" style="color:${c.color}">${c.name}</div>
         `;
@@ -276,11 +283,8 @@ function updatePreview() {
         const slot = document.getElementById('slot' + i);
         const id = G.selectedTeam[i];
         if(id !== undefined) {
-            // ADDED PORTRAIT FRAME TO PREVIEW
-            slot.innerHTML = `
-                <div class="portrait-frame-small">
-                    <canvas id="preview_sprite_${i}" width="50" height="50"></canvas>
-                </div>`;
+            // Larger canvas for better quality scaling
+            slot.innerHTML = `<canvas id="preview_sprite_${i}" width="65" height="65"></canvas>`;
             slot.classList.add('filled');
         } else { slot.innerHTML = '?'; slot.classList.remove('filled'); }
     }
