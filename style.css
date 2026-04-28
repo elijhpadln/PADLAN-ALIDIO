@@ -141,16 +141,58 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 }
 
 /* HUD OVERLAYS */
-#targetMenuOverlay { position: absolute; top: 120px; width: 100%; text-align: center; z-index: 100; pointer-events: none; }
-.target-msg { font-size: 1.5rem; text-shadow: 2px 2px 0 #000; color: #ff5252; animation: blink 1s infinite; margin-bottom: 10px;}
-.cancel-target { font-size: 1rem; color: white; text-shadow: 2px 2px 0 #000; pointer-events: all; display: inline-block; }
+#targetMenuOverlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    text-align: center;
+    z-index: 190;
+    pointer-events: none;
+}
+.target-msg {
+    display: block;
+    font-size: 1.55rem;
+    color: #ff7e78;
+    text-shadow: 3px 3px 0 #000;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+}
+.cancel-target {
+    font-size: 1rem;
+    color: white;
+    text-shadow: 2px 2px 0 #000;
+    pointer-events: all;
+    display: inline-block;
+    background: rgba(0,0,0,0.55);
+    padding: 4px 10px;
+    border: 2px solid rgba(255,255,255,0.45);
+}
 .cancel-target:hover { color: var(--pixel-gold); }
 
-/* NEW CLEAN HUD STYLES */
+.turn-banner {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    z-index: 180;
+    padding: 10px 18px;
+    font-size: 1.45rem;
+    letter-spacing: 2px;
+    color: #fff4b1;
+    background: rgba(0, 0, 0, 0.7);
+    border: 3px solid #f1c40f;
+    text-shadow: 3px 3px 0 #000;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.5), 0 0 18px rgba(0, 0, 0, 0.55);
+    pointer-events: none;
+}
+
+/* PIXEL HUD (MATCHES BAR SPRITE PROPORTIONS) */
 #bottom-hud { 
-    height: 120px; 
+    height: 112px;
     display: flex; 
-    padding: 0 5%; 
+    padding: 0 18px 8px;
     background: transparent; 
     z-index: 1000; 
     position: absolute; 
@@ -163,54 +205,104 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     display: flex; 
     justify-content: space-between;
     align-items: flex-end;
-    padding-bottom: 20px;
-    gap: 30px; 
+    padding-bottom: 0;
+    gap: 4px;
 }
 
 .hud-column { 
-    flex: 1; 
+    flex: 1;
     display: flex; 
     flex-direction: column; 
     justify-content: flex-end;
     position: relative; 
-    transition: 0.3s; 
+    transition: 0.2s; 
+    min-width: 0;
+    max-width: 280px;
 }
-.hud-column.active-hud { transform: translateY(-10px); }
+.hud-column.active-hud { transform: translateY(-6px); }
+
+.hud-column.hud-cool::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 14px;
+    background: rgba(102, 187, 255, 0.12);
+    pointer-events: none;
+}
 
 .hud-name { 
-    font-size: 1.4rem; 
-    color: #fff; 
-    text-shadow: 2px 2px 0 #000; 
+    font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
+    font-size: 0.9rem;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
     margin-bottom: 5px;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
 }
 
-.hud-bars { display: flex; flex-direction: column; gap: 8px; }
+.hud-bars { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
 
 .hud-bar-wrap { 
     position: relative; 
-    width: 100%; 
-    height: 24px; 
-    background: #222; 
-    border: 3px solid #f1c40f; 
-    outline: 3px solid #000; 
-    box-shadow: 4px 4px 0 rgba(0,0,0,0.5); 
+    width: 154px;
+    height: 26px; /* 2x of 13px frame sprite */
+    background: url('assets/bar_frame.png') no-repeat center;
+    background-size: 154px 26px;
+    border: none;
+    outline: none;
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.55);
+    overflow: hidden;
+    image-rendering: pixelated;
+    position: relative;
+    z-index: 1;
 }
 
-.hud-bar-bg { width: 100%; height: 100%; }
-.hud-bar-fill { height: 100%; transition: width 0.3s ease-out; border-right: 2px solid #fff; }
-.hp-fill { background: #e02f5e; }
-.mp-fill { background: #0ea5e9; }
+.hud-bar-bg {
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    top: 9px;
+    bottom: 9px;
+    background: rgba(0, 0, 0, 0.45);
+}
+.mp-bar {
+    margin-left: 14px;
+}
+.hud-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease-out;
+    border-right: 1px solid rgba(255,255,255,0.85);
+    image-rendering: pixelated;
+}
+.hp-fill { background: url('assets/hp_fill.png') repeat-x left center; background-size: auto 8px; }
+.mp-fill { background: url('assets/mp_fill.png') repeat-x left center; background-size: auto 8px; }
 
 .hud-bar-text { 
     position: absolute; 
-    right: 8px; 
+    right: 8px;
     top: 50%; 
     transform: translateY(-50%); 
-    font-size: 1.1rem; 
-    color: #fff; 
-    text-shadow: 2px 2px 0 #000; 
+    font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
+    font-size: 0.7rem;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
     z-index: 2; 
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    line-height: 1;
+    min-width: 0;
+    text-align: right;
+    font-style: italic;
 }
 
 /* COMMAND PANEL REPOSITIONED TO TOP LEFT */

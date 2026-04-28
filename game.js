@@ -1,10 +1,31 @@
 const ANIMATION_ASSETS = {
+    // --- HEROES ---
     archer: { idle: { src: 'assets/archer_idle.png' }, attack1: { src: 'assets/archer_attack1.png' }, attack2: { src: 'assets/archer_attack2.png' }, attack3: { src: 'assets/archer_attack3.png' }, hurt: { src: 'assets/archer_hurt.png' }, die: { src: 'assets/archer_dead.png' } },
     swordsman: { idle: { src: 'assets/swordsman_idle.png' }, attack1: { src: 'assets/swordsman_attack1.png' }, attack2: { src: 'assets/swordsman_attack2.png' }, attack3: { src: 'assets/swordsman_attack3.png' }, hurt: { src: 'assets/swordsman_hurt.png' }, die: { src: 'assets/swordsman_dead.png' } },
     wizard: { idle: { src: 'assets/wizard_idle.png' }, attack1: { src: 'assets/wizard_attack1.png' }, attack2: { src: 'assets/wizard_attack2.png' }, attack3: { src: 'assets/wizard_attack3.png' }, hurt: { src: 'assets/wizard_hurt.png' }, die: { src: 'assets/wizard_dead.png' } },
     enchantress: { idle: { src: 'assets/enchantress_idle.png' }, attack1: { src: 'assets/enchantress_attack1.png' }, attack2: { src: 'assets/enchantress_attack2.png' }, attack3: { src: 'assets/enchantress_attack3.png' }, hurt: { src: 'assets/enchantress_hurt.png' }, die: { src: 'assets/enchantress_dead.png' } },
     knight: { idle: { src: 'assets/knight_idle.png' }, attack1: { src: 'assets/knight_attack1.png' }, attack2: { src: 'assets/knight_attack2.png' }, attack3: { src: 'assets/knight_attack3.png' }, hurt: { src: 'assets/knight_hurt.png' }, die: { src: 'assets/knight_dead.png' } },
-    musketeer: { idle: { src: 'assets/musketeer_idle.png' }, attack1: { src: 'assets/musketeer_attack1.png' }, attack2: { src: 'assets/musketeer_attack2.png' }, attack3: { src: 'assets/musketeer_attack3.png' }, hurt: { src: 'assets/musketeer_hurt.png' }, die: { src: 'assets/musketeer_dead.png' } }
+    musketeer: { idle: { src: 'assets/musketeer_idle.png' }, attack1: { src: 'assets/musketeer_attack1.png' }, attack2: { src: 'assets/musketeer_attack2.png' }, attack3: { src: 'assets/musketeer_attack3.png' }, hurt: { src: 'assets/musketeer_hurt.png' }, die: { src: 'assets/musketeer_dead.png' } },
+
+    // --- MONSTERS / ENEMIES ---
+    firespirit: {
+        idle: { src: 'assets/firespirit_idle.png' }, idle2: { src: 'assets/firespirit_idle_2.png' }, walk: { src: 'assets/firespirit_walk.png' }, run: { src: 'assets/firespirit_run.png' },
+        attack1: { src: 'assets/firespirit_attack.png' },
+        shot: { src: 'assets/firespirit_shot.png' }, charge: { src: 'assets/firespirit_charge.png' }, flame: { src: 'assets/firespirit_flame.png' }, explosion: { src: 'assets/firespirit_explosion.png' },
+        hurt: { src: 'assets/firespirit_hurt.png' }, die: { src: 'assets/firespirit_dead.png' }
+    },
+    plent: {
+        idle: { src: 'assets/plent_idle.png' }, walk: { src: 'assets/plent_walk.png' },
+        attack1: { src: 'assets/plent_attack_1.png' }, attack2: { src: 'assets/plent_attack_2.png' }, attack3: { src: 'assets/plent_attack_3.png' },
+        poison: { src: 'assets/plent_poison.png' }, cloud_poison: { src: 'assets/plent_cloud_poison.png' }, disguise: { src: 'assets/plent_disguise.png' }, attack_disguise: { src: 'assets/plent_attack_disquise.png' },
+        hurt: { src: 'assets/plent_hurt.png' }, die: { src: 'assets/plent_dead.png' }
+    },
+    skeleton: {
+        idle: { src: 'assets/skeleton_idle.png' }, walk: { src: 'assets/skeleton_walk.png' }, run: { src: 'assets/skeleton_run.png' },
+        attack1: { src: 'assets/skeleton_attack_1.png' }, attack2: { src: 'assets/skeleton_attack_2.png' }, attack3: { src: 'assets/skeleton_attack_3.png' },
+        special_attack: { src: 'assets/skeleton_special_attack.png' }, jump: { src: 'assets/skeleton_jump.png' },
+        hurt: { src: 'assets/skeleton_hurt.png' }, die: { src: 'assets/skeleton_dead.png' }
+    }
 };
 
 const CHARACTERS =[
@@ -37,6 +58,25 @@ const CHARACTERS =[
         { name: 'Quick Draw', icon: 'assets/icon_quick_draw.png', power: 60, mpCost: 25, anim: 'attack2' },
         { name: 'Headshot', icon: 'assets/icon_headshot.png', power: 100, mpCost: 50, anim: 'attack3' },
         { name: 'Explosive Shot', icon: 'assets/icon_explosive_shot.png', power: 80, mpCost: 60, anim: 'attack3', isAoe: true }
+    ] },
+    { id: 6, name: 'Fire Spirit', key: 'firespirit', color: '#e67e22', isMelee: false, isEnemy: true, maxHp: 200, atk: 70, spd: 80, maxMp: 150, moves:[
+        { name: 'Fireball', power: 55, mpCost: 20, anim: 'shot' },
+        { name: 'Flame Dash', power: 75, mpCost: 35, anim: 'charge' },
+        { name: 'Inferno', power: 85, mpCost: 45, anim: 'flame' },
+        { name: 'Supernova', power: 90, mpCost: 60, anim: 'explosion', isAoe: true }
+    ] },
+    { id: 7, name: 'Plent', key: 'plent', color: '#27ae60', isMelee: true, isEnemy: true, maxHp: 550, atk: 45, spd: 45, maxMp: 100, moves:[
+        { name: 'Vine Whip', power: 45, mpCost: 15, anim: 'attack2' },
+        { name: 'Toxic Spit', power: 65, mpCost: 30, anim: 'poison' },
+        { name: 'Camouflage', power: 0, mpCost: 20, anim: 'disguise', effect: 'defenseUp' },
+        { name: 'Sneak Attack', power: 90, mpCost: 45, anim: 'attack_disguise' },
+        { name: 'Poison Cloud', power: 65, mpCost: 55, anim: 'cloud_poison', isAoe: true }
+    ] },
+    { id: 8, name: 'Skeleton', key: 'skeleton', color: '#ecf0f1', isMelee: true, isEnemy: true, maxHp: 320, atk: 60, spd: 65, maxMp: 120, moves:[
+        { name: 'Bone Slash', power: 55, mpCost: 20, anim: 'attack2' },
+        { name: 'Fatal Strike', power: 80, mpCost: 40, anim: 'attack3' },
+        { name: 'Leaping Strike', power: 75, mpCost: 35, anim: 'jump' },
+        { name: 'Bone Storm', power: 70, mpCost: 50, anim: 'special_attack', isAoe: true }
     ] }
 ];
 
@@ -213,13 +253,43 @@ function restartBattle() {
     document.getElementById('pause-btn').classList.remove('hidden');
 }
 
+function showTurnBanner(text = 'YOUR TURN') {
+    const banner = document.getElementById('turnBanner');
+    if (!banner) return;
+    banner.textContent = text;
+    banner.classList.remove('hidden');
+}
+
+function hideTurnBanner() {
+    const banner = document.getElementById('turnBanner');
+    if (!banner) return;
+    banner.classList.add('hidden');
+}
+
+function playAgain() {
+    G.activeTimers.forEach(t => t.clear());
+    G.activeAnimations.forEach(a => a.cancel());
+    G.activeAnimations =[];
+    resumeGame();
+    document.getElementById('pause-btn').classList.add('hidden');
+    G.pendingMove = null;
+    G.isAnimating = false;
+    G.p = null;
+    G.c = null;
+    G.selectedTeam =[];
+    hideTurnBanner();
+    showScreen('team');
+    renderTeamSelect();
+    updatePreview();
+}
+
 function showScreen(n) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(n + 'Screen').classList.add('active'); }
 function startGame() { G.selectedTeam =[]; showScreen('team'); renderTeamSelect(); }
 
 function renderTeamSelect() {
     const grid = document.getElementById('creatureGrid');
     grid.innerHTML = '';
-    CHARACTERS.forEach(c => {
+    CHARACTERS.filter(c => !c.isEnemy).forEach(c => {
         const el = document.createElement('div');
         el.className = 'cc';
         el.innerHTML = `
@@ -364,7 +434,12 @@ function endRPSGame(winner) {
     const nextBtn = document.getElementById("new-game-btn");
     nextBtn.onclick = (e) => {
         e.preventDefault();
-        const cpuIds =[]; for(let i=0; i<3; i++) cpuIds.push(Math.floor(Math.random() * 6));
+        const enemyRoster = CHARACTERS.filter(c => c.isEnemy);
+        const cpuIds =[];
+        for(let i=0; i<3; i++) {
+            const randomMonster = enemyRoster[Math.floor(Math.random() * enemyRoster.length)];
+            cpuIds.push(randomMonster.id);
+        }
         const overlay = document.getElementById('transition-overlay');
         overlay.classList.remove('hidden', 'iris-opening');
         overlay.classList.add('iris-closing');
@@ -419,16 +494,17 @@ function createEntityHTML(layer, c, x, y, z) {
 function renderHUD() {
     const panel = document.getElementById('party-panel');
     panel.innerHTML = '';
-    G.p.team.forEach(c => {
+    G.p.team.forEach((c, idx) => {
+        const coolTintClass = idx > 0 ? 'hud-cool' : '';
         panel.innerHTML += `
-        <div class="hud-column" id="hud_slot_${c.uid}">
+        <div class="hud-column ${coolTintClass}" id="hud_slot_${c.uid}">
             <div class="hud-name">${c.name.toUpperCase()}</div>
             <div class="hud-bars">
-                <div class="hud-bar-wrap">
+                <div class="hud-bar-wrap hp-bar">
                     <div class="hud-bar-bg"><div id="hp_${c.uid}" class="hud-bar-fill hp-fill"></div></div>
                     <div class="hud-bar-text" id="hp_txt_${c.uid}"></div>
                 </div>
-                <div class="hud-bar-wrap">
+                <div class="hud-bar-wrap mp-bar">
                     <div class="hud-bar-bg"><div id="mp_${c.uid}" class="hud-bar-fill mp-fill"></div></div>
                     <div class="hud-bar-text" id="mp_txt_${c.uid}"></div>
                 </div>
@@ -487,9 +563,11 @@ function advanceTurn() {
     document.querySelectorAll('.entity-wrap').forEach(e => e.classList.remove('is-active'));
     document.getElementById(`wrap_${G.activeEnt.uid}`).classList.add('is-active');
     if (G.activeEnt.isPlayer) {
+        showTurnBanner('YOUR TURN');
         document.getElementById('command-panel').classList.add('active-turn');
         showMainMenu();
     } else {
+        hideTurnBanner();
         document.getElementById('command-panel').classList.remove('active-turn');
         pausableTimeout(cpuTurn, 1000);
     }
@@ -500,6 +578,7 @@ function showMainMenu() {
     document.getElementById('skillsMenuBox').classList.add('hidden');
     document.getElementById('mainMenuBox').classList.remove('hidden');
     clearTargeting(); 
+    if (G.activeEnt && G.activeEnt.isPlayer) showTurnBanner('YOUR TURN');
     const skillBtn = document.getElementById('skill-btn');
     if (G.activeEnt.moves.some(m => G.activeEnt.mp >= m.mpCost)) skillBtn.classList.remove('disabled');
     else skillBtn.classList.add('disabled');
@@ -525,6 +604,7 @@ function showSkillsMenu() {
 
 function startTargeting() {
     document.getElementById('targetMenuOverlay').classList.remove('hidden');
+    hideTurnBanner();
     let targets;
     if (G.pendingMove.isHeal) { targets = G.activeEnt.isPlayer ? G.p.team : G.c.team; } 
     else { targets = G.pendingMove.isAoe ? (G.activeEnt.isPlayer ? G.c.team : G.p.team) : (G.activeEnt.isPlayer ? G.c.team : G.p.team); }
@@ -552,6 +632,7 @@ function cpuTurn() {
 
 function executeMove(actor, target, move) {
     G.isAnimating = true;
+    hideTurnBanner();
     document.getElementById('command-panel').classList.remove('active-turn');
     actor.mp = Math.max(0, actor.mp - (move.mpCost || 0));
     updateBars();
