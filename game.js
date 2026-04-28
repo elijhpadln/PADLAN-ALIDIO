@@ -292,10 +292,15 @@ function gameLoop(timestamp) {
         }
     }
     
-    if(G.predictedQueue) { 
-        G.predictedQueue.forEach((c, i) => {
-            drawModularSprite(`tq_icon_${i}_${c.uid}`, c.key, 'idle', !c.isPlayer, true);
-        }); 
+    // Draw the idle animation icons inside the info modal compass frames continuously
+    if(!document.getElementById('infoModal').classList.contains('hidden')) {
+        const modalEnts = (G.p && G.c) ?[...G.p.team, ...G.c.team] :[];
+        modalEnts.forEach(c => {
+            const cvs = document.getElementById(`info_icon_${c.uid}`);
+            if (cvs) {
+                drawModularSprite(`info_icon_${c.uid}`, c.key, 'idle', !c.isPlayer, true);
+            }
+        });
     }
 }
 
@@ -344,7 +349,7 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
         const dy = (canvas.height - dh) / 2;
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
-        let scale = 1.7; // Shrunk the characters slightly per request
+        let scale = 1.35; // Shrunk the characters more, per request
         if (clipW * scale > canvas.width) scale = canvas.width / clipW;
         if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
         
@@ -701,87 +706,46 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    const pPos =[{x: 15, y: 8}, {x: 28, y: 18}, {x: 41, y: 28}];
-    const cPos =[{x: 59, y: 28}, {x: 72, y: 18}, {x: 85, y: 8}];
+    
+    const pPos =[{x: 18, y: 15}, {x: 31, y: 25}, {x: 44, y: 35}];
+    const cPos =[{x: 56, y: 35}, {x: 69, y: 25}, {x: 82, y: 15}];
     
     G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - pPos[i].y));
     G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - cPos[i].y));
 }
 
 function createEntityHTML(layer, c, x, y, z) {
-    const cleanName = (c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '')).toUpperCase();
-    const statsHTML = `
-        <div class="entity-stats ${c.isPlayer ? 'ally' : 'enemy'}" id="stats_${c.uid}">
-            <div class="entity-stat-name">${cleanName}</div>
-            <div class="entity-stat-bar hp">
-                <div class="entity-stat-track"><div class="entity-stat-fill hp-fill" id="hp_${c.uid}"></div></div>
-                <div class="entity-stat-text" id="hp_txt_${c.uid}"></div>
-            </div>
-            <div class="entity-stat-bar mp">
-                <div class="entity-stat-track"><div class="entity-stat-fill mp-fill" id="mp_${c.uid}"></div></div>
-                <div class="entity-stat-text" id="mp_txt_${c.uid}"></div>
-            </div>
-        </div>`;
-        
     layer.innerHTML += `
         <div class="entity-wrap" id="wrap_${c.uid}" style="left:${x}%; bottom:${y}%; z-index:${z}; transform:translateX(-50%)">
-            ${statsHTML}
             <div class="platform"></div>
             <canvas class="sprite" id="sprite_${c.uid}" width="350" height="350"></canvas>
         </div>`;
 }
 
 function renderHUD() {
-    const panel = document.getElementById('party-panel');
-    panel.innerHTML = '';
-    updateBars();
-}
-
-function predictTimeline(count) {
-    let sim =[...G.p.team, ...G.c.team].filter(e => e.currentHp > 0).map(e => ({...e}));
-    let timeline =[];
+    const allyHud = document.getElementById('ally-hud');
+    const enemyHud = document.getElementById('enemy-hud');
     
-    while(timeline.length < count && sim.length > 0) {
-        let minTime = Infinity, nextUnit = null;
-        for(let e of sim) { 
-            let timeNeeded = (1000 - e.ct) / e.spd; 
-            if(timeNeeded < minTime) { 
-                minTime = timeNeeded; 
-                nextUnit = e; 
-            } 
-        }
-        for(let e of sim) { 
-            e.ct += e.spd * minTime; 
-        }
-        timeline.push({...nextUnit});
-        nextUnit.ct = 0; 
-    }
-    return timeline;
-}
-
-function updateTurnQueueUI() {
-    const qBox = document.getElementById('turn-queue');
-    qBox.innerHTML = '';
-    G.predictedQueue = predictTimeline(8);
-    G.predictedQueue.forEach((c, i) => {
-        const isP = c.isPlayer;
-        const borderColor = isP ? 'var(--pixel-gold)' : '#ff5252'; 
-        const hpPct = Math.max(0, (c.currentHp / c.maxHp) * 100);
-        const mpPct = Math.max(0, (c.mp / c.maxMp) * 100);
-        const activeClass = i === 0 ? 'tq-active' : '';
-        const readyText = i === 0 ? '<div class="tq-ready-text">READY!</div>' : '';
-        const enemyIconClass = !isP ? 'enemy-icon' : '';
-        
-        qBox.innerHTML += `
-            <div class="tq-item ${activeClass}" style="border-color: ${borderColor};">
-                <canvas class="tq-icon ${enemyIconClass}" id="tq_icon_${i}_${c.uid}" width="48" height="48"></canvas>
-                ${readyText}
-                <div class="tq-mini-bars">
-                    <div class="tq-bar-bg"><div class="tq-hp-fill" style="width:${hpPct}%"></div></div>
-                    <div class="tq-bar-bg"><div class="tq-mp-fill" style="width:${mpPct}%"></div></div>
+    const createBarHTML = (c) => {
+        const cleanName = (c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '')).toUpperCase();
+        return `
+            <div class="entity-stats ${c.isPlayer ? 'ally' : 'enemy'}" id="stats_${c.uid}">
+                <div class="entity-stat-name">${cleanName}</div>
+                <div class="entity-stat-bar hp">
+                    <div class="entity-stat-track"><div class="entity-stat-fill hp-fill" id="hp_${c.uid}"></div></div>
+                    <div class="entity-stat-text" id="hp_txt_${c.uid}"></div>
+                </div>
+                <div class="entity-stat-bar mp">
+                    <div class="entity-stat-track"><div class="entity-stat-fill mp-fill" id="mp_${c.uid}"></div></div>
+                    <div class="entity-stat-text" id="mp_txt_${c.uid}"></div>
                 </div>
             </div>`;
-    });
+    };
+
+    allyHud.innerHTML = G.p.team.map(createBarHTML).join('');
+    enemyHud.innerHTML = G.c.team.map(createBarHTML).join('');
+    
+    updateBars();
 }
 
 function advanceTurn() {
@@ -802,15 +766,8 @@ function advanceTurn() {
     G.activeEnt = nextUnit;
     G.activeEnt.ct = 0; 
     
-    updateTurnQueueUI();
     G.activeEnt.mp = Math.min(G.activeEnt.maxMp, G.activeEnt.mp + 20); 
     updateBars();
-    
-    document.querySelectorAll('.hud-column').forEach(e => e.classList.remove('active-hud'));
-    if (G.activeEnt.isPlayer) {
-        const activeHud = document.getElementById(`hud_slot_${G.activeEnt.uid}`);
-        if (activeHud) activeHud.classList.add('active-hud');
-    }
     
     document.querySelectorAll('.entity-wrap').forEach(e => e.classList.remove('is-active'));
     document.getElementById(`wrap_${G.activeEnt.uid}`).classList.add('is-active');
@@ -855,17 +812,9 @@ function showSkillsMenu() {
     
     G.activeEnt.moves.forEach(m => {
         const canUse = G.activeEnt.mp >= m.mpCost;
-        const item = document.createElement('div');
+        const item = document.createElement('button');
         item.className = `menu-item ${!canUse ? 'disabled' : ''}`;
-        const iconHtml = m.icon ? `<img src="${m.icon}" class="skill-icon" alt="icon">` : '';
-        item.innerHTML = `
-            <div style="display:flex; align-items:center;">
-                ${iconHtml}
-                <div style="display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;">
-                    <span>${m.name}</span>
-                    <small style="font-size:0.7rem; color:${canUse ? 'var(--pixel-mp)' : '#888'};">MP: ${m.mpCost}</small>
-                </div>
-            </div>`;
+        item.innerHTML = `${m.name}`;
         if (canUse) { 
             item.onclick = () => { G.pendingMove = m; startTargeting(); }; 
         }
@@ -876,6 +825,7 @@ function showSkillsMenu() {
 function startTargeting() {
     document.getElementById('targetMenuOverlay').classList.remove('hidden');
     document.getElementById('command-panel').classList.add('hidden'); 
+    document.getElementById('skillsMenuBox').classList.add('hidden'); 
     
     let targets;
     if (G.pendingMove.isHeal) { 
@@ -930,7 +880,7 @@ function cpuTurn() {
 function executeMove(actor, target, move) {
     G.isAnimating = true;
     document.getElementById('command-panel').classList.remove('active-turn');
-    document.getElementById('command-panel').classList.remove('hidden');
+    document.getElementById('command-panel').classList.add('hidden');
     
     actor.mp = Math.max(0, actor.mp - (move.mpCost || 0));
     updateBars();
@@ -1055,7 +1005,17 @@ function showInfoModal() {
         let html = `<div class="info-col"><h3>${title}</h3>`;
         team.forEach(c => { 
             const displayName = c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '');
-            html += `<div class="info-row"><strong>${displayName}</strong><br>HP: ${Math.ceil(c.currentHp)}/${c.maxHp} | MP: ${Math.floor(c.mp)}/${c.maxMp}</div>`; 
+            html += `
+            <div class="info-row" style="display:flex; align-items:center; gap: 15px;">
+                <div class="info-icon-frame">
+                    <canvas id="info_icon_${c.uid}" width="64" height="64"></canvas>
+                </div>
+                <div class="info-details" style="flex:1;">
+                    <strong style="font-size:1.2rem; color:var(--pixel-gold);">${displayName}</strong><br>
+                    <span style="color:#e74c3c;">HP:</span> ${Math.ceil(c.currentHp)}/${c.maxHp} <br>
+                    ${c.isPlayer ? `<span style="color:#3498db;">MP:</span> ${Math.floor(c.mp)}/${c.maxMp}` : ''}
+                </div>
+            </div>`; 
         });
         return html + `</div>`;
     };

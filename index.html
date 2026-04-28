@@ -102,6 +102,13 @@
 <!-- SCREEN 3: BATTLE -->
 <div id="battleScreen" class="screen">
     <div class="stage" id="stage">
+        
+        <!-- NEW TOP HUD FOR HP/MP BARS -->
+        <div id="top-hud">
+            <div id="ally-hud" class="side-hud left-hud"></div>
+            <div id="enemy-hud" class="side-hud right-hud"></div>
+        </div>
+
         <div id="turn-timeline-container">
             <div class="timeline-bg"></div>
             <div id="turn-queue"></div>
@@ -115,7 +122,6 @@
 
     <!-- HUD BOTTOM AREA -->
     <div id="bottom-hud">
-        <div id="party-panel" class="jrpg-window"></div>
         <div id="command-panel" class="jrpg-window">
             <div id="mainMenuBox" class="menu-list">
                 <div class="menu-item" onclick="handleStrike()">Strike</div>
