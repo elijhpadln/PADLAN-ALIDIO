@@ -82,7 +82,6 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .cc { position: relative; background: transparent; padding: 0.5rem; text-align: center; transition: transform 0.1s; cursor: pointer; border: none; box-shadow: none; }
 .cc:hover { transform: translateY(-4px); }
 
-/* PERFECT PNG-ONLY PORTRAIT FRAME */
 .portrait-frame {
     width: 110px;
     height: 154px;
@@ -116,7 +115,8 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 }
 .team-slot.filled { 
     border: none; 
-    background: transparent;
+    background: url('assets/20250425portraitFrame-Sheet.png') no-repeat center center;
+    background-size: 100% 100%;
     filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
 }
 
@@ -127,7 +127,17 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 
 /* BATTLE STAGE & ENTITIES */
 #battleScreen { background: #000; } 
-.stage { flex: 1; position: relative; width: 100%; overflow: hidden; background-image: url('assets/battle_bg.png'); background-size: cover; background-position: bottom; background-repeat: no-repeat; }
+.stage { 
+    flex: 1; 
+    position: relative; 
+    width: 100vw; 
+    height: 100vh;
+    overflow: hidden; 
+    background-image: url('assets/battle_bg.png'); 
+    background-size: cover; /* Prevents stretching */
+    background-position: top left; 
+    background-repeat: no-repeat; 
+}
 #entitiesLayer { position: absolute; inset: 0; }
 .entity-wrap { position: absolute; width: 70px; height: 120px; display: flex; justify-content: center; align-items: flex-end; transition: all 0.4s ease; z-index: 5; transform-origin: bottom center; }
 .platform { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 80px; height: 20px; background: rgba(0,0,0,0.4); border-radius: 50%; z-index: 1; pointer-events: none; filter: blur(2px); }
@@ -136,49 +146,49 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .entity-wrap.is-active .sprite { filter: drop-shadow(0 0 15px var(--pixel-gold)); }
 
 /* =======================================
-   STAIR-STEP TOP HUD
+   HORIZONTAL ASCENDING STAIR-STEP TOP HUD
    ======================================= */
 #top-hud {
     position: absolute;
     top: 20px;
-    left: 20px;
-    right: 20px;
-    height: 250px; 
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center; /* Centers HUD to avoid Pause button */
+    align-items: flex-start;
+    gap: 40px;
     pointer-events: none;
     z-index: 100;
 }
 .side-hud {
-    position: absolute;
-    top: 0;
-    width: 320px;
-    height: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
 }
-.side-hud.left-hud { left: 0; }
-.side-hud.right-hud { right: 50px; }
 
 .vs-text {
-    position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    position: relative;
     font-family: 'CustomPixelFont', sans-serif;
     font-size: 3rem;
     color: white;
     text-shadow: 4px 4px 0 #000;
+    margin-top: 55px; /* Aligns with the lowest stairs */
 }
 
 .entity-stats {
-    position: absolute;
-    width: 200px;
+    position: relative;
+    width: 170px;
     transition: opacity 0.3s, margin 0.3s;
 }
-.left-hud .entity-stats:nth-child(1) { top: 0; left: 0; }
-.left-hud .entity-stats:nth-child(2) { top: 85px; left: 60px; }
-.left-hud .entity-stats:nth-child(3) { top: 170px; left: 120px; }
 
-.right-hud .entity-stats:nth-child(1) { top: 0; right: 0; }
-.right-hud .entity-stats:nth-child(2) { top: 85px; right: 60px; }
-.right-hud .entity-stats:nth-child(3) { top: 170px; right: 120px; }
+/* ASCENDING STAIRS OUTWARD FROM VS (Center is lowest -> Edges are highest) */
+.left-hud .entity-stats:nth-child(1) { margin-top: 0px; }    /* Leftmost / Highest */
+.left-hud .entity-stats:nth-child(2) { margin-top: 30px; }   /* Middle */
+.left-hud .entity-stats:nth-child(3) { margin-top: 60px; }   /* Near VS / Lowest */
+
+.right-hud .entity-stats:nth-child(1) { margin-top: 60px; }  /* Near VS / Lowest */
+.right-hud .entity-stats:nth-child(2) { margin-top: 30px; }  /* Middle */
+.right-hud .entity-stats:nth-child(3) { margin-top: 0px; }   /* Rightmost / Highest */
 
 .entity-stats.dead { opacity: 0.5; }
 
@@ -192,21 +202,22 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 }
 .right-hud .entity-stat-name { text-align: right; }
 
+/* RESTORED SPRITE FRAME & REMOVED CSS BORDERS */
 .entity-stat-bar {
     position: relative;
-    width: 200px;
+    width: 100%;
     height: 26px;
     margin-bottom: 5px;
     background: url('assets/bar_frame.png') no-repeat center;
-    background-size: 200px 26px;
+    background-size: 100% 100%;
     image-rendering: pixelated;
     overflow: hidden;
 }
 .entity-stats.enemy .entity-stat-bar.mp { display: none; }
-.entity-stat-track { position: absolute; left: 14px; right: 14px; top: 9px; height: 8px; background: rgba(0, 0, 0, 0.45); }
-.entity-stat-fill { position: relative; height: 8px; width: 0%; transition: width 0.3s ease-out; border-right: 1px solid rgba(255, 255, 255, 0.85); }
-.entity-stat-fill.hp-fill { background: url('assets/hp_fill.png') repeat-x left center; background-size: auto 8px; }
-.entity-stat-fill.mp-fill { background: url('assets/mp_fill.png') repeat-x left center; background-size: auto 8px; }
+.entity-stat-track { position: absolute; left: 12px; right: 12px; top: 9px; height: 8px; background: rgba(0, 0, 0, 0.45); }
+.entity-stat-fill { position: relative; height: 100%; width: 0%; transition: width 0.3s ease-out; border-right: 1px solid rgba(255, 255, 255, 0.85); }
+.entity-stat-fill.hp-fill { background-color: #e74c3c; background-image: url('assets/hp_fill.png'); background-repeat: repeat-x; background-size: auto 100%; }
+.entity-stat-fill.mp-fill { background-color: #3498db; background-image: url('assets/mp_fill.png'); background-repeat: repeat-x; background-size: auto 100%; }
 .entity-stat-text { display: none; }
 
 /* TARGETING */

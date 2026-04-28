@@ -1,48 +1,79 @@
 const ANIMATION_ASSETS = {
-    // --- HEROES ---
-    archer: { idle: { src: 'assets/archer_idle.png' }, attack1: { src: 'assets/archer_attack1.png' }, attack2: { src: 'assets/archer_attack2.png' }, attack3: { src: 'assets/archer_attack3.png' }, hurt: { src: 'assets/archer_hurt.png' }, die: { src: 'assets/archer_dead.png' } },
-    swordsman: { idle: { src: 'assets/swordsman_idle.png' }, attack1: { src: 'assets/swordsman_attack1.png' }, attack2: { src: 'assets/swordsman_attack2.png' }, attack3: { src: 'assets/swordsman_attack3.png' }, hurt: { src: 'assets/swordsman_hurt.png' }, die: { src: 'assets/swordsman_dead.png' } },
-    wizard: { idle: { src: 'assets/wizard_idle.png' }, attack1: { src: 'assets/wizard_attack1.png' }, attack2: { src: 'assets/wizard_attack2.png' }, attack3: { src: 'assets/wizard_attack3.png' }, hurt: { src: 'assets/wizard_hurt.png' }, die: { src: 'assets/wizard_dead.png' } },
-    enchantress: { idle: { src: 'assets/enchantress_idle.png' }, attack1: { src: 'assets/enchantress_attack1.png' }, attack2: { src: 'assets/enchantress_attack2.png' }, attack3: { src: 'assets/enchantress_attack3.png' }, hurt: { src: 'assets/enchantress_hurt.png' }, die: { src: 'assets/enchantress_dead.png' } },
-    knight: { idle: { src: 'assets/knight_idle.png' }, attack1: { src: 'assets/knight_attack1.png' }, attack2: { src: 'assets/knight_attack2.png' }, attack3: { src: 'assets/knight_attack3.png' }, hurt: { src: 'assets/knight_hurt.png' }, die: { src: 'assets/knight_dead.png' } },
-    musketeer: { idle: { src: 'assets/musketeer_idle.png' }, attack1: { src: 'assets/musketeer_attack1.png' }, attack2: { src: 'assets/musketeer_attack2.png' }, attack3: { src: 'assets/musketeer_attack3.png' }, hurt: { src: 'assets/musketeer_hurt.png' }, die: { src: 'assets/musketeer_dead.png' } },
+    // --- HEROES (Run & Walk removed, Jump retained) ---
+    archer: { 
+        arrow: { src: 'assets/archer_arrow.png' }, attack1: { src: 'assets/archer_attack1.png' }, 
+        die: { src: 'assets/archer_dead.png' }, hurt: { src: 'assets/archer_hurt.png' }, 
+        idle: { src: 'assets/archer_idle.png' }, idle2: { src: 'assets/archer_idle2.png' }, 
+        jump: { src: 'assets/archer_jump.png' }, shot1: { src: 'assets/archer_shot1.png' }, 
+        shot2: { src: 'assets/archer_shot2.png' }
+    },
+    swordsman: { 
+        attack1: { src: 'assets/swordsman_attack1.png' }, attack2: { src: 'assets/swordsman_attack2.png' }, 
+        attack3: { src: 'assets/swordsman_attack3.png' }, die: { src: 'assets/swordsman_dead.png' }, 
+        hurt: { src: 'assets/swordsman_hurt.png' }, idle: { src: 'assets/swordsman_idle.png' }, 
+        idle2: { src: 'assets/swordsman_idle2.png' }, jump: { src: 'assets/swordsman_jump.png' }
+    },
+    wizard: { 
+        jump: { src: 'assets/wizard_jump.png' }, idle2: { src: 'assets/wizard_idle2.png' }, 
+        idle: { src: 'assets/wizard_idle.png' }, hurt: { src: 'assets/wizard_hurt.png' }, 
+        die: { src: 'assets/wizard_dead.png' }, attack3: { src: 'assets/wizard_attack3.png' }, 
+        attack2: { src: 'assets/wizard_attack2.png' }, attack1: { src: 'assets/wizard_attack1.png' } 
+    },
+    enchantress: { 
+        attack1: { src: 'assets/enchantress_attack1.png' }, attack2: { src: 'assets/enchantress_attack2.png' }, 
+        attack3: { src: 'assets/enchantress_attack3.png' }, attack4: { src: 'assets/enchantress_attack4.png' }, 
+        die: { src: 'assets/enchantress_dead.png' }, hurt: { src: 'assets/enchantress_hurt.png' }, 
+        idle: { src: 'assets/enchantress_idle.png' }, jump: { src: 'assets/enchantress_jump.png' }
+    },
+    knight: { 
+        attack1: { src: 'assets/knight_attack1.png' }, attack2: { src: 'assets/knight_attack2.png' }, 
+        attack3: { src: 'assets/knight_attack3.png' }, attack4: { src: 'assets/knight_attack4.png' }, 
+        die: { src: 'assets/knight_dead.png' }, hurt: { src: 'assets/knight_hurt.png' }, 
+        idle: { src: 'assets/knight_idle.png' }, jump: { src: 'assets/knight_jump.png' }
+    },
+    musketeer: { 
+        attack1: { src: 'assets/musketeer_attack1.png' }, attack2: { src: 'assets/musketeer_attack2.png' }, 
+        attack3: { src: 'assets/musketeer_attack3.png' }, attack4: { src: 'assets/musketeer_attack4.png' }, 
+        die: { src: 'assets/musketeer_dead.png' }, hurt: { src: 'assets/musketeer_hurt.png' }, 
+        idle: { src: 'assets/musketeer_idle.png' }, jump: { src: 'assets/musketeer_jump.png' }
+    },
     
     // --- MONSTERS / ENEMIES ---
-    firespirit: { idle: { src: 'assets/firespirit_idle.png' }, idle2: { src: 'assets/firespirit_idle_2.png' }, walk: { src: 'assets/firespirit_walk.png' }, run: { src: 'assets/firespirit_run.png' }, attack1: { src: 'assets/firespirit_attack.png' }, shot: { src: 'assets/firespirit_shot.png' }, charge: { src: 'assets/firespirit_charge.png' }, flame: { src: 'assets/firespirit_flame.png' }, explosion: { src: 'assets/firespirit_explosion.png' }, hurt: { src: 'assets/firespirit_hurt.png' }, die: { src: 'assets/firespirit_dead.png' } },
-    plent: { idle: { src: 'assets/plent_idle.png' }, walk: { src: 'assets/plent_walk.png' }, attack1: { src: 'assets/plent_attack_1.png' }, attack2: { src: 'assets/plent_attack_2.png' }, attack3: { src: 'assets/plent_attack_3.png' }, poison: { src: 'assets/plent_poison.png' }, cloud_poison: { src: 'assets/plent_cloud_poison.png' }, disguise: { src: 'assets/plent_disguise.png' }, attack_disguise: { src: 'assets/plent_attack_disquise.png' }, hurt: { src: 'assets/plent_hurt.png' }, die: { src: 'assets/plent_dead.png' } },
-    skeleton: { idle: { src: 'assets/skeleton_idle.png' }, walk: { src: 'assets/skeleton_walk.png' }, run: { src: 'assets/skeleton_run.png' }, attack1: { src: 'assets/skeleton_attack_1.png' }, attack2: { src: 'assets/skeleton_attack_2.png' }, attack3: { src: 'assets/skeleton_attack_3.png' }, special_attack: { src: 'assets/skeleton_special_attack.png' }, jump: { src: 'assets/skeleton_jump.png' }, hurt: { src: 'assets/skeleton_hurt.png' }, die: { src: 'assets/skeleton_dead.png' } }
+    firespirit: { idle: { src: 'assets/firespirit_idle.png' }, idle2: { src: 'assets/firespirit_idle_2.png' }, attack1: { src: 'assets/firespirit_attack.png' }, shot: { src: 'assets/firespirit_shot.png' }, charge: { src: 'assets/firespirit_charge.png' }, flame: { src: 'assets/firespirit_flame.png' }, explosion: { src: 'assets/firespirit_explosion.png' }, hurt: { src: 'assets/firespirit_hurt.png' }, die: { src: 'assets/firespirit_dead.png' }, jump: { src: 'assets/firespirit_hurt.png' } },
+    plent: { idle: { src: 'assets/plent_idle.png' }, attack1: { src: 'assets/plent_attack_1.png' }, attack2: { src: 'assets/plent_attack_2.png' }, attack3: { src: 'assets/plent_attack_3.png' }, poison: { src: 'assets/plent_poison.png' }, cloud_poison: { src: 'assets/plent_cloud_poison.png' }, disguise: { src: 'assets/plent_disguise.png' }, attack_disguise: { src: 'assets/plent_attack_disquise.png' }, hurt: { src: 'assets/plent_hurt.png' }, die: { src: 'assets/plent_dead.png' }, jump: { src: 'assets/plent_hurt.png' } },
+    skeleton: { idle: { src: 'assets/skeleton_idle.png' }, attack1: { src: 'assets/skeleton_attack_1.png' }, attack2: { src: 'assets/skeleton_attack_2.png' }, attack3: { src: 'assets/skeleton_attack_3.png' }, special_attack: { src: 'assets/skeleton_special_attack.png' }, jump: { src: 'assets/skeleton_jump.png' }, hurt: { src: 'assets/skeleton_hurt.png' }, die: { src: 'assets/skeleton_dead.png' } }
 };
 
 const CHARACTERS =[
     { id: 0, name: 'Archer', key: 'archer', color: '#2ecc71', isMelee: false, maxHp: 560, atk: 45, spd: 85, maxMp: 150, moves:[
-        { name: 'Volley', icon: 'assets/icon_volley.png', power: 75, mpCost: 20, anim: 'attack2' },
-        { name: 'Piercing Arrow', icon: 'assets/icon_pierce.png', power: 110, mpCost: 35, anim: 'attack3' },
-        { name: 'Rain of Arrows', icon: 'assets/icon_arrow_rain.png', power: 90, mpCost: 40, anim: 'attack3', isAoe: true }
+        { name: 'Volley', icon: 'assets/icon_volley.png', power: 75, mpCost: 20, anim: 'shot1' },
+        { name: 'Piercing Arrow', icon: 'assets/icon_pierce.png', power: 110, mpCost: 35, anim: 'shot2' },
+        { name: 'Rain of Arrows', icon: 'assets/icon_arrow_rain.png', power: 90, mpCost: 40, anim: 'jump', isAoe: true }
     ] },
     { id: 1, name: 'Swordsman', key: 'swordsman', color: '#e74c3c', isMelee: true, maxHp: 700, atk: 55, spd: 60, maxMp: 100, moves:[
         { name: 'Cross Slash', icon: 'assets/icon_cross_slash.png', power: 90, mpCost: 25, anim: 'attack2' },
         { name: 'Blade Dance', icon: 'assets/icon_blade_dance.png', power: 120, mpCost: 50, anim: 'attack3', isAoe: true },
-        { name: 'Defensive Stance', icon: 'assets/icon_defense.png', power: 0, mpCost: 20, anim: 'idle', effect: 'defenseUp' }
+        { name: 'Defensive Stance', icon: 'assets/icon_defense.png', power: 0, mpCost: 20, anim: 'idle2', effect: 'defenseUp' }
     ] },
     { id: 2, name: 'Wizard', key: 'wizard', color: '#9b59b6', isMelee: false, maxHp: 420, atk: 65, spd: 55, maxMp: 200, moves:[
         { name: 'Arcane Missiles', icon: 'assets/icon_arcane_missiles.png', power: 100, mpCost: 30, anim: 'attack2' },
         { name: 'Meteor', icon: 'assets/icon_meteor.png', power: 150, mpCost: 70, anim: 'attack3', isAoe: true },
-        { name: 'Healing Light', icon: 'assets/icon_healing_light.png', power: 250, mpCost: 40, anim: 'attack1', isHeal: true }
+        { name: 'Healing Light', icon: 'assets/icon_healing_light.png', power: 250, mpCost: 40, anim: 'idle2', isHeal: true }
     ] },
     { id: 3, name: 'Enchantress', key: 'enchantress', color: '#e056fd', isMelee: false, maxHp: 455, atk: 60, spd: 65, maxMp: 180, moves:[
         { name: 'Mystic Orb', icon: 'assets/icon_mystic_orb.png', power: 95, mpCost: 30, anim: 'attack2' },
-        { name: 'Astral Storm', icon: 'assets/icon_astral_storm.png', power: 130, mpCost: 60, anim: 'attack3', isAoe: true },
-        { name: 'Rejuvenation', icon: 'assets/icon_rejuvenation.png', power: 220, mpCost: 35, anim: 'attack1', isHeal: true }
+        { name: 'Astral Storm', icon: 'assets/icon_astral_storm.png', power: 130, mpCost: 60, anim: 'attack4', isAoe: true },
+        { name: 'Rejuvenation', icon: 'assets/icon_rejuvenation.png', power: 220, mpCost: 35, anim: 'attack3', isHeal: true }
     ] },
     { id: 4, name: 'Knight', key: 'knight', color: '#c0c0c0', isMelee: true, maxHp: 875, atk: 40, spd: 40, maxMp: 90, moves:[
         { name: 'Shield Strike', icon: 'assets/icon_shield_strike.png', power: 80, mpCost: 15, anim: 'attack2' },
         { name: 'Holy Cleave', icon: 'assets/icon_holy_cleave.png', power: 100, mpCost: 40, anim: 'attack3', isAoe: true },
-        { name: 'Fortify', icon: 'assets/icon_fortify.png', power: 0, mpCost: 30, anim: 'idle', effect: 'defenseUp' }
+        { name: 'Fortify', icon: 'assets/icon_fortify.png', power: 0, mpCost: 30, anim: 'attack4', effect: 'defenseUp' }
     ] },
     { id: 5, name: 'Musketeer', key: 'musketeer', color: '#f1c40f', isMelee: false, maxHp: 490, atk: 55, spd: 75, maxMp: 120, moves:[
         { name: 'Swift Strike', icon: 'assets/icon_quick_draw.png', power: 90, mpCost: 25, anim: 'attack2' },
         { name: 'Vital Point', icon: 'assets/icon_headshot.png', power: 140, mpCost: 50, anim: 'attack3' },
-        { name: 'Blade Fury', icon: 'assets/icon_explosive_shot.png', power: 110, mpCost: 60, anim: 'attack3', isAoe: true }
+        { name: 'Blade Fury', icon: 'assets/icon_explosive_shot.png', power: 110, mpCost: 60, anim: 'attack4', isAoe: true }
     ] },
 
     // --- MONSTERS ---
@@ -120,7 +151,7 @@ function gameLoop(timestamp) {
     if (globalFrameCount >= 8) { globalFrameCount = 0; animTick++; }
 
     const allEnts = (G.p && G.c) ?[...G.p.team, ...G.c.team] :[];
-    allEnts.forEach(ent => drawModularSprite(`sprite_${ent.uid}`, ent.key, ent.action, !ent.isPlayer, false));
+    allEnts.forEach(ent => drawModularSprite(`sprite_${ent.uid}`, ent.key, ent.action, !ent.isPlayer, false, ent));
     
     CHARACTERS.forEach(h => drawModularSprite(`select_sprite_${h.id}`, h.key, 'idle', false, true));
     
@@ -132,7 +163,7 @@ function gameLoop(timestamp) {
     }
 }
 
-function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
+function drawModularSprite(canvasId, charKey, action, flipX, isUI = false, ent = null) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -152,7 +183,16 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
     const frameHeight = img.naturalHeight;
     
     let currentFrame = totalFrames === 1 ? 0 : (animTick % totalFrames);
-    if (action === 'die' || action === 'dead') currentFrame = totalFrames - 1; 
+    
+    if (action === 'die' || action === 'dead') {
+        if (ent && ent.dieTick !== undefined) {
+            let ticksPassed = animTick - ent.dieTick;
+            let slowTicks = Math.floor(ticksPassed / 1.5); 
+            currentFrame = Math.min(slowTicks, totalFrames - 1);
+        } else {
+            currentFrame = totalFrames - 1;
+        }
+    } 
 
     const sourceX = currentFrame * frameWidth;
     const clipW = frameWidth;
@@ -160,18 +200,12 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
 
     if (isUI) {
         if (flipX) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
-        
-        // Make the idle animations 60% larger inside UI frames
         let scale = Math.min(canvas.width / frameWidth, canvas.height / frameHeight);
         scale *= 1.6; 
-        
         const dw = clipW * scale;
         const dh = frameHeight * scale;
         const dx = (canvas.width - dw) / 2;
-        
-        // Anchor the character near the bottom so it doesn't get cut off
         const dy = canvas.height - dh - 10; 
-        
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
         let scale = 1.8;
@@ -214,7 +248,6 @@ function resumeGame() {
 }
 
 function quitToMenu() {
-    // A full page reload correctly cleans up the RPS game variables and timers.
     window.location.reload();
 }
 
@@ -256,7 +289,6 @@ function renderTeamSelect() {
     CHARACTERS.filter(c => !c.isEnemy).forEach(c => {
         const el = document.createElement('div');
         el.className = 'cc';
-        // Canvas size explicitly fits the background frame exactly to prevent cutting off
         el.innerHTML = `
             <div class="portrait-frame">
                 <canvas id="select_sprite_${c.id}" width="110" height="154"></canvas>
@@ -523,34 +555,51 @@ function executeMove(actor, target, move) {
     updateBars();
     actor.action = move.anim || 'attack1';
     animTick = 0; 
+    
+    const imgKey = `${actor.key}_${actor.action}`;
+    const img = LOADED_IMAGES[imgKey];
+    let frames = 6; 
+    if (img && img.naturalHeight > 0) {
+        frames = Math.max(1, Math.floor(img.naturalWidth / img.naturalHeight));
+    }
+    
+    let animDuration = frames * 133; 
+    let stepDuration = Math.max(animDuration, 600); 
+    let attackDelay = stepDuration * 0.5; 
+    
+    // We add more padding to totalWait to make sure the slow death jump doesn't get cut off.
+    let totalWait = Math.max(stepDuration + 500, 1000); 
+    
     const wrap = document.getElementById(`wrap_${actor.uid}`);
-    let animDuration = 800; 
-    let attackDelay = animDuration * 0.4; 
     let dir = actor.isPlayer ? 30 : -30;
+    
     let anim = wrap.animate([
         { transform: `translateX(-50%) translate(0px, 0px)` },
         { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.3 },
         { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.7 },
         { transform: `translateX(-50%) translate(0px, 0px)` }
-    ], { duration: animDuration, easing: 'ease-in-out' });
+    ], { duration: stepDuration, easing: 'ease-in-out' });
+    
     G.activeAnimations.push(anim);
     anim.onfinish = () => { G.activeAnimations = G.activeAnimations.filter(a => a !== anim); wrap.style.transform = `translateX(-50%)`; };
     if (G.isPaused) anim.pause();
+    
     pausableTimeout(() => {
         if (move.isAoe) { (actor.isPlayer ? G.c.team : G.p.team).filter(t => t.currentHp > 0).forEach(t => applyDamage(actor, t, move)); } 
         else { applyDamage(actor, target, move); }
         updateBars();
     }, attackDelay); 
+    
     pausableTimeout(() => {
         actor.action = 'idle';
-        (actor.isPlayer ? G.c.team : G.p.team).forEach(t => { if(t.currentHp <= 0) t.action = 'die'; });
         G.isAnimating = false;
         pausableTimeout(advanceTurn, 200); 
-    }, animDuration); 
+    }, totalWait); 
 }
 
 function applyDamage(actor, target, move) {
-    target.action = 'hurt';
+    if(target.currentHp <= 0) return;
+
     let dmg = Math.floor(move.power + (actor.atk * 0.25));
     if (move.power === 0 && !move.isHeal) dmg = 0; 
     
@@ -559,13 +608,26 @@ function applyDamage(actor, target, move) {
         let healAmt = Math.abs(move.power); 
         spawnNum(`+${healAmt}`, target.uid, 'heal');
         target.currentHp = Math.min(target.maxHp, target.currentHp + healAmt);
+        pausableTimeout(() => { if (target.currentHp > 0) target.action = 'idle'; }, 400);
     } else {
         if (Math.random() < (move.critChance || 0.05)) { dmg = Math.floor(dmg * 1.5); spawnNum(`CRIT ${dmg}`, target.uid, 'crit'); } 
         else { spawnNum(`-${dmg}`, target.uid, 'dmg'); }
+        
         target.currentHp = Math.max(0, target.currentHp - dmg);
         doHitAnim(target.uid, target.isPlayer);
+        
+        if (target.currentHp <= 0) {
+            // Initiate jump for 600ms, then swap to the slower death animation
+            target.action = 'jump';
+            pausableTimeout(() => { 
+                target.action = 'die'; 
+                target.dieTick = animTick;
+            }, 600);
+        } else {
+            target.action = 'hurt';
+            pausableTimeout(() => { if (target.currentHp > 0) target.action = 'idle'; }, 400);
+        }
     }
-    pausableTimeout(() => { if (target.currentHp > 0) target.action = 'idle'; }, 400);
 }
 
 function spawnNum(txt, uid, type) {
@@ -604,7 +666,7 @@ function showInfoModal() {
             const displayName = c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '');
             html += `
             <div class="info-row" style="display:flex; align-items:center; gap: 15px;">
-                <div class="info-icon-frame"><canvas id="info_icon_${c.uid}" width="80" height="80"></canvas></div>
+                <div class="info-icon-frame"><canvas id="info_icon_${c.uid}" width="100" height="100"></canvas></div>
                 <div class="info-details" style="flex:1;">
                     <strong style="font-size:1.2rem; color:var(--pixel-gold);">${displayName}</strong><br>
                     <span style="color:#e74c3c;">HP:</span> ${Math.ceil(c.currentHp)}/${c.maxHp} <br>
