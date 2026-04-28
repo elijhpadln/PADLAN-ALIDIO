@@ -344,7 +344,7 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
         const dy = (canvas.height - dh) / 2;
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
-        let scale = 2.0; // Scaled up slightly for better visibility
+        let scale = 1.7; // Shrunk the characters slightly per request
         if (clipW * scale > canvas.width) scale = canvas.width / clipW;
         if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
         
@@ -701,7 +701,6 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    // Lowered their y-positions to fit beautifully inside the grass area
     const pPos =[{x: 15, y: 8}, {x: 28, y: 18}, {x: 41, y: 28}];
     const cPos =[{x: 59, y: 28}, {x: 72, y: 18}, {x: 85, y: 8}];
     
@@ -816,6 +815,8 @@ function advanceTurn() {
     document.querySelectorAll('.entity-wrap').forEach(e => e.classList.remove('is-active'));
     document.getElementById(`wrap_${G.activeEnt.uid}`).classList.add('is-active');
     
+    document.getElementById('command-panel').classList.remove('hidden');
+
     if (G.activeEnt.isPlayer) {
         document.getElementById('command-panel').classList.add('active-turn');
         showMainMenu();
@@ -829,6 +830,7 @@ function showMainMenu() {
     document.getElementById('targetMenuOverlay').classList.add('hidden');
     document.getElementById('skillsMenuBox').classList.add('hidden');
     document.getElementById('mainMenuBox').classList.remove('hidden');
+    document.getElementById('command-panel').classList.remove('hidden'); 
     clearTargeting(); 
     
     const skillBtn = document.getElementById('skill-btn');
@@ -873,8 +875,9 @@ function showSkillsMenu() {
 
 function startTargeting() {
     document.getElementById('targetMenuOverlay').classList.remove('hidden');
-    let targets;
+    document.getElementById('command-panel').classList.add('hidden'); 
     
+    let targets;
     if (G.pendingMove.isHeal) { 
         targets = G.activeEnt.isPlayer ? G.p.team : G.c.team; 
     } else { 
@@ -895,6 +898,7 @@ function startTargeting() {
 
 function cancelTargeting() { 
     clearTargeting(); 
+    document.getElementById('command-panel').classList.remove('hidden');
     showMainMenu(); 
 }
 
@@ -926,6 +930,7 @@ function cpuTurn() {
 function executeMove(actor, target, move) {
     G.isAnimating = true;
     document.getElementById('command-panel').classList.remove('active-turn');
+    document.getElementById('command-panel').classList.remove('hidden');
     
     actor.mp = Math.max(0, actor.mp - (move.mpCost || 0));
     updateBars();
