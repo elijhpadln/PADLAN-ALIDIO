@@ -344,7 +344,7 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
         const dy = (canvas.height - dh) / 2;
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
-        let scale = 1.6;
+        let scale = 2.0; // Scaled up slightly for better visibility
         if (clipW * scale > canvas.width) scale = canvas.width / clipW;
         if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
         
@@ -410,19 +410,6 @@ function restartBattle() {
     document.getElementById('pause-btn').classList.remove('hidden');
 }
 
-function showTurnBanner(text = 'YOUR TURN') {
-    const banner = document.getElementById('turnBanner');
-    if (!banner) return;
-    banner.textContent = text;
-    banner.classList.remove('hidden');
-}
-
-function hideTurnBanner() {
-    const banner = document.getElementById('turnBanner');
-    if (!banner) return;
-    banner.classList.add('hidden');
-}
-
 function playAgain() {
     G.activeTimers.forEach(t => t.clear());
     G.activeAnimations.forEach(a => a.cancel());
@@ -436,7 +423,6 @@ function playAgain() {
     G.c = null;
     G.selectedTeam =[];
     
-    hideTurnBanner();
     showScreen('team');
     renderTeamSelect();
     updatePreview();
@@ -715,8 +701,9 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    const pPos =[{x: 12, y: 10}, {x: 26, y: 20}, {x: 40, y: 30}];
-    const cPos =[{x: 60, y: 30}, {x: 74, y: 20}, {x: 88, y: 10}];
+    // Lowered their y-positions to fit beautifully inside the grass area
+    const pPos =[{x: 15, y: 8}, {x: 28, y: 18}, {x: 41, y: 28}];
+    const cPos =[{x: 59, y: 28}, {x: 72, y: 18}, {x: 85, y: 8}];
     
     G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - pPos[i].y));
     G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - cPos[i].y));
@@ -830,11 +817,9 @@ function advanceTurn() {
     document.getElementById(`wrap_${G.activeEnt.uid}`).classList.add('is-active');
     
     if (G.activeEnt.isPlayer) {
-        showTurnBanner('YOUR TURN');
         document.getElementById('command-panel').classList.add('active-turn');
         showMainMenu();
     } else {
-        hideTurnBanner();
         document.getElementById('command-panel').classList.remove('active-turn');
         pausableTimeout(cpuTurn, 1000);
     }
@@ -845,8 +830,6 @@ function showMainMenu() {
     document.getElementById('skillsMenuBox').classList.add('hidden');
     document.getElementById('mainMenuBox').classList.remove('hidden');
     clearTargeting(); 
-    
-    if (G.activeEnt && G.activeEnt.isPlayer) showTurnBanner('YOUR TURN');
     
     const skillBtn = document.getElementById('skill-btn');
     if (G.activeEnt.moves.some(m => G.activeEnt.mp >= m.mpCost)) {
@@ -890,7 +873,6 @@ function showSkillsMenu() {
 
 function startTargeting() {
     document.getElementById('targetMenuOverlay').classList.remove('hidden');
-    hideTurnBanner();
     let targets;
     
     if (G.pendingMove.isHeal) { 
@@ -943,7 +925,6 @@ function cpuTurn() {
 
 function executeMove(actor, target, move) {
     G.isAnimating = true;
-    hideTurnBanner();
     document.getElementById('command-panel').classList.remove('active-turn');
     
     actor.mp = Math.max(0, actor.mp - (move.mpCost || 0));
