@@ -14,39 +14,38 @@ const ANIMATION_ASSETS = {
 };
 
 const CHARACTERS =[
-    // --- HEROES (HP VALUES INCREASED BY ~75%) ---
     { id: 0, name: 'Archer', key: 'archer', color: '#2ecc71', isMelee: false, maxHp: 560, atk: 45, spd: 85, maxMp: 150, moves:[
-        { name: 'Volley', icon: 'assets/icon_volley.png', power: 50, mpCost: 20, anim: 'attack2' },
-        { name: 'Piercing Arrow', icon: 'assets/icon_pierce.png', power: 75, mpCost: 35, anim: 'attack3' },
-        { name: 'Rain of Arrows', icon: 'assets/icon_arrow_rain.png', power: 60, mpCost: 40, anim: 'attack3', isAoe: true }
+        { name: 'Volley', icon: 'assets/icon_volley.png', power: 75, mpCost: 20, anim: 'attack2' },
+        { name: 'Piercing Arrow', icon: 'assets/icon_pierce.png', power: 110, mpCost: 35, anim: 'attack3' },
+        { name: 'Rain of Arrows', icon: 'assets/icon_arrow_rain.png', power: 90, mpCost: 40, anim: 'attack3', isAoe: true }
     ] },
     { id: 1, name: 'Swordsman', key: 'swordsman', color: '#e74c3c', isMelee: true, maxHp: 700, atk: 55, spd: 60, maxMp: 100, moves:[
-        { name: 'Cross Slash', icon: 'assets/icon_cross_slash.png', power: 60, mpCost: 25, anim: 'attack2' },
-        { name: 'Blade Dance', icon: 'assets/icon_blade_dance.png', power: 85, mpCost: 50, anim: 'attack3', isAoe: true },
+        { name: 'Cross Slash', icon: 'assets/icon_cross_slash.png', power: 90, mpCost: 25, anim: 'attack2' },
+        { name: 'Blade Dance', icon: 'assets/icon_blade_dance.png', power: 120, mpCost: 50, anim: 'attack3', isAoe: true },
         { name: 'Defensive Stance', icon: 'assets/icon_defense.png', power: 0, mpCost: 20, anim: 'idle', effect: 'defenseUp' }
     ] },
     { id: 2, name: 'Wizard', key: 'wizard', color: '#9b59b6', isMelee: false, maxHp: 420, atk: 65, spd: 55, maxMp: 200, moves:[
-        { name: 'Arcane Missiles', icon: 'assets/icon_arcane_missiles.png', power: 70, mpCost: 30, anim: 'attack2' },
-        { name: 'Meteor', icon: 'assets/icon_meteor.png', power: 110, mpCost: 70, anim: 'attack3', isAoe: true },
-        { name: 'Healing Light', icon: 'assets/icon_healing_light.png', power: 80, mpCost: 40, anim: 'attack1', isHeal: true }
+        { name: 'Arcane Missiles', icon: 'assets/icon_arcane_missiles.png', power: 100, mpCost: 30, anim: 'attack2' },
+        { name: 'Meteor', icon: 'assets/icon_meteor.png', power: 150, mpCost: 70, anim: 'attack3', isAoe: true },
+        { name: 'Healing Light', icon: 'assets/icon_healing_light.png', power: 250, mpCost: 40, anim: 'attack1', isHeal: true }
     ] },
     { id: 3, name: 'Enchantress', key: 'enchantress', color: '#e056fd', isMelee: false, maxHp: 455, atk: 60, spd: 65, maxMp: 180, moves:[
-        { name: 'Mystic Orb', icon: 'assets/icon_mystic_orb.png', power: 65, mpCost: 30, anim: 'attack2' },
-        { name: 'Astral Storm', icon: 'assets/icon_astral_storm.png', power: 95, mpCost: 60, anim: 'attack3', isAoe: true },
-        { name: 'Rejuvenation', icon: 'assets/icon_rejuvenation.png', power: 70, mpCost: 35, anim: 'attack1', isHeal: true }
+        { name: 'Mystic Orb', icon: 'assets/icon_mystic_orb.png', power: 95, mpCost: 30, anim: 'attack2' },
+        { name: 'Astral Storm', icon: 'assets/icon_astral_storm.png', power: 130, mpCost: 60, anim: 'attack3', isAoe: true },
+        { name: 'Rejuvenation', icon: 'assets/icon_rejuvenation.png', power: 220, mpCost: 35, anim: 'attack1', isHeal: true }
     ] },
     { id: 4, name: 'Knight', key: 'knight', color: '#c0c0c0', isMelee: true, maxHp: 875, atk: 40, spd: 40, maxMp: 90, moves:[
-        { name: 'Shield Strike', icon: 'assets/icon_shield_strike.png', power: 50, mpCost: 15, anim: 'attack2' },
-        { name: 'Holy Cleave', icon: 'assets/icon_holy_cleave.png', power: 70, mpCost: 40, anim: 'attack3', isAoe: true },
+        { name: 'Shield Strike', icon: 'assets/icon_shield_strike.png', power: 80, mpCost: 15, anim: 'attack2' },
+        { name: 'Holy Cleave', icon: 'assets/icon_holy_cleave.png', power: 100, mpCost: 40, anim: 'attack3', isAoe: true },
         { name: 'Fortify', icon: 'assets/icon_fortify.png', power: 0, mpCost: 30, anim: 'idle', effect: 'defenseUp' }
     ] },
+    // --- MUSKETEER SKILLS RENAMED TO BE SWORD-THEMED ---
     { id: 5, name: 'Musketeer', key: 'musketeer', color: '#f1c40f', isMelee: false, maxHp: 490, atk: 55, spd: 75, maxMp: 120, moves:[
-        { name: 'Quick Draw', icon: 'assets/icon_quick_draw.png', power: 60, mpCost: 25, anim: 'attack2' },
-        { name: 'Headshot', icon: 'assets/icon_headshot.png', power: 100, mpCost: 50, anim: 'attack3' },
-        { name: 'Explosive Shot', icon: 'assets/icon_explosive_shot.png', power: 80, mpCost: 60, anim: 'attack3', isAoe: true }
+        { name: 'Swift Strike', icon: 'assets/icon_quick_draw.png', power: 90, mpCost: 25, anim: 'attack2' },
+        { name: 'Vital Point', icon: 'assets/icon_headshot.png', power: 140, mpCost: 50, anim: 'attack3' },
+        { name: 'Blade Fury', icon: 'assets/icon_explosive_shot.png', power: 110, mpCost: 60, anim: 'attack3', isAoe: true }
     ] },
 
-    // --- MONSTERS (HP VALUES INCREASED BY ~75%) ---
     { id: 6, name: 'Fire Spirit', key: 'firespirit', color: '#e67e22', isMelee: false, isEnemy: true, maxHp: 350, atk: 70, spd: 80, maxMp: 150, moves:[
         { name: 'Fireball', power: 55, mpCost: 20, anim: 'shot' }, { name: 'Flame Dash', power: 75, mpCost: 35, anim: 'charge' }, { name: 'Inferno', power: 85, mpCost: 45, anim: 'flame' }, { name: 'Supernova', power: 90, mpCost: 60, anim: 'explosion', isAoe: true }
     ] },
@@ -168,7 +167,7 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
         const dy = (canvas.height - dh) / 2;
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
-        let scale = 1.8; // Adjusted scale for better presence
+        let scale = 1.8;
         if (clipW * scale > canvas.width) scale = canvas.width / clipW;
         if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
         const dw = clipW * scale;
@@ -401,11 +400,11 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    const pPos =[{x: 22, y: 22}, {x: 14, y: 12}, {x: 24, y: 4}];
-    const cPos =[{x: 78, y: 22}, {x: 86, y: 12}, {x: 76, y: 4}];
-
-    G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - pPos[i].y));
-    G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - cPos[i].y));
+    // --- CHARACTER POSITIONING ADJUSTED ---
+    const pPos =[{x: 30, y: 15}, {x: 18, y: 15}, {x: 6, y: 15}];
+    const cPos =[{x: 70, y: 15}, {x: 82, y: 15}, {x: 94, y: 15}];
+    G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - i));
+    G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - i));
 }
 
 function createEntityHTML(layer, c, x, y, z) {
@@ -474,7 +473,8 @@ function showSkillsMenu() {
         const canUse = G.activeEnt.mp >= m.mpCost;
         const item = document.createElement('button');
         item.className = `menu-item ${!canUse ? 'disabled' : ''}`;
-        item.innerHTML = `${m.name} <small>MP:${m.mpCost}</small>`;
+        const iconHtml = m.icon ? `<img src="${m.icon}" class="skill-icon" alt="${m.name} icon">` : '<span class="skill-icon-placeholder"></span>';
+        item.innerHTML = `${iconHtml}<span>${m.name}</span><span class="skill-mp-cost">${m.mpCost} MP</span>`;
         if (canUse) { item.onclick = () => { G.pendingMove = m; startTargeting(); }; }
         list.appendChild(item);
     });
@@ -545,12 +545,12 @@ function executeMove(actor, target, move) {
 
 function applyDamage(actor, target, move) {
     target.action = 'hurt';
-    let dmg = Math.floor(move.power + (actor.atk * 0.5));
+    let dmg = Math.floor(move.power + (actor.atk * 0.25));
     if (move.power === 0 && !move.isHeal) dmg = 0; 
     
     if (move.isHeal) {
         target.action = 'idle';
-        let healAmt = Math.abs(dmg);
+        let healAmt = Math.abs(move.power); // Use base power for more reliable healing
         spawnNum(`+${healAmt}`, target.uid, 'heal');
         target.currentHp = Math.min(target.maxHp, target.currentHp + healAmt);
     } else {
@@ -577,17 +577,21 @@ function doHitAnim(uid, isPlayer) {
 }
 
 function updateBars() {
-    G.p.team.forEach(c => {
-        const hB = document.getElementById(`hp_${c.uid}`); if(hB) { hB.style.width = Math.max(0, (c.currentHp / c.maxHp)*100) + '%'; document.getElementById(`hp_txt_${c.uid}`).innerText = `${Math.ceil(Math.max(0, c.currentHp))}/${c.maxHp}`; }
-        const mB = document.getElementById(`mp_${c.uid}`); if(mB) { mB.style.width = Math.max(0, (c.mp / c.maxMp)*100) + '%'; document.getElementById(`mp_txt_${c.uid}`).innerText = `${Math.floor(c.mp)}/${c.maxMp}`; }
-    });
-    
-    G.c.team.forEach(c => {
-        const ehB = document.getElementById(`ehp_fill_${c.uid}`); 
-        const wrap = document.getElementById(`ehp_${c.uid}`);
-        if(ehB) ehB.style.width = Math.max(0, (c.currentHp / c.maxHp)*100) + '%';
-        if(wrap && c.currentHp <= 0) wrap.style.display = 'none';
-    });
+    const updateEntityBars = (c) => {
+        const hpPct = Math.max(0, (c.currentHp / c.maxHp) * 100);
+        const mpPct = Math.max(0, (c.mp / c.maxMp) * 100);
+        const hB = document.getElementById(`hp_${c.uid}`), mB = document.getElementById(`mp_${c.uid}`);
+        const hpText = document.getElementById(`hp_txt_${c.uid}`), mpText = document.getElementById(`mp_txt_${c.uid}`);
+        const statsWrap = document.getElementById(`stats_${c.uid}`);
+        if (hB) hB.style.width = hpPct + '%';
+        if (mB) mB.style.width = mpPct + '%';
+        if (hpText) hpText.innerText = ``;
+        if (mpText) mpText.innerText = ``;
+        if (statsWrap && c.currentHp <= 0) statsWrap.classList.add('dead');
+    };
+    if (!G.p || !G.c) return;
+    G.p.team.forEach(updateEntityBars);
+    G.c.team.forEach(updateEntityBars);
 }
 
 function showInfoModal() {
@@ -597,7 +601,7 @@ function showInfoModal() {
             const displayName = c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '');
             html += `
             <div class="info-row" style="display:flex; align-items:center; gap: 15px;">
-                <div class="info-icon-frame"><canvas id="info_icon_${c.uid}" width="64" height="64"></canvas></div>
+                <div class="info-icon-frame"><canvas id="info_icon_${c.uid}" width="100" height="100"></canvas></div>
                 <div class="info-details" style="flex:1;">
                     <strong style="font-size:1.2rem; color:var(--pixel-gold);">${displayName}</strong><br>
                     <span style="color:#e74c3c;">HP:</span> ${Math.ceil(c.currentHp)}/${c.maxHp} <br>
