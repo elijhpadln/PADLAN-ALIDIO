@@ -161,16 +161,16 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
     if (isUI) {
         if (flipX) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
         
-        // UI SCALING FACTOR: Makes the idle animations 35% larger inside the frames
+        // Make the idle animations 60% larger inside UI frames
         let scale = Math.min(canvas.width / frameWidth, canvas.height / frameHeight);
-        scale *= 1.35; 
+        scale *= 1.6; 
         
         const dw = clipW * scale;
         const dh = frameHeight * scale;
         const dx = (canvas.width - dw) / 2;
         
-        // Shifts the character down slightly to sit comfortably in the frame
-        const dy = (canvas.height - dh) / 2 + 8; 
+        // Anchor the character near the bottom so it doesn't get cut off
+        const dy = canvas.height - dh - 10; 
         
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
@@ -204,6 +204,7 @@ function togglePause() {
         G.activeTimers.forEach(t => t.pause());     
     }
 }
+
 function resumeGame() { 
     G.isPaused = false; 
     document.getElementById('pauseScreen').classList.add('hidden');
@@ -211,14 +212,10 @@ function resumeGame() {
     G.activeAnimations.forEach(a => a.play());
     G.activeTimers.forEach(t => t.resume());
 }
+
 function quitToMenu() {
-    G.activeTimers.forEach(t => t.clear());
-    G.activeAnimations.forEach(a => a.cancel());
-    G.activeAnimations =[];
-    resumeGame();
-    document.getElementById('pause-btn').classList.add('hidden');
-    G.selectedTeam =[]; G.p = null; G.c = null;
-    showScreen('menu');
+    // A full page reload correctly cleans up the RPS game variables and timers.
+    window.location.reload();
 }
 
 function restartBattle() {
@@ -259,10 +256,10 @@ function renderTeamSelect() {
     CHARACTERS.filter(c => !c.isEnemy).forEach(c => {
         const el = document.createElement('div');
         el.className = 'cc';
-        // Canvas size increased for higher resolution scaling inside the frame
+        // Canvas size explicitly fits the background frame exactly to prevent cutting off
         el.innerHTML = `
             <div class="portrait-frame">
-                <canvas id="select_sprite_${c.id}" width="90" height="90"></canvas>
+                <canvas id="select_sprite_${c.id}" width="110" height="154"></canvas>
             </div>
             <div class="cc-name" style="color:${c.color}">${c.name}</div>
         `;
@@ -283,8 +280,7 @@ function updatePreview() {
         const slot = document.getElementById('slot' + i);
         const id = G.selectedTeam[i];
         if(id !== undefined) {
-            // Larger canvas for better quality scaling
-            slot.innerHTML = `<canvas id="preview_sprite_${i}" width="65" height="65"></canvas>`;
+            slot.innerHTML = `<canvas id="preview_sprite_${i}" width="75" height="105"></canvas>`;
             slot.classList.add('filled');
         } else { slot.innerHTML = '?'; slot.classList.remove('filled'); }
     }
@@ -608,7 +604,7 @@ function showInfoModal() {
             const displayName = c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '');
             html += `
             <div class="info-row" style="display:flex; align-items:center; gap: 15px;">
-                <div class="info-icon-frame"><canvas id="info_icon_${c.uid}" width="100" height="100"></canvas></div>
+                <div class="info-icon-frame"><canvas id="info_icon_${c.uid}" width="80" height="80"></canvas></div>
                 <div class="info-details" style="flex:1;">
                     <strong style="font-size:1.2rem; color:var(--pixel-gold);">${displayName}</strong><br>
                     <span style="color:#e74c3c;">HP:</span> ${Math.ceil(c.currentHp)}/${c.maxHp} <br>

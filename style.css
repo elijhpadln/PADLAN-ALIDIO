@@ -82,7 +82,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .cc { position: relative; background: transparent; padding: 0.5rem; text-align: center; transition: transform 0.1s; cursor: pointer; border: none; box-shadow: none; }
 .cc:hover { transform: translateY(-4px); }
 
-/* REMOVED the grey background and border. Now it just uses the PNG. */
+/* PERFECT PNG-ONLY PORTRAIT FRAME */
 .portrait-frame {
     width: 110px;
     height: 154px;
@@ -94,11 +94,9 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     margin: 0 auto 5px;
     image-rendering: pixelated;
     transition: filter 0.2s;
+    overflow: hidden;
 }
-.cc.selected .portrait-frame { 
-    filter: drop-shadow(0 0 10px var(--pixel-gold)); 
-}
-
+.cc.selected .portrait-frame { filter: drop-shadow(0 0 10px var(--pixel-gold)); }
 .cc-name { font-size: 0.9rem; text-shadow: 2px 2px 0 #000; margin-top: 5px; }
 
 .team-preview { display: flex; gap: 1rem; align-items: center; background: #000; padding: 1rem; border: 4px solid #4a3728; margin-top: 5px; }
@@ -118,8 +116,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 }
 .team-slot.filled { 
     border: none; 
-    background: url('assets/20250425portraitFrame-Sheet.png') no-repeat center center;
-    background-size: 100% 100%;
+    background: transparent;
     filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));
 }
 
