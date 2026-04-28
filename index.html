@@ -3,7 +3,7 @@
 <head> 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Axiom Clash - RPS Integrated</title>
+    <title>Axiom Clash - RPG Battle</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -142,13 +142,12 @@
     </div>
 </div>
 
-<!-- ANIMATED MULTI-PAGE BOOK MODAL -->
+<!-- CLASSIC INFO MODAL -->
 <div id="infoModal" class="modal-overlay hidden">
-    <div class="book-wrapper">
-        <canvas id="bookAnimCanvas"></canvas>
-        <div id="bookModalContent" class="book-content hidden">
-            <div id="infoModalBody"></div>
-        </div>
+    <div class="modal-box jrpg-window" style="width: 800px; max-width: 90%;">
+        <div class="modal-header">BATTLEFIELD INFO</div>
+        <div class="modal-body" id="infoModalBody" style="display:flex; gap:20px;"></div>
+        <div class="menu-item" style="text-align: center; margin-top:20px;" onclick="closeModals()">Close</div>
     </div>
 </div>
 
