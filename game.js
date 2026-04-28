@@ -1,3 +1,8 @@
+/*
+  UPDATE: The book animation logic has been completely rewritten below to use a dedicated <canvas>,
+  which fixes the scaling/distortion bug. It now also handles a multi-page state.
+*/
+
 const ANIMATION_ASSETS = {
     // --- HEROES ---
     archer: { idle: { src: 'assets/archer_idle.png' }, attack1: { src: 'assets/archer_attack1.png' }, attack2: { src: 'assets/archer_attack2.png' }, attack3: { src: 'assets/archer_attack3.png' }, hurt: { src: 'assets/archer_hurt.png' }, die: { src: 'assets/archer_dead.png' } },
@@ -85,16 +90,6 @@ let uidCounter = 0;
 let globalFrameCount = 0;
 let animTick = 0;
 const LOADED_IMAGES = {};
-const BOOK_ANIM_SEQUENCE = [
-    { src: 'assets/book_anim_01_open_book.png', frameW: 256, frameH: 256, frameMs: 60 },
-    { src: 'assets/book_anim_02_pages_appear.png', frameW: 128, frameH: 128, frameMs: 70 },
-    { src: 'assets/book_anim_03_turn_right.png', frameW: 256, frameH: 256, frameMs: 55 },
-    { src: 'assets/book_anim_04_turn_left.png', frameW: 256, frameH: 256, frameMs: 55 },
-    { src: 'assets/book_anim_05_pages_disappear.png', frameW: 128, frameH: 128, frameMs: 70 },
-    { src: 'assets/book_anim_06_close_book.png', frameW: 256, frameH: 256, frameMs: 60 }
-];
-const BOOK_ANIM_CACHE = {};
-let isBookAnimPlaying = false;
 let imagesToLoad = 0;
 let imagesLoaded = 0;
 
@@ -157,10 +152,6 @@ function gameLoop(timestamp) {
     
     CHARACTERS.forEach(h => {
         drawModularSprite(`select_sprite_${h.id}`, h.key, 'idle', false, true);
-        if(!document.getElementById('infoModal').classList.contains('hidden')) {
-             const mCanvas = document.getElementById(`modal_sprite_${h.id}`);
-             if(mCanvas) drawModularSprite(`modal_sprite_${h.id}`, h.key, 'idle', false, true);
-        }
     });
     for(let i=0; i<3; i++) { if(G.selectedTeam[i] !== undefined) drawModularSprite(`preview_sprite_${i}`, CHARACTERS[G.selectedTeam[i]].key, 'idle', false, true); }
     if(G.predictedQueue) { G.predictedQueue.forEach((c, i) => drawModularSprite(`tq_icon_${i}_${c.uid}`, c.key, 'idle', !c.isPlayer, true)); }
@@ -202,7 +193,6 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
         const dy = (canvas.height - dh) / 2;
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
-        // Keep battle sprites readable without crowding the stage.
         let scale = 1.6;
         if (clipW * scale > canvas.width) scale = canvas.width / clipW;
         if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
@@ -303,7 +293,6 @@ function renderTeamSelect() {
         const el = document.createElement('div');
         el.className = 'cc';
         el.innerHTML = `
-            <div class="info-icon" onclick="event.stopPropagation(); showCharacterInfoModal(${c.id})">i</div>
             <div style="display:flex;justify-content:center;align-items:center;height:100px;"><canvas id="select_sprite_${c.id}" width="100" height="100"></canvas></div>
             <div class="cc-name" style="color:${c.color}">${c.name}</div>
         `;
@@ -725,100 +714,158 @@ function updateBars() {
     G.c.team.forEach(updateEntityBars);
 }
 
-function openBattleInfoModal() {
-    const renderCol = (title, team) => {
-        let html = `<div class="info-col"><h3>${title}</h3>`;
-        team.forEach(c => { html += `<div class="info-row"><strong>${c.name}</strong><br>HP: ${Math.ceil(c.currentHp)}/${c.maxHp} | MP: ${c.mp}/${c.maxMp}</div>`; });
-        return html + `</div>`;
-    };
-    document.querySelector('#infoModal .modal-header').innerText = "BATTLEFIELD INFO";
-    document.getElementById('infoModalBody').innerHTML = renderCol("YOUR PARTY", G.p.team) + renderCol("ENEMY TEAM", G.c.team);
-    document.getElementById('infoModal').classList.remove('hidden');
-}
-function closeModals() {
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
-    const overlay = document.getElementById('bookAnimOverlay');
-    if (overlay) overlay.classList.add('hidden');
-}
+// =======================================================
+// UPDATE: MULTI-PAGE BOOK ANIMATION LOGIC & CANVAS RENDER
+// =======================================================
 
-function runBookAnimation(onDone) {
-    const overlay = document.getElementById('bookAnimOverlay');
-    const sprite = document.getElementById('bookAnimSprite');
-    if (!overlay || !sprite || isBookAnimPlaying) {
-        onDone();
-        return;
-    }
-    const loadImage = (src) => new Promise((resolve, reject) => {
-        if (BOOK_ANIM_CACHE[src] && BOOK_ANIM_CACHE[src].complete) {
-            resolve(BOOK_ANIM_CACHE[src]);
-            return;
+const BOOK_SPRITESHEETS = {
+    open:  { src: 'assets/book_anim_01_open_book.png',   cols: 4, rows: 3, frames: 12, frameW: 256, frameH: 256, ms: 40 },
+    turnR: { src: 'assets/book_anim_03_turn_right.png',  cols: 4, rows: 4, frames: 15, frameW: 256, frameH: 256, ms: 35 },
+    turnL: { src: 'assets/book_anim_04_turn_left.png',   cols: 4, rows: 4, frames: 15, frameW: 256, frameH: 256, ms: 35 },
+    close: { src: 'assets/book_anim_06_close_book.png',  cols: 4, rows: 3, frames: 12, frameW: 256, frameH: 256, ms: 40 }
+};
+
+const BOOK_CACHE = {};
+let isBookAnimPlaying = false;
+let currentBookPage = 1; // 1 = Allies, 2 = Enemies
+
+// Preload the book images quietly when the page loads
+Object.values(BOOK_SPRITESHEETS).forEach(cfg => {
+    const img = new Image();
+    img.src = cfg.src;
+    BOOK_CACHE[cfg.src] = img;
+});
+
+// FIX: This new function uses a canvas to draw the sprite at its original resolution, fixing distortion.
+async function playBookAnimation(canvas, animKey) {
+    return new Promise(resolve => {
+        const cfg = BOOK_SPRITESHEETS[animKey];
+        const img = BOOK_CACHE[cfg.src];
+        
+        if (!img || !img.complete || img.naturalWidth === 0) {
+            console.warn(`Could not load book sprite: ${cfg.src}`);
+            return resolve();
         }
-        const img = new Image();
-        img.onload = () => { BOOK_ANIM_CACHE[src] = img; resolve(img); };
-        img.onerror = () => reject(new Error(`Missing: ${src}`));
-        img.src = src;
-    });
-    const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-    const playSheet = async (cfg) => {
-        const img = await loadImage(cfg.src);
-        if (!img || img.naturalWidth === 0 || img.naturalHeight === 0) return;
-        const cols = Math.max(1, Math.floor(img.naturalWidth / cfg.frameW));
-        const rows = Math.max(1, Math.floor(img.naturalHeight / cfg.frameH));
-        const totalFrames = cols * rows;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
 
-        sprite.style.width = `${cfg.frameW}px`;
-        sprite.style.height = `${cfg.frameH}px`;
-        sprite.style.backgroundImage = `url('${cfg.src}')`;
-        sprite.style.backgroundSize = `${img.naturalWidth}px ${img.naturalHeight}px`;
+        const fw = cfg.frameW;
+        const fh = cfg.frameH;
 
-        for (let frame = 0; frame < totalFrames; frame++) {
-            const col = frame % cols;
-            const row = Math.floor(frame / cols);
-            sprite.style.backgroundPosition = `${-col * cfg.frameW}px ${-row * cfg.frameH}px`;
-            await wait(cfg.frameMs);
-        }
-    };
+        canvas.width = fw;
+        canvas.height = fh;
 
-    isBookAnimPlaying = true;
-    overlay.classList.remove('hidden');
-    (async () => {
-        try {
-            for (const cfg of BOOK_ANIM_SEQUENCE) {
-                await playSheet(cfg);
+        let frame = 0;
+        const interval = setInterval(() => {
+            if (frame >= cfg.frames) {
+                clearInterval(interval);
+                resolve();
+                return;
             }
-        } catch (err) {
-            console.warn(err.message || err);
-        } finally {
-            overlay.classList.add('hidden');
-            isBookAnimPlaying = false;
-            onDone();
-        }
-    })();
+            
+            const col = frame % cfg.cols;
+            const row = Math.floor(frame / cfg.cols);
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, col * fw, row * fh, fw, fh, 0, 0, canvas.width, canvas.height);
+
+            frame++;
+        }, cfg.ms);
+    });
 }
 
-function showInfoModal() {
-    runBookAnimation(openBattleInfoModal);
-}
-
-function showCharacterInfoModal(id) {
-    const c = CHARACTERS.find(x => x.id === id);
-    if (!c) return;
-    document.querySelector('#infoModal .modal-header').innerText = c.name.toUpperCase() + " INFO";
-    let movesHtml = c.moves.map(m => { const iconHtml = m.icon ? `<img src="${m.icon}" class="skill-icon" alt="icon">` : ''; return `<li>${iconHtml}<strong>${m.name}</strong> <span style="color:#aaa;">(Pwr:${m.power}, MP:${m.mpCost})</span> ${m.isAoe ? '<span style="color:#e74c3c;">[AOE]</span>' : ''}</li>`; }).join('');
-    document.getElementById('infoModalBody').innerHTML = `
-        <div class="info-col" style="flex: 1; display:flex; flex-direction:column; align-items:center;">
-            <div style="display:flex;justify-content:center;margin-bottom:15px; background:rgba(0,0,0,0.5); border-radius:8px; border:2px solid #555;">
-                <canvas id="modal_sprite_${c.id}" width="100" height="100"></canvas>
-            </div>
-            <div style="width: 100%;"><div class="info-row"><strong>❤️ HP:</strong> ${c.maxHp}</div><div class="info-row"><strong>🔷 MP:</strong> ${c.maxMp}</div><div class="info-row"><strong>⚔️ ATK:</strong> ${c.atk}</div><div class="info-row"><strong>💨 SPD:</strong> ${c.spd}</div></div>
+function generateTeamHTML(team) {
+    return team.map(c => `
+        <div class="book-char-row">
+            <div class="book-char-name">${c.name}</div>
+            <div class="book-char-stats">HP: ${Math.ceil(c.currentHp)}/${c.maxHp} | MP: ${Math.floor(c.mp)}/${c.maxMp}</div>
         </div>
-        <div class="info-col" style="flex: 2;">
-            <h3 style="font-size:1.2rem; border-bottom:2px solid #555; padding-bottom:5px; margin-bottom: 10px;">SKILLS</h3>
-            <ul style="padding-left: 10px; font-size: 1rem; line-height: 2; margin-top:10px; list-style-type:none;">${movesHtml}</ul>
-        </div>`;
-    document.getElementById('infoModal').classList.remove('hidden');
-    drawModularSprite(`modal_sprite_${c.id}`, c.key, 'idle', false, true);
+    `).join('');
+}
+
+function renderBookPageContent() {
+    const body = document.getElementById('infoModalBody');
+    if (currentBookPage === 1) {
+        body.innerHTML = `
+            <h2 class="book-page-title">YOUR PARTY</h2>
+            <div style="flex:1;">${generateTeamHTML(G.p.team)}</div>
+            <div class="book-nav-controls">
+                <button class="book-btn" onclick="turnBookPage('next')">Next Page &rarr;</button>
+                <button class="book-btn secondary" onclick="closeBookModal()">Close</button>
+            </div>
+        `;
+    } else {
+        body.innerHTML = `
+            <h2 class="book-page-title">ENEMY TEAM</h2>
+            <div style="flex:1;">${generateTeamHTML(G.c.team)}</div>
+            <div class="book-nav-controls">
+                <button class="book-btn" onclick="turnBookPage('prev')">&larr; Prev Page</button>
+                <button class="book-btn secondary" onclick="closeBookModal()">Close</button>
+            </div>
+        `;
+    }
+}
+
+// UPDATE: This function now only handles the multi-page battle log.
+async function showInfoModal() {
+    if (isBookAnimPlaying) return;
+    isBookAnimPlaying = true;
+    
+    const modal = document.getElementById('infoModal');
+    const content = document.getElementById('bookModalContent');
+    const canvas = document.getElementById('bookAnimCanvas');
+    
+    modal.classList.remove('hidden');
+    content.classList.add('hidden'); 
+    
+    await playBookAnimation(canvas, 'open');
+    
+    currentBookPage = 1;
+    renderBookPageContent();
+    content.classList.remove('hidden'); 
+    
+    isBookAnimPlaying = false;
+}
+
+// UPDATE: Logic to turn pages back and forth.
+async function turnBookPage(direction) {
+    if (isBookAnimPlaying) return;
+    isBookAnimPlaying = true;
+    
+    const content = document.getElementById('bookModalContent');
+    const canvas = document.getElementById('bookAnimCanvas');
+    
+    content.classList.add('hidden'); 
+    
+    // FIX: Ensures the correct right/left page turn animation is played.
+    if (direction === 'next') {
+        await playBookAnimation(canvas, 'turnR');
+        currentBookPage = 2;
+    } else {
+        await playBookAnimation(canvas, 'turnL');
+        currentBookPage = 1;
+    }
+    
+    renderBookPageContent();
+    content.classList.remove('hidden'); 
+    
+    isBookAnimPlaying = false;
+}
+
+async function closeBookModal() {
+    if (isBookAnimPlaying) return;
+    isBookAnimPlaying = true;
+    
+    const modal = document.getElementById('infoModal');
+    const content = document.getElementById('bookModalContent');
+    const canvas = document.getElementById('bookAnimCanvas');
+    
+    content.classList.add('hidden'); 
+    await playBookAnimation(canvas, 'close');
+    
+    modal.classList.add('hidden'); 
+    isBookAnimPlaying = false;
 }
 
 function checkGameOver() {

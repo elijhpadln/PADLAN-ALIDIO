@@ -131,7 +131,7 @@
     </div>
 </div>
 
-<!-- PAUSE & INFO MODALS -->
+<!-- PAUSE MODAL -->
 <div id="pauseScreen" class="modal-overlay hidden">
     <div class="pause-box">
         <div class="close-x" onclick="resumeGame()"></div>
@@ -142,15 +142,14 @@
     </div>
 </div>
 
+<!-- ANIMATED MULTI-PAGE BOOK MODAL -->
 <div id="infoModal" class="modal-overlay hidden">
-    <div class="modal-box jrpg-window" style="width: 800px; max-width: 90%;">
-        <div class="modal-header">BATTLEFIELD INFO</div>
-        <div class="modal-body" id="infoModalBody" style="display:flex; gap:20px;"></div>
-        <div class="menu-item" style="text-align: center; margin-top:20px;" onclick="closeModals()">Close</div>
+    <div class="book-wrapper">
+        <canvas id="bookAnimCanvas"></canvas>
+        <div id="bookModalContent" class="book-content hidden">
+            <div id="infoModalBody"></div>
+        </div>
     </div>
-</div>
-<div id="bookAnimOverlay" class="book-anim-overlay hidden">
-    <div id="bookAnimSprite" class="book-anim-sprite"></div>
 </div>
 
 <!-- SCREEN 4: GAME OVER -->

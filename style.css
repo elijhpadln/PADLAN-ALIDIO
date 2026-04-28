@@ -8,7 +8,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: var(--bg-dark); font-family: 'CustomPixelFont', sans-serif; color: white; overflow: hidden; image-rendering: pixelated; cursor: url('assets/cursor.png'), auto; }
-button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-btn, .close-x, .pick-hand, #new-game-btn { cursor: url('assets/cursor_pointer.png'), pointer !important; }
+button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-btn, .close-x, .pick-hand, #new-game-btn, .close-btn, .book-btn { cursor: url('assets/cursor_pointer.png'), pointer !important; }
 .screen { display: none; width: 100vw; height: 100vh; position: absolute; top:0; left:0; }
 .screen.active { display: flex; flex-direction: column; }
 .hidden { display: none !important; }
@@ -171,7 +171,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
 
-/* TARGET RETICLE: Scale increased to 6.5 & Z-index explicitly forced OVER the sprite */
+/* TARGET RETICLE */
 .entity-wrap.targetable { cursor: crosshair; }
 .entity-wrap.targetable:hover::after {
     content: '';
@@ -197,9 +197,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 }
 
 /* HORIZONTAL TIMELINE */
-#turn-timeline-container { 
-    display: none !important; 
-}
+#turn-timeline-container { display: none !important; }
 
 /* HUD OVERLAYS */
 #targetMenuOverlay {
@@ -260,106 +258,7 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
     bottom: 0;
     width: 100%;
 }
-
-#party-panel { 
-    display: none;
-}
-
-.hud-column { 
-    flex: 1;
-    display: flex; 
-    flex-direction: column; 
-    justify-content: flex-end;
-    position: relative; 
-    transition: 0.2s; 
-    min-width: 0;
-    max-width: 360px;
-}
-.hud-column.active-hud { transform: translateY(-6px); }
-
-.hud-column.hud-cool::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 14px;
-    background: rgba(102, 187, 255, 0.12);
-    pointer-events: none;
-}
-
-.hud-name { 
-    font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
-    font-size: 1.1rem;
-    color: #fff;
-    text-shadow: 2px 2px 0 #000;
-    margin-bottom: 7px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1;
-    font-style: italic;
-    position: relative;
-    z-index: 1;
-}
-
-.hud-bars { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
-
-.hud-bar-wrap { 
-    position: relative; 
-    width: 210px;
-    height: 38px;
-    background: url('assets/bar_frame.png') no-repeat center;
-    background-size: 210px 38px;
-    border: none;
-    outline: none;
-    box-shadow: 2px 2px 0 rgba(0,0,0,0.55);
-    overflow: hidden;
-    image-rendering: pixelated;
-    position: relative;
-    z-index: 1;
-}
-
-.hud-bar-bg {
-    position: absolute;
-    left: 15px;
-    right: 15px;
-    top: 13px;
-    bottom: 13px;
-    background: rgba(0, 0, 0, 0.45);
-}
-.mp-bar {
-    margin-left: 24px;
-}
-.hud-bar-fill {
-    height: 100%;
-    transition: width 0.3s ease-out;
-    border-right: 1px solid rgba(255,255,255,0.85);
-    image-rendering: pixelated;
-}
-.hp-fill { background: url('assets/hp_fill.png') repeat-x left center; background-size: auto 12px; }
-.mp-fill { background: url('assets/mp_fill.png') repeat-x left center; background-size: auto 12px; }
-
-.hud-bar-text { 
-    position: absolute; 
-    right: 12px;
-    top: 50%; 
-    transform: translateY(-50%); 
-    font-family: 'Press Start 2P', 'CustomPixelFont', monospace;
-    font-size: 0.9rem;
-    color: #fff;
-    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-    z-index: 2; 
-    background: transparent;
-    padding: 0;
-    border-radius: 0;
-    line-height: 1;
-    min-width: 0;
-    text-align: right;
-    font-style: italic;
-}
+#party-panel { display: none; }
 
 /* COMMAND PANEL AT BOTTOM CENTER */
 #command-panel { 
@@ -424,31 +323,94 @@ button, .menu-item, .pause-menu-item, .cc, .cancel-target, .targetable, #pause-b
 .pause-menu-item:hover { background: #8ce99a; transform: translateY(-2px); box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2), 0 6px 0 #222; }
 .pause-menu-item:active { transform: translateY(2px); box-shadow: none; }
 
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-.modal-box { padding: 25px; width: 450px; color: #fff; background: #2c304d; border: 4px solid #111; }
-.modal-header { color: var(--pixel-gold); text-align: center; margin-bottom: 20px; font-size: 1rem; text-shadow: 2px 2px 0 #000; }
-.info-col { flex: 1; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 2px; border: 2px solid #4a3728;}
-.info-col h3 { font-size: 0.6rem; color: var(--pixel-gold); margin-bottom: 10px; }
-.info-row { border-bottom: 1px solid rgba(0,0,0,0.2); padding: 8px 0; font-size: 0.9rem; }
-.book-anim-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2200;
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+
+/* =======================================================
+   ANIMATED CANVAS BOOK MODAL 
+   ======================================================= */
+.book-wrapper {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: none;
-    background: rgba(0, 0, 0, 0.3);
 }
-.book-anim-sprite {
-    width: 64px;
-    height: 64px;
+
+#bookAnimCanvas {
+    display: block;
     image-rendering: pixelated;
-    background-repeat: no-repeat;
-    transform: scale(3);
-    transform-origin: center center;
-    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.8));
+    filter: drop-shadow(0 15px 25px rgba(0,0,0,0.8));
 }
+
+.book-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%; /* Locks the content safely inside the blank book pages */
+    height: 70%;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    color: #2c1a0f;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+.book-content.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.book-page-title {
+    text-align: center;
+    color: #3e2617;
+    font-size: 1.8rem;
+    border-bottom: 2px solid rgba(62, 38, 23, 0.3);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    text-shadow: none;
+}
+
+.book-char-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed rgba(62, 38, 23, 0.2);
+    padding: 12px 0;
+}
+.book-char-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2c1a0f;
+}
+.book-char-stats {
+    color: #5c3b1e;
+    font-size: 0.95rem;
+}
+
+.book-nav-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: auto; /* Pushes buttons to the bottom of the pages */
+}
+
+.book-btn {
+    background: #4a3728;
+    color: #e8dcc4;
+    border: 2px solid #2c2016;
+    padding: 10px 25px;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    transition: 0.1s;
+}
+.book-btn:hover { background: #634b38; transform: translate(-2px, -2px); box-shadow: 5px 5px 0 rgba(0,0,0,0.3); }
+.book-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
+.book-btn.secondary { background: #7a3c3c; }
+.book-btn.secondary:hover { background: #964d4d; }
+/* ======================================================= */
+
 .fnum { position: absolute; pointer-events: none; z-index: 100; font-size: 1.2rem; animation: numUp 1.2s ease forwards; text-shadow: 3px 3px 0 #000; }
 .fnum.dmg { color: #ff5252; } .fnum.heal { color: #69db7c; } .fnum.shld { color: #90caf9; } .fnum.crit { color: #ffd700; font-weight: bold; }
 #gameoverScreen { background: var(--bg-dark); justify-content: center; align-items: center; text-align: center; z-index: 5000; }
