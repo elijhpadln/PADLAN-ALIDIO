@@ -8,35 +8,35 @@ const ANIMATION_ASSETS = {
 };
 
 const CHARACTERS =[
-    { id: 0, name: 'Archer', key: 'archer', color: '#2ecc71', isMelee: false, maxHp: 200, atk: 50, spd: 85, maxMp: 150, moves:[
-        { name: 'Volley', power: 70, mpCost: 20, anim: 'attack2' },
-        { name: 'Piercing Arrow', power: 90, mpCost: 35, anim: 'attack3' },
-        { name: 'Rain of Arrows', power: 80, mpCost: 40, anim: 'attack3', isAoe: true }
+    { id: 0, name: 'Archer', key: 'archer', color: '#2ecc71', isMelee: false, maxHp: 320, atk: 45, spd: 85, maxMp: 150, moves:[
+        { name: 'Volley', icon: 'assets/icon_volley.png', power: 50, mpCost: 20, anim: 'attack2' },
+        { name: 'Piercing Arrow', icon: 'assets/icon_pierce.png', power: 75, mpCost: 35, anim: 'attack3' },
+        { name: 'Rain of Arrows', icon: 'assets/icon_arrow_rain.png', power: 60, mpCost: 40, anim: 'attack3', isAoe: true }
     ] },
-    { id: 1, name: 'Swordsman', key: 'swordsman', color: '#e74c3c', isMelee: true, maxHp: 250, atk: 60, spd: 60, maxMp: 100, moves:[
-        { name: 'Cross Slash', power: 80, mpCost: 25, anim: 'attack2' },
-        { name: 'Blade Dance', power: 100, mpCost: 50, anim: 'attack3', isAoe: true },
-        { name: 'Defensive Stance', power: 0, mpCost: 20, anim: 'idle', effect: 'defenseUp' }
+    { id: 1, name: 'Swordsman', key: 'swordsman', color: '#e74c3c', isMelee: true, maxHp: 400, atk: 55, spd: 60, maxMp: 100, moves:[
+        { name: 'Cross Slash', icon: 'assets/icon_cross_slash.png', power: 60, mpCost: 25, anim: 'attack2' },
+        { name: 'Blade Dance', icon: 'assets/icon_blade_dance.png', power: 85, mpCost: 50, anim: 'attack3', isAoe: true },
+        { name: 'Defensive Stance', icon: 'assets/icon_defense.png', power: 0, mpCost: 20, anim: 'idle', effect: 'defenseUp' }
     ] },
-    { id: 2, name: 'Wizard', key: 'wizard', color: '#9b59b6', isMelee: false, maxHp: 150, atk: 70, spd: 55, maxMp: 200, moves:[
-        { name: 'Arcane Missiles', power: 90, mpCost: 30, anim: 'attack2' },
-        { name: 'Meteor', power: 130, mpCost: 70, anim: 'attack3', isAoe: true },
-        { name: 'Healing Light', power: 70, mpCost: 40, anim: 'attack1', isHeal: true }
+    { id: 2, name: 'Wizard', key: 'wizard', color: '#9b59b6', isMelee: false, maxHp: 240, atk: 65, spd: 55, maxMp: 200, moves:[
+        { name: 'Arcane Missiles', icon: 'assets/icon_arcane_missiles.png', power: 70, mpCost: 30, anim: 'attack2' },
+        { name: 'Meteor', icon: 'assets/icon_meteor.png', power: 110, mpCost: 70, anim: 'attack3', isAoe: true },
+        { name: 'Healing Light', icon: 'assets/icon_healing_light.png', power: 80, mpCost: 40, anim: 'attack1', isHeal: true }
     ] },
-    { id: 3, name: 'Enchantress', key: 'enchantress', color: '#e056fd', isMelee: false, maxHp: 160, atk: 65, spd: 65, maxMp: 180, moves:[
-        { name: 'Mystic Orb', power: 85, mpCost: 30, anim: 'attack2' },
-        { name: 'Astral Storm', power: 120, mpCost: 60, anim: 'attack3', isAoe: true },
-        { name: 'Rejuvenation', power: 60, mpCost: 35, anim: 'attack1', isHeal: true }
+    { id: 3, name: 'Enchantress', key: 'enchantress', color: '#e056fd', isMelee: false, maxHp: 260, atk: 60, spd: 65, maxMp: 180, moves:[
+        { name: 'Mystic Orb', icon: 'assets/icon_mystic_orb.png', power: 65, mpCost: 30, anim: 'attack2' },
+        { name: 'Astral Storm', icon: 'assets/icon_astral_storm.png', power: 95, mpCost: 60, anim: 'attack3', isAoe: true },
+        { name: 'Rejuvenation', icon: 'assets/icon_rejuvenation.png', power: 70, mpCost: 35, anim: 'attack1', isHeal: true }
     ] },
-    { id: 4, name: 'Knight', key: 'knight', color: '#c0c0c0', isMelee: true, maxHp: 300, atk: 40, spd: 40, maxMp: 90, moves:[
-        { name: 'Shield Strike', power: 60, mpCost: 15, anim: 'attack2' },
-        { name: 'Holy Cleave', power: 90, mpCost: 40, anim: 'attack3', isAoe: true },
-        { name: 'Fortify', power: 0, mpCost: 30, anim: 'idle', effect: 'defenseUp' }
+    { id: 4, name: 'Knight', key: 'knight', color: '#c0c0c0', isMelee: true, maxHp: 500, atk: 40, spd: 40, maxMp: 90, moves:[
+        { name: 'Shield Strike', icon: 'assets/icon_shield_strike.png', power: 50, mpCost: 15, anim: 'attack2' },
+        { name: 'Holy Cleave', icon: 'assets/icon_holy_cleave.png', power: 70, mpCost: 40, anim: 'attack3', isAoe: true },
+        { name: 'Fortify', icon: 'assets/icon_fortify.png', power: 0, mpCost: 30, anim: 'idle', effect: 'defenseUp' }
     ] },
-    { id: 5, name: 'Musketeer', key: 'musketeer', color: '#f1c40f', isMelee: false, maxHp: 180, atk: 60, spd: 75, maxMp: 120, moves:[
-        { name: 'Quick Draw', power: 80, mpCost: 25, anim: 'attack2' },
-        { name: 'Headshot', power: 120, mpCost: 50, anim: 'attack3' },
-        { name: 'Explosive Shot', power: 100, mpCost: 60, anim: 'attack3', isAoe: true }
+    { id: 5, name: 'Musketeer', key: 'musketeer', color: '#f1c40f', isMelee: false, maxHp: 280, atk: 55, spd: 75, maxMp: 120, moves:[
+        { name: 'Quick Draw', icon: 'assets/icon_quick_draw.png', power: 60, mpCost: 25, anim: 'attack2' },
+        { name: 'Headshot', icon: 'assets/icon_headshot.png', power: 100, mpCost: 50, anim: 'attack3' },
+        { name: 'Explosive Shot', icon: 'assets/icon_explosive_shot.png', power: 80, mpCost: 60, anim: 'attack3', isAoe: true }
     ] }
 ];
 
@@ -100,7 +100,7 @@ function gameLoop(timestamp) {
     }
 
     globalFrameCount++;
-    if (globalFrameCount >= 24) { globalFrameCount = 0; animTick++; }
+    if (globalFrameCount >= 8) { globalFrameCount = 0; animTick++; }
 
     const allEnts = (G.p && G.c) ?[...G.p.team, ...G.c.team] :[];
     allEnts.forEach(ent => drawModularSprite(`sprite_${ent.uid}`, ent.key, ent.action, !ent.isPlayer, false));
@@ -114,12 +114,6 @@ function gameLoop(timestamp) {
     });
     for(let i=0; i<3; i++) { if(G.selectedTeam[i] !== undefined) drawModularSprite(`preview_sprite_${i}`, CHARACTERS[G.selectedTeam[i]].key, 'idle', false, true); }
     if(G.predictedQueue) { G.predictedQueue.forEach((c, i) => drawModularSprite(`tq_icon_${i}_${c.uid}`, c.key, 'idle', !c.isPlayer, true)); }
-    if(G.p) { 
-        G.p.team.forEach(c => {
-            drawModularSprite(`portrait_bg_${c.uid}`, c.key, 'idle', false, true);
-            drawModularSprite(`hud_idle_${c.uid}`, c.key, 'idle', false, true); // HUD Idle Animation
-        }); 
-    }
 }
 
 function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
@@ -133,7 +127,7 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
     const img = LOADED_IMAGES[imgKey];
 
     if (!img || !img.complete || img.naturalWidth === 0) {
-        if(!isUI) { ctx.fillStyle = flipX ? '#ff5252' : '#3498db'; ctx.fillRect(20, 20, 56, 56); }
+        if(!isUI) { ctx.fillStyle = flipX ? '#ff5252' : '#3498db'; ctx.fillRect(canvas.width/2 - 28, canvas.height - 56, 56, 56); }
         return;
     }
 
@@ -145,12 +139,7 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
     if (action === 'die' || action === 'dead') currentFrame = totalFrames - 1; 
 
     const sourceX = currentFrame * frameWidth;
-    
-    // ARCHER DEATH FIX: Clipping 1px from the source width removes the adjacent frame's brown pixel bleed
-    let clipW = frameWidth;
-    if (charKey === 'archer' && (action === 'die' || action === 'dead')) {
-        clipW = frameWidth - 1;
-    }
+    const clipW = frameWidth;
 
     ctx.save();
 
@@ -163,7 +152,10 @@ function drawModularSprite(canvasId, charKey, action, flipX, isUI = false) {
         const dy = (canvas.height - dh) / 2;
         ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
     } else {
-        const scale = 1.5; 
+        // Reduced scale from 2.5 to 1.8 so the models are smaller
+        let scale = 1.8; 
+        if (clipW * scale > canvas.width) scale = canvas.width / clipW;
+        if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
         const dw = clipW * scale;
         const dh = frameHeight * scale;
         const dx = (canvas.width - dw) / 2;
@@ -218,8 +210,6 @@ function restartBattle() {
     
     initBattle(G.lastBattleParams.pIds, G.lastBattleParams.cIds, G.lastBattleParams.bonus);
     showScreen('battle');
-    
-    // Fix: Show the pause button again upon restart
     document.getElementById('pause-btn').classList.remove('hidden');
 }
 
@@ -270,9 +260,7 @@ const rpsOverlay = document.querySelector(".pick-hand-menu");
 const playerHandImg = document.querySelector(".player-hand");
 const cpuHandImg = document.querySelector(".cpu-hand");
 const newGameMenu = document.querySelector(".new-game-overlay");
-
 let rpsIsLocked = false;
-
 pickHands.forEach(hand => hand.addEventListener("click", onPick));
 
 function confirmTeam() {
@@ -286,20 +274,13 @@ function confirmTeam() {
 async function onPick(e) {
     if (rpsIsLocked) return;
     rpsIsLocked = true;
-
     let playerHand = e.currentTarget.dataset.hand;
     let cpuHand = pickCpuHand();
-
     await exitMenu();
     await revealHand(playerHand, cpuHand);
-
     let roundWinner = determineRoundWinner(playerHand, cpuHand);
-
     if (roundWinner === 'draw') {
-        setTimeout(async () => {
-            await openMenu();
-            rpsIsLocked = false;
-        }, 1000);
+        setTimeout(async () => { await openMenu(); rpsIsLocked = false; }, 1000);
     } else {
         if (roundWinner === 'player') {
             const hearts = document.querySelectorAll(".cpu-container .hearts img");
@@ -324,22 +305,12 @@ async function onPick(e) {
             await waitAnimation(playerHandImg);
             playerHandImg.classList.remove("hand-damage");
         }
-        
         setTimeout(() => { endRPSGame(roundWinner); }, 500);
     }
 }
 
-async function exitMenu() {
-    pickHandMenu.classList.add("menu-exit");
-    await waitTransition(pickHandMenu);
-    rpsOverlay.classList.add("overlay-exit");
-    await waitTransition(rpsOverlay);
-}
-
-async function openMenu() {
-    pickHandMenu.classList.remove("menu-exit");
-    rpsOverlay.classList.remove("overlay-exit");
-}
+async function exitMenu() { pickHandMenu.classList.add("menu-exit"); await waitTransition(pickHandMenu); rpsOverlay.classList.add("overlay-exit"); await waitTransition(rpsOverlay); }
+async function openMenu() { pickHandMenu.classList.remove("menu-exit"); rpsOverlay.classList.remove("overlay-exit"); }
 
 async function shakeAnimation() {
     setTimeout(() => { cpuHandImg.classList.add("shake"); }, 500);
@@ -373,15 +344,11 @@ const determineRoundWinner = (playerHand, cpuHand) => {
     else return "draw";
 }
 
-const pickCpuHand = () => {
-    const cpuHand = Math.floor((Math.random() * 3) + 1);
-    if (cpuHand == 1) return "rock"; else if (cpuHand == 2) return "paper"; else if (cpuHand == 3) return "scissor";
-}
+const pickCpuHand = () => { const cpuHand = Math.floor((Math.random() * 3) + 1); if (cpuHand == 1) return "rock"; else if (cpuHand == 2) return "paper"; else if (cpuHand == 3) return "scissor"; }
 
 function endRPSGame(winner) {
     let winStatus = document.getElementById("rpsWinStatus");
     let bonus = 'none';
-    
     if (winner === "cpu") {
         winStatus.textContent = "AMBUSHED!";
         winStatus.style.color = "#ff5252";
@@ -394,70 +361,37 @@ function endRPSGame(winner) {
         bonus = 'player';
     }
     newGameMenu.classList.remove("hide-new-game-menu");
-
     const nextBtn = document.getElementById("new-game-btn");
     nextBtn.onclick = (e) => {
         e.preventDefault();
         const cpuIds =[]; for(let i=0; i<3; i++) cpuIds.push(Math.floor(Math.random() * 6));
-        
         const overlay = document.getElementById('transition-overlay');
         overlay.classList.remove('hidden', 'iris-opening');
         overlay.classList.add('iris-closing');
-
         setTimeout(() => {
             initBattle(G.selectedTeam, cpuIds, bonus);
             showScreen('battle');
             document.getElementById('pause-btn').classList.remove('hidden');
-            
             overlay.classList.remove('iris-closing');
             overlay.classList.add('iris-opening');
-            
-            setTimeout(() => {
-                overlay.classList.add('hidden'); 
-            }, 800);
+            setTimeout(() => { overlay.classList.add('hidden'); }, 800);
         }, 800);
     };
 }
 
-function waitTransition(element) {
-    return new Promise(resolve => {
-        element.addEventListener("transitionend", handler);
-        function handler(e) {
-            const expectedProperties =["opacity", "transform", "background-color"];
-            if (e.target === element && expectedProperties.includes(e.propertyName)) {
-                element.removeEventListener("transitionend", handler);
-                resolve();
-            }
-        }
-    });
-}
-function waitAnimation(element) {
-    return new Promise(resolve => {
-        element.addEventListener("animationend", (e) => { if (e.target == element) { resolve(); } });
-    });
-}
+function waitTransition(element) { return new Promise(resolve => { element.addEventListener("transitionend", function handler(e) { const expected =["opacity", "transform", "background-color"]; if (e.target === element && expected.includes(e.propertyName)) { element.removeEventListener("transitionend", handler); resolve(); } }); }); }
+function waitAnimation(element) { return new Promise(resolve => { element.addEventListener("animationend", (e) => { if (e.target == element) { resolve(); } }); }); }
 
 // ===============================================
 // BATTLE ENGINE
 // ===============================================
 function initBattle(pIds, cIds, bonus = 'none') {
     G.lastBattleParams = { pIds, cIds, bonus };
-    
-    const mkP = ids => ids.map(id => { 
-        const b = CHARACTERS.find(h=>h.id===id); 
-        const startCT = bonus === 'player' ? 1000 : (bonus === 'enemy' ? 0 : Math.random()*200);
-        return { ...b, uid: 'u' + (uidCounter++), currentHp: b.maxHp, mp: b.maxMp, isPlayer: true, action: 'idle', ct: startCT }; 
-    });
-    const mkC = ids => ids.map(id => { 
-        const b = CHARACTERS.find(m=>m.id===id); 
-        const startCT = bonus === 'enemy' ? 1000 : (bonus === 'player' ? 0 : Math.random()*200);
-        return { ...b, name:`Enemy ${b.name}`, uid: 'u' + (uidCounter++), currentHp: b.maxHp, mp: b.maxMp, isPlayer: false, action: 'idle', ct: startCT }; 
-    });
-    
+    const mkP = ids => ids.map(id => { const b = CHARACTERS.find(h=>h.id===id); const startCT = bonus === 'player' ? 1000 : (bonus === 'enemy' ? 0 : Math.random()*200); return { ...b, uid: 'u' + (uidCounter++), currentHp: b.maxHp, mp: b.maxMp, isPlayer: true, action: 'idle', ct: startCT }; });
+    const mkC = ids => ids.map(id => { const b = CHARACTERS.find(m=>m.id===id); const startCT = bonus === 'enemy' ? 1000 : (bonus === 'player' ? 0 : Math.random()*200); return { ...b, name:`Enemy ${b.name}`, uid: 'u' + (uidCounter++), currentHp: b.maxHp, mp: b.maxMp, isPlayer: false, action: 'idle', ct: startCT }; });
     G.p = { team: mkP(pIds) };
     G.c = { team: mkC(cIds) };
     G.turnQueue =[];
-    
     renderEntities(); 
     renderHUD(); 
     pausableTimeout(advanceTurn, 100);
@@ -466,22 +400,19 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    const pPos =[{x: 22, y: 22}, {x: 14, y: 12}, {x: 24, y: 4}];
-    const cPos =[{x: 78, y: 22}, {x: 86, y: 12}, {x: 76, y: 4}];
-
+    const pPos =[{x: 35, y: 28}, {x: 22, y: 18}, {x: 9, y: 8}];
+    const cPos =[{x: 65, y: 28}, {x: 78, y: 18}, {x: 91, y: 8}];
+    
     G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - pPos[i].y));
     G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - cPos[i].y));
 }
 
 function createEntityHTML(layer, c, x, y, z) {
     let ehpHTML = '';
-    if (!c.isPlayer) {
-        ehpHTML = `<div class="ehp-bar" id="ehp_${c.uid}"><div class="ehp-fill" id="ehp_fill_${c.uid}"></div></div>`;
-    }
-    
+    if (!c.isPlayer) { ehpHTML = `<div class="ehp-bar" id="ehp_${c.uid}"><div class="ehp-fill" id="ehp_fill_${c.uid}"></div></div>`; }
     layer.innerHTML += `<div class="entity-wrap" id="wrap_${c.uid}" style="left:${x}%; bottom:${y}%; z-index:${z}; transform:translateX(-50%)">
         ${ehpHTML}
-        <div class="platform"></div><canvas class="sprite" id="sprite_${c.uid}" width="150" height="150"></canvas>
+        <div class="platform"></div><canvas class="sprite" id="sprite_${c.uid}" width="350" height="350"></canvas>
     </div>`;
 }
 
@@ -490,12 +421,17 @@ function renderHUD() {
     panel.innerHTML = '';
     G.p.team.forEach(c => {
         panel.innerHTML += `
-        <div class="portrait-slot" id="hud_slot_${c.uid}">
-            <div class="portrait-bg"><canvas id="portrait_bg_${c.uid}" width="120" height="120"></canvas></div>
-            <div class="hero-header"><canvas id="hud_idle_${c.uid}" width="40" height="40" class="hud-idle-sprite"></canvas> ${c.name}</div>
-            <div class="bars-container">
-                <div class="bar-row"><span class="bar-label">HP</span><div class="bar-bg"><div id="hp_${c.uid}" class="hp-fill"></div></div><span id="hp_txt_${c.uid}" class="bar-val"></span></div>
-                <div class="bar-row"><span class="bar-label">MP</span><div class="bar-bg"><div id="mp_${c.uid}" class="mp-fill"></div></div><span id="mp_txt_${c.uid}" class="bar-val"></span></div>
+        <div class="hud-column" id="hud_slot_${c.uid}">
+            <div class="hud-name">${c.name.toUpperCase()}</div>
+            <div class="hud-bars">
+                <div class="hud-bar-wrap">
+                    <div class="hud-bar-bg"><div id="hp_${c.uid}" class="hud-bar-fill hp-fill"></div></div>
+                    <div class="hud-bar-text" id="hp_txt_${c.uid}"></div>
+                </div>
+                <div class="hud-bar-wrap">
+                    <div class="hud-bar-bg"><div id="mp_${c.uid}" class="hud-bar-fill mp-fill"></div></div>
+                    <div class="hud-bar-text" id="mp_txt_${c.uid}"></div>
+                </div>
             </div>
         </div>`;
     });
@@ -505,7 +441,6 @@ function renderHUD() {
 function predictTimeline(count) {
     let sim =[...G.p.team, ...G.c.team].filter(e => e.currentHp > 0).map(e => ({...e}));
     let timeline =[];
-
     while(timeline.length < count && sim.length > 0) {
         let minTime = Infinity, nextUnit = null;
         for(let e of sim) { let timeNeeded = (1000 - e.ct) / e.spd; if(timeNeeded < minTime) { minTime = timeNeeded; nextUnit = e; } }
@@ -520,7 +455,6 @@ function updateTurnQueueUI() {
     const qBox = document.getElementById('turn-queue');
     qBox.innerHTML = '';
     G.predictedQueue = predictTimeline(8);
-    
     G.predictedQueue.forEach((c, i) => {
         const isP = c.isPlayer;
         const borderColor = isP ? 'var(--pixel-gold)' : '#ff5252'; 
@@ -529,43 +463,29 @@ function updateTurnQueueUI() {
         const activeClass = i === 0 ? 'tq-active' : '';
         const readyText = i === 0 ? '<div class="tq-ready-text">READY!</div>' : '';
         const enemyIconClass = !isP ? 'enemy-icon' : '';
-
-        qBox.innerHTML += `
-            <div class="tq-item ${activeClass}" style="border-color: ${borderColor};">
-                <canvas class="tq-icon ${enemyIconClass}" id="tq_icon_${i}_${c.uid}" width="48" height="48"></canvas>
-                ${readyText}
-                <div class="tq-mini-bars"><div class="tq-bar-bg"><div class="tq-hp-fill" style="width:${hpPct}%"></div></div><div class="tq-bar-bg"><div class="tq-mp-fill" style="width:${mpPct}%"></div></div></div>
-            </div>
-        `;
+        qBox.innerHTML += `<div class="tq-item ${activeClass}" style="border-color: ${borderColor};"><canvas class="tq-icon ${enemyIconClass}" id="tq_icon_${i}_${c.uid}" width="48" height="48"></canvas>${readyText}<div class="tq-mini-bars"><div class="tq-bar-bg"><div class="tq-hp-fill" style="width:${hpPct}%"></div></div><div class="tq-bar-bg"><div class="tq-mp-fill" style="width:${mpPct}%"></div></div></div></div>`;
     });
 }
 
 function advanceTurn() {
     if (checkGameOver()) return;
-    
     let alive =[...G.p.team, ...G.c.team].filter(e => e.currentHp > 0);
     if(alive.length === 0) return;
-
     let minTime = Infinity, nextUnit = null;
     for(let e of alive) { let timeNeeded = (1000 - e.ct) / e.spd; if(timeNeeded < minTime) { minTime = timeNeeded; nextUnit = e; } }
     alive.forEach(e => { e.ct += e.spd * minTime; });
-
     G.activeEnt = nextUnit;
     G.activeEnt.ct = 0; 
     updateTurnQueueUI();
-
     G.activeEnt.mp = Math.min(G.activeEnt.maxMp, G.activeEnt.mp + 20); 
     updateBars();
-
-    document.querySelectorAll('.portrait-slot').forEach(e => e.classList.remove('active-hud'));
+    document.querySelectorAll('.hud-column').forEach(e => e.classList.remove('active-hud'));
     if (G.activeEnt.isPlayer) {
         const activeHud = document.getElementById(`hud_slot_${G.activeEnt.uid}`);
         if (activeHud) activeHud.classList.add('active-hud');
     }
-
     document.querySelectorAll('.entity-wrap').forEach(e => e.classList.remove('is-active'));
     document.getElementById(`wrap_${G.activeEnt.uid}`).classList.add('is-active');
-
     if (G.activeEnt.isPlayer) {
         document.getElementById('command-panel').classList.add('active-turn');
         showMainMenu();
@@ -580,7 +500,6 @@ function showMainMenu() {
     document.getElementById('skillsMenuBox').classList.add('hidden');
     document.getElementById('mainMenuBox').classList.remove('hidden');
     clearTargeting(); 
-    
     const skillBtn = document.getElementById('skill-btn');
     if (G.activeEnt.moves.some(m => G.activeEnt.mp >= m.mpCost)) skillBtn.classList.remove('disabled');
     else skillBtn.classList.add('disabled');
@@ -593,12 +512,12 @@ function showSkillsMenu() {
     document.getElementById('skillsMenuBox').classList.remove('hidden');
     const list = document.getElementById('skillsList');
     list.innerHTML = '';
-    
     G.activeEnt.moves.forEach(m => {
         const canUse = G.activeEnt.mp >= m.mpCost;
         const item = document.createElement('div');
         item.className = `menu-item ${!canUse ? 'disabled' : ''}`;
-        item.innerHTML = `${m.name} <small>MP:${m.mpCost}</small>`;
+        const iconHtml = m.icon ? `<img src="${m.icon}" class="skill-icon" alt="icon">` : '';
+        item.innerHTML = `<div style="display:flex; align-items:center;">${iconHtml}<div style="display:flex; flex-direction:column; align-items:flex-start; line-height:1.2;"><span>${m.name}</span><small style="font-size:0.7rem; color:${canUse ? 'var(--pixel-mp)' : '#888'};">MP: ${m.mpCost}</small></div></div>`;
         if (canUse) { item.onclick = () => { G.pendingMove = m; startTargeting(); }; }
         list.appendChild(item);
     });
@@ -606,14 +525,9 @@ function showSkillsMenu() {
 
 function startTargeting() {
     document.getElementById('targetMenuOverlay').classList.remove('hidden');
-    
     let targets;
-    if (G.pendingMove.isHeal) {
-        targets = G.activeEnt.isPlayer ? G.p.team : G.c.team;
-    } else {
-        targets = G.pendingMove.isAoe ? (G.activeEnt.isPlayer ? G.c.team : G.p.team) : (G.activeEnt.isPlayer ? G.c.team : G.p.team);
-    }
-    
+    if (G.pendingMove.isHeal) { targets = G.activeEnt.isPlayer ? G.p.team : G.c.team; } 
+    else { targets = G.pendingMove.isAoe ? (G.activeEnt.isPlayer ? G.c.team : G.p.team) : (G.activeEnt.isPlayer ? G.c.team : G.p.team); }
     targets.forEach(c => {
         if(c.currentHp > 0) {
             const wrap = document.getElementById(`wrap_${c.uid}`);
@@ -630,97 +544,46 @@ function cpuTurn() {
     const validMoves = G.activeEnt.moves.filter(m => m.mpCost <= G.activeEnt.mp);
     let move = { name: 'Strike', power: G.activeEnt.atk, mpCost: 0, anim: 'attack1' };
     if (validMoves.length > 0 && Math.random() > 0.5) { move = validMoves[Math.floor(Math.random() * validMoves.length)]; }
-    
     let targets = move.isHeal ? G.c.team.filter(c => c.currentHp > 0) : G.p.team.filter(c => c.currentHp > 0);
     if (targets.length === 0) return;
     const target = targets[Math.floor(Math.random() * targets.length)];
-    
     executeMove(G.activeEnt, target, move);
 }
 
 function executeMove(actor, target, move) {
     G.isAnimating = true;
     document.getElementById('command-panel').classList.remove('active-turn');
-    
     actor.mp = Math.max(0, actor.mp - (move.mpCost || 0));
     updateBars();
+    
     actor.action = move.anim || 'attack1';
-    animTick = 0;
+    animTick = 0; 
     
     const wrap = document.getElementById(`wrap_${actor.uid}`);
-    let anim;
-    let attackDelay = 0;
-    let animDuration = 0;
-
-    if (move.isAoe || !target || !actor.isMelee) {
-        const dir = actor.isPlayer ? 50 : -50;
-        animDuration = 1000;
-        attackDelay = animDuration * 0.4; 
-        
-        anim = wrap.animate([
-            { transform: `translateX(-50%) translate(0px, 0px)` },
-            { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.3 },
-            { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.7 },
-            { transform: `translateX(-50%) translate(0px, 0px)` }
-        ], { duration: animDuration, easing: 'ease-in-out' });
-        
-    } else {
-        const aRect = wrap.getBoundingClientRect();
-        const targetWrap = document.getElementById(`wrap_${target.uid}`);
-        const tRect = targetWrap.getBoundingClientRect();
-        
-        const aCenterX = aRect.left + aRect.width / 2;
-        const aCenterY = aRect.top + aRect.height / 2;
-        const tCenterX = tRect.left + tRect.width / 2;
-        const tCenterY = tRect.top + tRect.height / 2;
-        
-        let isAlly = (actor.isPlayer === target.isPlayer);
-        let offset = 0;
-        if (!isAlly) {
-            offset = actor.isPlayer ? -80 : 80;
-        } else {
-            offset = (tCenterX > aCenterX) ? -40 : 40;
-        }
-        
-        const tx = tCenterX - aCenterX + offset;
-        const ty = tCenterY - aCenterY;
-        
-        animDuration = 1500; 
-        attackDelay = animDuration * 0.3; 
-        
-        anim = wrap.animate([
-            { transform: `translateX(-50%) translate(0px, 0px)` },
-            { transform: `translateX(-50%) translate(${tx}px, ${ty}px)`, offset: 0.3 },
-            { transform: `translateX(-50%) translate(${tx}px, ${ty}px)`, offset: 0.7 },
-            { transform: `translateX(-50%) translate(0px, 0px)` }
-        ], { duration: animDuration, easing: 'ease-in-out' });
-    }
+    let animDuration = 800; 
+    let attackDelay = animDuration * 0.4; 
+    let dir = actor.isPlayer ? 30 : -30;
+    
+    let anim = wrap.animate([
+        { transform: `translateX(-50%) translate(0px, 0px)` },
+        { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.3 },
+        { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.7 },
+        { transform: `translateX(-50%) translate(0px, 0px)` }
+    ], { duration: animDuration, easing: 'ease-in-out' });
 
     G.activeAnimations.push(anim);
-    anim.onfinish = () => {
-        G.activeAnimations = G.activeAnimations.filter(a => a !== anim);
-        wrap.style.transform = `translateX(-50%)`;
-    };
+    anim.onfinish = () => { G.activeAnimations = G.activeAnimations.filter(a => a !== anim); wrap.style.transform = `translateX(-50%)`; };
     if (G.isPaused) anim.pause();
     
     pausableTimeout(() => {
-        if (move.isAoe) {
-            const targets = actor.isPlayer ? G.c.team : G.p.team;
-            targets.filter(t => t.currentHp > 0).forEach(t => applyDamage(actor, t, move));
-        } else {
-            applyDamage(actor, target, move);
-        }
+        if (move.isAoe) { (actor.isPlayer ? G.c.team : G.p.team).filter(t => t.currentHp > 0).forEach(t => applyDamage(actor, t, move)); } 
+        else { applyDamage(actor, target, move); }
         updateBars();
     }, attackDelay); 
     
     pausableTimeout(() => {
         actor.action = 'idle';
-        
-        const allTargets = actor.isPlayer ? G.c.team : G.p.team;
-        allTargets.forEach(t => {
-            if(t.currentHp <= 0) t.action = 'die';
-        });
-        
+        (actor.isPlayer ? G.c.team : G.p.team).forEach(t => { if(t.currentHp <= 0) t.action = 'die'; });
         G.isAnimating = false;
         pausableTimeout(advanceTurn, 200); 
     }, animDuration); 
@@ -728,7 +591,7 @@ function executeMove(actor, target, move) {
 
 function applyDamage(actor, target, move) {
     target.action = 'hurt';
-    let dmg = Math.floor(move.power + (actor.atk * 0.5));
+    let dmg = Math.floor(move.power + (actor.atk * 0.4));
     if (move.power === 0 && !move.isHeal) dmg = 0; 
     
     if (move.isHeal) {
@@ -737,16 +600,11 @@ function applyDamage(actor, target, move) {
         spawnNum(`+${healAmt}`, target.uid, 'heal');
         target.currentHp = Math.min(target.maxHp, target.currentHp + healAmt);
     } else {
-        if (Math.random() < (move.critChance || 0)) { 
-            dmg = Math.floor(dmg * 1.5); 
-            spawnNum(`CRIT ${dmg}`, target.uid, 'crit'); 
-        } else { 
-            spawnNum(`-${dmg}`, target.uid, 'dmg'); 
-        }
+        if (Math.random() < (move.critChance || 0.05)) { dmg = Math.floor(dmg * 1.5); spawnNum(`CRIT ${dmg}`, target.uid, 'crit'); } 
+        else { spawnNum(`-${dmg}`, target.uid, 'dmg'); }
         target.currentHp = Math.max(0, target.currentHp - dmg);
         doHitAnim(target.uid, target.isPlayer);
     }
-    
     pausableTimeout(() => { if (target.currentHp > 0) target.action = 'idle'; }, 400);
 }
 
@@ -761,10 +619,7 @@ function spawnNum(txt, uid, type) {
 
 function doHitAnim(uid, isPlayer) { 
     const w = document.getElementById(`wrap_${uid}`); 
-    if (w) { 
-        w.style.animation = isPlayer ? 'hit 0.4s' : 'hitE 0.4s'; 
-        pausableTimeout(() => w.style.animation = '', 400); 
-    } 
+    if (w) { w.style.animation = isPlayer ? 'hit 0.4s' : 'hitE 0.4s'; pausableTimeout(() => w.style.animation = '', 400); } 
 }
 
 function updateBars() {
@@ -772,7 +627,6 @@ function updateBars() {
         const hB = document.getElementById(`hp_${c.uid}`); if(hB) { hB.style.width = Math.max(0, (c.currentHp / c.maxHp)*100) + '%'; document.getElementById(`hp_txt_${c.uid}`).innerText = `${Math.ceil(Math.max(0, c.currentHp))}/${c.maxHp}`; }
         const mB = document.getElementById(`mp_${c.uid}`); if(mB) { mB.style.width = Math.max(0, (c.mp / c.maxMp)*100) + '%'; document.getElementById(`mp_txt_${c.uid}`).innerText = `${Math.floor(c.mp)}/${c.maxMp}`; }
     });
-    
     G.c.team.forEach(c => {
         const ehB = document.getElementById(`ehp_fill_${c.uid}`); 
         const wrap = document.getElementById(`ehp_${c.uid}`);
@@ -797,28 +651,18 @@ function showCharacterInfoModal(id) {
     const c = CHARACTERS.find(x => x.id === id);
     if (!c) return;
     document.querySelector('#infoModal .modal-header').innerText = c.name.toUpperCase() + " INFO";
-    
-    let movesHtml = c.moves.map(m => `<li><strong>${m.name}</strong> <span style="color:#aaa;">(Pwr:${m.power}, MP:${m.mpCost})</span> ${m.isAoe ? '<span style="color:#e74c3c;">[AOE]</span>' : ''}</li>`).join('');
-    
+    let movesHtml = c.moves.map(m => { const iconHtml = m.icon ? `<img src="${m.icon}" class="skill-icon" alt="icon">` : ''; return `<li>${iconHtml}<strong>${m.name}</strong> <span style="color:#aaa;">(Pwr:${m.power}, MP:${m.mpCost})</span> ${m.isAoe ? '<span style="color:#e74c3c;">[AOE]</span>' : ''}</li>`; }).join('');
     document.getElementById('infoModalBody').innerHTML = `
         <div class="info-col" style="flex: 1; display:flex; flex-direction:column; align-items:center;">
             <div style="display:flex;justify-content:center;margin-bottom:15px; background:rgba(0,0,0,0.5); border-radius:8px; border:2px solid #555;">
                 <canvas id="modal_sprite_${c.id}" width="100" height="100"></canvas>
             </div>
-            <div style="width: 100%;">
-                <div class="info-row"><strong>❤️ HP:</strong> ${c.maxHp}</div>
-                <div class="info-row"><strong>🔷 MP:</strong> ${c.maxMp}</div>
-                <div class="info-row"><strong>⚔️ ATK:</strong> ${c.atk}</div>
-                <div class="info-row"><strong>💨 SPD:</strong> ${c.spd}</div>
-            </div>
+            <div style="width: 100%;"><div class="info-row"><strong>❤️ HP:</strong> ${c.maxHp}</div><div class="info-row"><strong>🔷 MP:</strong> ${c.maxMp}</div><div class="info-row"><strong>⚔️ ATK:</strong> ${c.atk}</div><div class="info-row"><strong>💨 SPD:</strong> ${c.spd}</div></div>
         </div>
         <div class="info-col" style="flex: 2;">
             <h3 style="font-size:1.2rem; border-bottom:2px solid #555; padding-bottom:5px; margin-bottom: 10px;">SKILLS</h3>
-            <ul style="padding-left: 20px; font-size: 1rem; line-height: 2; margin-top:10px;">
-                ${movesHtml}
-            </ul>
-        </div>
-    `;
+            <ul style="padding-left: 10px; font-size: 1rem; line-height: 2; margin-top:10px; list-style-type:none;">${movesHtml}</ul>
+        </div>`;
     document.getElementById('infoModal').classList.remove('hidden');
     drawModularSprite(`modal_sprite_${c.id}`, c.key, 'idle', false, true);
 }
