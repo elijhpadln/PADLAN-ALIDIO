@@ -39,13 +39,13 @@ const CHARACTERS =[
         { name: 'Holy Cleave', icon: 'assets/icon_holy_cleave.png', power: 100, mpCost: 40, anim: 'attack3', isAoe: true },
         { name: 'Fortify', icon: 'assets/icon_fortify.png', power: 0, mpCost: 30, anim: 'idle', effect: 'defenseUp' }
     ] },
-    // --- MUSKETEER SKILLS RENAMED TO BE SWORD-THEMED ---
     { id: 5, name: 'Musketeer', key: 'musketeer', color: '#f1c40f', isMelee: false, maxHp: 490, atk: 55, spd: 75, maxMp: 120, moves:[
         { name: 'Swift Strike', icon: 'assets/icon_quick_draw.png', power: 90, mpCost: 25, anim: 'attack2' },
         { name: 'Vital Point', icon: 'assets/icon_headshot.png', power: 140, mpCost: 50, anim: 'attack3' },
         { name: 'Blade Fury', icon: 'assets/icon_explosive_shot.png', power: 110, mpCost: 60, anim: 'attack3', isAoe: true }
     ] },
 
+    // --- MONSTERS ---
     { id: 6, name: 'Fire Spirit', key: 'firespirit', color: '#e67e22', isMelee: false, isEnemy: true, maxHp: 350, atk: 70, spd: 80, maxMp: 150, moves:[
         { name: 'Fireball', power: 55, mpCost: 20, anim: 'shot' }, { name: 'Flame Dash', power: 75, mpCost: 35, anim: 'charge' }, { name: 'Inferno', power: 85, mpCost: 45, anim: 'flame' }, { name: 'Supernova', power: 90, mpCost: 60, anim: 'explosion', isAoe: true }
     ] },
@@ -252,8 +252,11 @@ function renderTeamSelect() {
     CHARACTERS.filter(c => !c.isEnemy).forEach(c => {
         const el = document.createElement('div');
         el.className = 'cc';
+        // ADDED PORTRAIT FRAME HERE
         el.innerHTML = `
-            <div style="display:flex;justify-content:center;align-items:center;height:100px;"><canvas id="select_sprite_${c.id}" width="100" height="100"></canvas></div>
+            <div class="portrait-frame">
+                <canvas id="select_sprite_${c.id}" width="65" height="65"></canvas>
+            </div>
             <div class="cc-name" style="color:${c.color}">${c.name}</div>
         `;
         el.onclick = () => toggleCreature(c, el);
@@ -273,7 +276,11 @@ function updatePreview() {
         const slot = document.getElementById('slot' + i);
         const id = G.selectedTeam[i];
         if(id !== undefined) {
-            slot.innerHTML = `<canvas id="preview_sprite_${i}" width="80" height="80"></canvas>`;
+            // ADDED PORTRAIT FRAME TO PREVIEW
+            slot.innerHTML = `
+                <div class="portrait-frame-small">
+                    <canvas id="preview_sprite_${i}" width="50" height="50"></canvas>
+                </div>`;
             slot.classList.add('filled');
         } else { slot.innerHTML = '?'; slot.classList.remove('filled'); }
     }
@@ -400,7 +407,6 @@ function initBattle(pIds, cIds, bonus = 'none') {
 function renderEntities() {
     const layer = document.getElementById('entitiesLayer');
     layer.innerHTML = '';
-    // --- CHARACTER POSITIONING ADJUSTED ---
     const pPos =[{x: 30, y: 15}, {x: 18, y: 15}, {x: 6, y: 15}];
     const cPos =[{x: 70, y: 15}, {x: 82, y: 15}, {x: 94, y: 15}];
     G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - i));
@@ -550,7 +556,7 @@ function applyDamage(actor, target, move) {
     
     if (move.isHeal) {
         target.action = 'idle';
-        let healAmt = Math.abs(move.power); // Use base power for more reliable healing
+        let healAmt = Math.abs(move.power); 
         spawnNum(`+${healAmt}`, target.uid, 'heal');
         target.currentHp = Math.min(target.maxHp, target.currentHp + healAmt);
     } else {
@@ -581,12 +587,9 @@ function updateBars() {
         const hpPct = Math.max(0, (c.currentHp / c.maxHp) * 100);
         const mpPct = Math.max(0, (c.mp / c.maxMp) * 100);
         const hB = document.getElementById(`hp_${c.uid}`), mB = document.getElementById(`mp_${c.uid}`);
-        const hpText = document.getElementById(`hp_txt_${c.uid}`), mpText = document.getElementById(`mp_txt_${c.uid}`);
         const statsWrap = document.getElementById(`stats_${c.uid}`);
         if (hB) hB.style.width = hpPct + '%';
         if (mB) mB.style.width = mpPct + '%';
-        if (hpText) hpText.innerText = ``;
-        if (mpText) mpText.innerText = ``;
         if (statsWrap && c.currentHp <= 0) statsWrap.classList.add('dead');
     };
     if (!G.p || !G.c) return;
