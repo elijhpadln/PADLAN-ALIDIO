@@ -83,11 +83,36 @@
 <div id="battleScreen" class="screen">
     <div class="stage" id="stage">
         
-        <!-- NEW HORIZONTAL TOP HUD FOR HP/MP BARS -->
-        <div id="top-hud">
-            <div id="ally-hud" class="side-hud left-hud"></div>
-            <div class="vs-text">VS</div>
-            <div id="enemy-hud" class="side-hud right-hud"></div>
+        <div id="game-hud">
+            <!-- TOP STAIR-STEP STATS -->
+            <div id="top-hud">
+                <div id="ally-hud" class="side-hud left-hud"></div>
+                <div class="vs-text">VS</div>
+                <div id="enemy-hud" class="side-hud right-hud"></div>
+            </div>
+
+            <!-- BATTLE NARRATOR -->
+            <div id="battle-log-hud">
+                <div id="battle-log" class="jrpg-window"></div>
+            </div>
+            
+            <!-- BOTTOM COMMAND PANEL -->
+            <div id="bottom-hud">
+                 <div id="command-panel" class="jrpg-window">
+                    <!-- Added Display For Active Hero's Turn -->
+                    <div id="active-hero-display" style="text-align:center; color:var(--pixel-gold); margin-bottom:10px; font-size:1.2rem; text-shadow: 2px 2px 0 #000;"></div>
+                    <div id="mainMenuBox" class="menu-list">
+                        <button class="menu-item" onclick="handleStrike()">Strike</button>
+                        <button class="menu-item" id="skill-btn" onclick="showSkillsMenu()">Skills</button>
+                        <button class="menu-item" onclick="showInfoModal()">Info</button>
+                    </div>
+                </div>
+
+                <div id="skillsMenuBox" class="jrpg-window hidden">
+                    <div id="skillsList"></div>
+                    <button class="menu-item" onclick="showMainMenu()">Back</button>
+                </div>
+            </div>
         </div>
 
         <div id="targetMenuOverlay" class="hidden">
@@ -95,21 +120,6 @@
             <div class="cancel-target" onclick="cancelTargeting()">[ CANCEL ]</div>
         </div>
         <div id="entitiesLayer"></div>
-    </div>
-
-    <!-- ENLARGED BOTTOM COMMAND PANEL -->
-    <div id="bottom-hud">
-        <div id="command-panel" class="jrpg-window">
-            <div id="mainMenuBox" class="menu-list">
-                <button class="menu-item" onclick="handleStrike()">Strike</button>
-                <button class="menu-item" id="skill-btn" onclick="showSkillsMenu()">Skills</button>
-                <button class="menu-item" onclick="showInfoModal()">Info</button>
-            </div>
-            <div id="skillsMenuBox" class="menu-list hidden">
-                <div id="skillsList"></div>
-                <button class="menu-item" onclick="showMainMenu()">Back</button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -129,7 +139,7 @@
     <div class="modal-box jrpg-window">
         <div class="modal-header">BATTLEFIELD INFO</div>
         <div class="modal-body" id="infoModalBody" style="display:flex; gap:20px;"></div>
-        <button class="menu-item" style="text-align: center; margin-top:20px;" onclick="closeModals()">Close</button>
+        <button class="menu-item" style="display:block; margin: 25px auto 0;" onclick="closeModals()">Close</button>
     </div>
 </div>
 
