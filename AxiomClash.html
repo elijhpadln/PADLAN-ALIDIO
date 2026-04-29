@@ -1,0 +1,3640 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axiom Clash - RPG Battle</title>
+    <link rel="icon" type="image/gif" href="assets/icon.gif">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CUSTOM FONT LOADER --- */
+        @font-face {
+            font-family: 'CustomPixelFont';
+            src: url('assets/myfont.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        :root {
+            --bg-dark: #0f0a1a;
+            --pixel-gold: #ffd700;
+            --pixel-hp: #e74c3c;
+            --pixel-mp: #3498db;
+            --panel: #161b22;
+            --rps-text-color: #3B2F1E;
+            --rps-border: #2F2F2F;
+            --rps-border-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg-dark);
+            font-family: 'CustomPixelFont', sans-serif;
+            color: white;
+            overflow: hidden;
+            image-rendering: pixelated;
+            cursor: url('assets/cursor.png'), auto;
+        }
+
+        button,
+        .menu-item,
+        .pause-menu-item,
+        .cc,
+        .cancel-target,
+        .targetable,
+        #pause-btn,
+        .close-x,
+        .pick-hand,
+        #new-game-btn,
+        .close-btn {
+            cursor: url('assets/cursor_pointer.png'), pointer !important;
+            outline: none;
+            pointer-events: auto;
+        }
+
+        /* SCREEN VISIBILITY */
+        .screen {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .paused-anim * {
+            animation-play-state: paused !important;
+        }
+
+        /* TRANSITIONS */
+        .iris-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            box-shadow: 0 0 0 300vw #000;
+            background: transparent;
+            z-index: 9999;
+            pointer-events: none;
+            width: 300vw;
+            height: 300vw;
+        }
+
+        .iris-closing {
+            animation: irisClose 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: all;
+        }
+
+        .iris-opening {
+            animation: irisOpen 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            pointer-events: none;
+        }
+
+        @keyframes irisClose {
+            0% {
+                width: 300vw;
+                height: 300vw;
+            }
+
+            100% {
+                width: 0px;
+                height: 0px;
+            }
+        }
+
+        @keyframes irisOpen {
+            0% {
+                width: 0px;
+                height: 0px;
+            }
+
+            100% {
+                width: 300vw;
+                height: 300vw;
+            }
+        }
+
+        /* MENUS & PARALLAX */
+        #menuScreen {
+            background-color: #87CEEB;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        #menu-scene-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .parallax-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+        }
+
+        #layer-sky {
+            background-image: url('assets/sky.png');
+        }
+
+        #layer-grass {
+            background-image: url('assets/grass.png');
+        }
+
+        #layer-tree {
+            background-image: url('assets/tree.png');
+        }
+
+        #layer-flowers {
+            background-image: url('assets/flowers.png');
+        }
+
+        .vignette {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .title-container,
+        .press-start-wrap {
+            position: relative;
+            z-index: 5;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: clamp(2.5rem, 9vw, 5rem);
+            color: var(--pixel-gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 4px 4px 0 #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000;
+            margin-bottom: 60px;
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        .press-start-text {
+            font-size: 1.5rem;
+            color: #ffffff;
+            text-shadow: 3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            animation: blink 1s step-end infinite;
+            cursor: pointer;
+            pointer-events: all;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+        .press-start-text span {
+            color: #ffffff;
+        }
+
+        /* WEBLINK ICON */
+        .weblink-icon {
+            width: 64px;
+            height: 64px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+        }
+
+        .weblink-icon:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .social-links-container {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+        }
+
+
+        /* INFO ICON */
+        .info-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: #3498db;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 14px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            vertical-align: middle;
+            margin-left: 10px;
+            line-height: 1;
+            pointer-events: all;
+            position: relative;
+            z-index: 50;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .info-icon-btn:hover {
+            background: var(--pixel-gold);
+            transform: scale(1.2);
+        }
+
+        .cc-name {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #menu-cat {
+            position: absolute;
+            right: 22%;
+            bottom: 15%;
+            width: 128px;
+            height: 128px;
+            background: url('assets/menu_cat.png') left center;
+            background-size: 400% 100%;
+            image-rendering: pixelated;
+            z-index: 3;
+            animation: catIdle 0.8s steps(4) infinite;
+        }
+
+        @keyframes catIdle {
+            from {
+                background-position: 0 0;
+            }
+
+            to {
+                background-position: -512px 0;
+            }
+        }
+
+        /* TEAM SELECT */
+        #teamScreen {
+            background: var(--bg-dark);
+            overflow: hidden;
+        }
+
+        #teamScreen.active {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 0;
+            width: 100%;
+            max-height: 100vh;
+        }
+
+        .screen-title {
+            color: var(--pixel-gold);
+            font-size: 1.8rem;
+            text-shadow: 3px 3px 0 #000;
+            margin-top: 10px;
+        }
+
+        .screen-subtitle {
+            font-size: 1rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .creature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .cc {
+            position: relative;
+            background: transparent;
+            padding: 0.5rem;
+            text-align: center;
+            transition: transform 0.1s;
+            border: none;
+            box-shadow: none;
+        }
+
+        .cc:hover {
+            transform: translateY(-4px);
+        }
+
+        .portrait-frame {
+            width: 110px;
+            height: 154px;
+            background: url('assets/20250425portraitFrame-Sheet.png') no-repeat center center;
+            background-size: 100% 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 5px;
+            image-rendering: pixelated;
+            transition: filter 0.2s;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .portrait-frame:hover {
+            transform: scale(1.05);
+        }
+
+        .cc.selected .portrait-frame {
+            filter: drop-shadow(0 0 10px var(--pixel-gold));
+        }
+
+        .cc-name {
+            font-size: 0.9rem;
+            text-shadow: 2px 2px 0 #000;
+            margin-top: 5px;
+        }
+
+        .team-preview {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: #000;
+            padding: 1rem;
+            border: 4px solid #4a3728;
+            margin-top: 5px;
+        }
+
+        .team-slot {
+            width: 75px;
+            height: 105px;
+            border: 2px dashed #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #555;
+            image-rendering: pixelated;
+            overflow: hidden;
+            background: transparent;
+            border-radius: 4px;
+        }
+
+        .team-slot.filled {
+            border: none;
+            background: url('assets/20250425portraitFrame-Sheet.png') no-repeat center center;
+            background-size: 100% 100%;
+            filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5));
+        }
+
+        .btn-start {
+            width: max-content;
+            background: var(--pixel-gold);
+            border: 4px solid #4a3728;
+            color: #000;
+            padding: 15px 20px;
+            font-size: 1rem;
+            font-family: 'CustomPixelFont', sans-serif;
+            box-shadow: 0 6px 0 #000;
+            transition: 0.1s;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #000;
+        }
+
+        .btn-start:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #000;
+        }
+
+        .btn-start:disabled {
+            background: #555;
+            border-color: #333;
+            color: #888;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* BATTLE STAGE */
+        #battleScreen {
+            background: #000;
+        }
+
+        .stage {
+            flex: 1;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-image: url('assets/battle_bg.png');
+            background-size: cover;
+            background-position: top left;
+            background-repeat: no-repeat;
+            transition: transform 0.1s;
+        }
+
+        .stage.screen-shake {
+            animation: shake 0.3s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        #entitiesLayer {
+            position: absolute;
+            inset: 0;
+        }
+
+        .entity-wrap {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            z-index: 5;
+            transform-origin: bottom center;
+        }
+
+        .platform {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            z-index: 1;
+            pointer-events: none;
+            filter: blur(2px);
+        }
+
+        .sprite {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 350px;
+            height: 350px;
+            z-index: 2;
+            image-rendering: pixelated;
+            pointer-events: none;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+        }
+
+        .entity-wrap.is-active {
+            z-index: 50;
+        }
+
+        .entity-wrap.is-active .sprite {
+            filter: drop-shadow(0 0 15px var(--pixel-gold));
+        }
+
+        /* ==========================
+   BATTLE HUD (OLD LAYOUT)
+   ========================== */
+        #game-hud {
+            position: absolute;
+            inset: 0;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* Narrator / Log */
+        #battle-log-hud {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: max-content;
+            min-width: 400px;
+            text-align: center;
+            z-index: 105;
+        }
+
+        #battle-log {
+            padding: 10px 25px;
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            border-style: solid;
+            border-width: 18px;
+            border-image: url('assets/20240707dragon9SlicesA.png') 32 fill stretch;
+            opacity: 0;
+            transition: opacity 0.3s ease-out;
+            pointer-events: none;
+        }
+
+        /* HORIZONTAL ASCENDING STAIR-STEP TOP HUD */
+        #top-hud {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        .side-hud {
+            display: flex;
+            flex-direction: row;
+            gap: 40px;
+        }
+
+        .vs-text {
+            position: relative;
+            font-family: 'CustomPixelFont', sans-serif;
+            font-size: 3rem;
+            color: white;
+            text-shadow: 4px 4px 0 #000;
+            margin-top: 55px;
+        }
+
+        .entity-stats {
+            position: relative;
+            width: 170px;
+            transition: opacity 0.3s, filter 0.3s, margin 0.3s;
+        }
+
+        /* FLAT ALIGNMENT FOR ALL ENTITY STATS */
+        .left-hud .entity-stats:nth-child(1) {
+            margin-top: 0px;
+        }
+
+        .left-hud .entity-stats:nth-child(2) {
+            margin-top: 0px;
+        }
+
+        .left-hud .entity-stats:nth-child(3) {
+            margin-top: 0px;
+        }
+
+        .right-hud .entity-stats:nth-child(1) {
+            margin-top: 0px;
+        }
+
+        .right-hud .entity-stats:nth-child(2) {
+            margin-top: 0px;
+        }
+
+        .right-hud .entity-stats:nth-child(3) {
+            margin-top: 0px;
+        }
+
+        .entity-stats.dead {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .entity-stat-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .right-hud .entity-stat-name {
+            justify-content: flex-end;
+        }
+
+        /* TURN INDICATOR (Moved here from old location) */
+        .turn-indicator {
+            width: 24px;
+            height: 24px;
+            background-image: url('assets/gui_cursor00.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            visibility: hidden;
+        }
+
+        .turn-indicator.active {
+            visibility: visible;
+            animation: pointerBounce 0.6s ease-in-out infinite;
+        }
+
+        @keyframes pointerBounce {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            50% {
+                transform: translateX(-6px);
+            }
+        }
+
+        /* BAR FRAME & STATS */
+        .entity-stat-bar {
+            position: relative;
+            width: 100%;
+            height: 26px;
+            margin-bottom: 5px;
+            background: url('assets/bar_frame.png') no-repeat center;
+            background-size: 100% 100%;
+            image-rendering: pixelated;
+            overflow: hidden;
+        }
+
+        .entity-stat-track {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            top: 9px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        .entity-stat-fill {
+            position: relative;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease-out;
+            border-right: 1px solid rgba(255, 255, 255, 0.85);
+        }
+
+        .entity-stat-fill.hp-fill {
+            background-color: #e74c3c;
+            background-image: url('assets/hp_fill.png');
+            background-repeat: repeat-x;
+            background-size: auto 100%;
+        }
+
+        .entity-stat-fill.mp-fill {
+            background-color: #3498db;
+            background-image: url('assets/mp_fill.png');
+            background-repeat: repeat-x;
+            background-size: auto 100%;
+        }
+
+        .stat-bar-text {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9rem;
+            color: #fff;
+            text-shadow: 1px 1px 0 #000;
+            z-index: 10;
+            pointer-events: none;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* BOTTOM COMMAND PANEL */
+        #bottom-hud {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        #command-panel {
+            position: relative;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            width: max-content;
+            min-width: 450px;
+            padding: 10px 25px;
+            background: transparent;
+            border-style: solid;
+            border-width: 18px;
+            border-image: url('assets/20240707dragon9SlicesA.png') 32 fill stretch;
+            z-index: 2000;
+            pointer-events: none;
+            opacity: 0.5;
+            transition: 0.2s;
+        }
+
+        #command-panel.active-turn {
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        .menu-list {
+            display: flex;
+            flex-direction: row;
+            gap: 8px;
+        }
+
+        .menu-list.hidden {
+            display: none !important;
+        }
+
+        #mainMenuBox.menu-list {
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+        }
+
+        /* SKILLS MENU */
+        #skillsMenuBox {
+            position: absolute;
+            left: 50%;
+            bottom: 100%;
+            margin-bottom: 15px;
+            transform: translateX(-50%);
+            width: max-content;
+            min-width: 320px;
+            background: transparent;
+            border-style: solid;
+            border-width: 18px;
+            border-image: url('assets/20250420manaSoul9SlicesB-Sheet.png') 32 fill stretch;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        #skillsList {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 100%;
+            gap: 10px;
+        }
+
+        /* MENU ITEMS */
+        .menu-item {
+            font-family: 'CustomPixelFont', sans-serif;
+            font-size: 1.6rem;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+            padding: 5px 10px;
+            transition: 0.1s;
+            color: #fff;
+            background: transparent;
+            border: none;
+            text-align: center;
+            /* FIXED: Hitbox improvement */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+            min-height: 40px;
+            cursor: url('assets/cursor_pointer.png'), pointer !important;
+        }
+
+        .menu-item:hover {
+            color: var(--pixel-gold);
+            transform: scale(1.1) translateY(-2px);
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 0 8px rgba(255, 215, 0, 0.6);
+        }
+
+        .menu-item.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        #skillsList .menu-item {
+            border-style: solid;
+            border-width: 14px;
+            border-image: url('assets/20240707dragon9SlicesA.png') 32 fill stretch;
+            justify-content: flex-start;
+            gap: 15px;
+            padding: 8px 12px;
+        }
+
+        .skill-icon {
+            width: 24px;
+            height: 24px;
+            image-rendering: pixelated;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            border: 1px solid #000;
+            pointer-events: none;
+        }
+
+        .skill-icon-placeholder {
+            width: 24px;
+            height: 24px;
+            pointer-events: none;
+        }
+
+        .skill-mp-cost {
+            font-size: 1rem;
+            color: var(--pixel-mp);
+            text-shadow: 1px 1px 0 #000;
+            margin-left: auto;
+            padding-left: 15px;
+            pointer-events: none;
+        }
+
+        /* TARGETING */
+        .targetable {
+            cursor: crosshair !important;
+            outline: none;
+        }
+
+        .entity-wrap.targetable:hover::after,
+        .entity-wrap.targetable.focused-target::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 180px;
+            background-image: url('assets/target1.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            image-rendering: pixelated;
+            z-index: 100;
+            pointer-events: none;
+            animation: animateTargetTwoImages 0.6s infinite;
+        }
+
+        .entity-wrap.targetable:hover,
+        .entity-wrap.targetable.focused-target {
+            transform: translateX(-50%) scale(1.1) !important;
+            z-index: 60;
+        }
+
+        @keyframes animateTargetTwoImages {
+
+            0%,
+            49% {
+                background-image: url('assets/target1.png');
+            }
+
+            50%,
+            100% {
+                background-image: url('assets/target2.png');
+            }
+        }
+
+        #targetMenuOverlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            text-align: center;
+            z-index: 190;
+            pointer-events: none;
+        }
+
+        .target-msg {
+            display: block;
+            font-size: 3.5rem;
+            color: #ff7e78;
+            text-shadow: 4px 4px 0 #000;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .cancel-target {
+            font-size: 1.8rem;
+            color: white;
+            text-shadow: 3px 3px 0 #000;
+            pointer-events: auto;
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 8px 20px;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            width: max-content;
+        }
+
+        .cancel-target:hover {
+            color: var(--pixel-gold);
+        }
+
+
+        /* PAUSE & INFO MODALS */
+        /* FIXED: Pause button cursor and hitbox */
+        #pause-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 48px;
+            height: 48px;
+            background: url('assets/pause_icon.png') no-repeat center;
+            background-size: contain;
+            z-index: 9999;
+            filter: drop-shadow(2px 2px 0 #000);
+            transition: 0.1s;
+            cursor: url('assets/cursor_pointer.png'), pointer !important;
+            pointer-events: auto;
+        }
+
+        #pause-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .pause-box {
+            background: url('assets/parchment.png') no-repeat center;
+            background-size: 100% 100%;
+            width: 350px;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            filter: drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.5));
+            padding: 40px;
+            position: relative;
+        }
+
+        .close-x {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            width: 32px;
+            height: 32px;
+            background: url('assets/close_icon.png') no-repeat center;
+            background-size: contain;
+            transition: 0.1s;
+            cursor: pointer;
+            z-index: 10;
+            pointer-events: auto;
+        }
+
+        .close-x:hover {
+            transform: scale(1.1);
+        }
+
+        .pause-title {
+            font-size: 2rem;
+            color: #4a3728;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 0 #fff;
+        }
+
+        .pause-menu-item {
+            width: 220px;
+            background: #69db7c;
+            border: 4px solid #4a3728;
+            color: #000;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2), 0 4px 0 #222;
+            transition: 0.1s;
+            font-size: 1.2rem;
+            display: block;
+            box-sizing: border-box;
+            margin: 0 auto;
+            pointer-events: auto;
+        }
+
+        .pause-menu-item:hover {
+            background: #8ce99a;
+            transform: translateY(-2px);
+            box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.2), 0 6px 0 #222;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* INFO MODAL */
+        .modal-box {
+            padding: 35px;
+            width: 900px;
+            max-width: 95%;
+            color: #fff;
+            background: transparent;
+            border-style: solid;
+            border-width: 18px;
+            border-image: url('assets/20250420manaSoul9SlicesC-Sheet.png') 32 fill stretch;
+            display: flex;
+            flex-direction: column;
+            max-height: 85vh;
+        }
+
+        .modal-header {
+            color: var(--pixel-gold);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 0 #000;
+            flex-shrink: 0;
+        }
+
+        .modal-body {
+            display: flex;
+            gap: 20px;
+            overflow: hidden;
+            flex: 1;
+        }
+
+        .info-col {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            border: 2px solid #2d2116;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .info-col h3 {
+            font-size: 1rem;
+            color: var(--pixel-gold);
+            padding: 15px;
+            text-shadow: 1px 1px 0 #000;
+            margin: 0;
+            text-align: center;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .info-col-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .info-col-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .info-col-scroll::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .info-col-scroll::-webkit-scrollbar-thumb {
+            background: var(--pixel-gold);
+            border-radius: 4px;
+        }
+
+        .info-row {
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+            padding: 15px 0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-icon-frame {
+            width: 90px;
+            height: 90px;
+            background: url('assets/20250425compass-Sheet.png') no-repeat center center;
+            background-size: contain;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            image-rendering: pixelated;
+            flex-shrink: 0;
+        }
+
+        .info-icon-frame canvas {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .info-skill-badge {
+            font-size: 0.7rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 3px 6px;
+            border: 1px solid #555;
+            border-radius: 4px;
+            color: #e8dcc4;
+            white-space: nowrap;
+        }
+
+        /* FLOATING NUMBERS & GAME OVER */
+        .fnum {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+            font-size: 1.2rem;
+            animation: numUp 1.2s ease forwards;
+            text-shadow: 3px 3px 0 #000;
+        }
+
+        .fnum.dmg {
+            color: #ff5252;
+        }
+
+        .fnum.heal {
+            color: #69db7c;
+        }
+
+        .fnum.shld {
+            color: #90caf9;
+        }
+
+        .fnum.crit {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        #gameoverScreen {
+            background: var(--bg-dark);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 5000;
+        }
+
+        .go-title {
+            font-size: 6rem;
+            text-shadow: 4px 4px 0 #000;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .go-sub {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        #gameoverScreen .btn-start {
+            width: 260px;
+            font-size: 1.4rem;
+            text-align: center;
+            padding: 15px 0;
+            display: inline-block;
+        }
+
+        /* ANIMATIONS */
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes titleFloat {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes hit {
+            0% {
+                transform: translateX(-50%);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: translateX(calc(-50% - 15px));
+                filter: brightness(2) drop-shadow(0 0 10px red);
+            }
+
+            100% {
+                transform: translateX(-50%);
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes hitE {
+            0% {
+                transform: translateX(-50%);
+                filter: brightness(1);
+            }
+
+            50% {
+                transform: translateX(calc(-50% + 15px));
+                filter: brightness(2) drop-shadow(0 0 10px red);
+            }
+
+            100% {
+                transform: translateX(-50%);
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes numUp {
+            0% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -80px);
+            }
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
+
+        /* VFX */
+        @keyframes vfxSpawn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .vfx-sprite {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            pointer-events: none;
+            z-index: 120;
+            image-rendering: pixelated;
+        }
+
+        .vfx-sprite.heal {
+            animation: vfxSpawn 1.2s ease-out forwards;
+        }
+
+        .vfx-sprite.slash {
+            animation: vfxSpawn 0.675s ease-out forwards;
+        }
+
+        .vfx-sprite.smoke {
+            animation: vfxSpawn 0.8s ease-out forwards;
+        }
+
+        .vfx-sprite.mage-hit {
+            animation: vfxSpawn 0.375s ease-out forwards;
+        }
+
+        .vfx-sprite.explosion {
+            animation: vfxSpawn 1.125s ease-out forwards;
+        }
+
+        /* RPS */
+        #rpsScreen {
+            background-image: url('assets/battle_bg.png');
+            background-size: cover;
+            background-position: bottom;
+        }
+
+        #rpsScreen h1,
+        #rpsScreen p {
+            font-family: 'CustomPixelFont', sans-serif;
+        }
+
+        .pick-hand-menu {
+            position: fixed;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 1;
+            transition: background 160ms steps(3) 100ms;
+        }
+
+        .overlay-exit {
+            background-color: rgba(0, 0, 0, 0);
+        }
+
+        .menu-head {
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            padding: 6px 0 8px 0;
+            border-bottom: 6px solid var(--rps-border);
+            background-color: #FBB762;
+        }
+
+        .menu-head h1 {
+            color: #2F2F2F;
+            font-weight: normal;
+        }
+
+        .pick-hand-container {
+            position: relative;
+            background-color: #E6E2BD;
+            width: fit-content;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(0) translateY(0);
+            opacity: 1;
+            transition: transform 280ms steps(7), opacity 280ms steps(7);
+            border: 6px solid var(--rps-border);
+            border-radius: var(--rps-border-radius);
+            overflow: hidden;
+            box-shadow: 0 0 0 1px #2B2B2B inset, 2px 2px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        .menu-exit {
+            transform: translateX(6px) translateY(-50%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .pick-hand-content {
+            display: grid;
+            padding: 36px;
+            gap: 32px;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            place-items: center;
+            align-items: flex-end;
+            grid-template-areas: "rock rock" "scissor paper";
+        }
+
+        #pick-rock {
+            grid-area: rock;
+        }
+
+        #pick-paper {
+            grid-area: paper;
+        }
+
+        #pick-scissor {
+            grid-area: scissor;
+        }
+
+        .pick-hand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            width: max-content;
+        }
+
+        .pick-hand img {
+            width: 85px;
+        }
+
+        .pick-hand p {
+            font-size: 1.3rem;
+            color: #7D4400;
+            font-weight: bold;
+        }
+
+        #rps-main {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .player-container,
+        .cpu-container {
+            background-color: transparent;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 0;
+            justify-content: flex-start;
+            gap: 20px;
+        }
+
+        .player-container h1,
+        .cpu-container h1 {
+            color: white;
+            text-shadow: 3px 3px 0 #000;
+            font-size: 2.5rem;
+            font-weight: normal;
+            margin-top: 5vh;
+        }
+
+        .hearts {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5vh;
+        }
+
+        .hand-wrap {
+            display: grid;
+            place-items: center;
+            height: 200px;
+            margin-top: auto;
+            margin-bottom: 25vh;
+        }
+
+        .new-game-overlay {
+            background-color: rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hide-new-game-menu {
+            display: none;
+        }
+
+        .new-game-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #E6E2BD;
+            padding: 20px;
+            border-radius: var(--rps-border-radius);
+            border: 6px solid var(--rps-border);
+            box-shadow: 0 0 0 1px #2B2B2B inset, 2px 2px 0 rgba(0, 0, 0, 0.25);
+            gap: 15px;
+        }
+
+        #new-game-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 240px;
+            background: #FBB762;
+            color: #3A2A1A;
+            font-family: inherit;
+            font-size: 1.1rem;
+            padding: 15px 18px;
+            border-radius: 4px;
+            box-shadow: 0 0 0 2px #2B1B0E inset, 2px 2px 0 rgba(0, 0, 0, 0.25);
+            border: none;
+            cursor: pointer;
+            transition: transform 60ms steps(1), box-shadow 60ms steps(1);
+            text-align: center;
+        }
+
+        #new-game-btn:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 0 0 0 2px #2B1B0E inset, 3px 3px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        #new-game-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 0 0 0 2px #2B1B0E inset, 1px 1px 0 rgba(0, 0, 0, 0.25);
+        }
+
+        /* RPS ANIMATIONS */
+        @keyframes pixelFloat {
+            0% {
+                transform: translate(0px, 0px);
+            }
+
+            25% {
+                transform: translate(0px, -3px);
+            }
+
+            50% {
+                transform: translate(3px, -4px);
+            }
+
+            75% {
+                transform: translate(0px, -3px);
+            }
+
+            100% {
+                transform: translate(0px, 0px);
+            }
+        }
+
+        #pick-rock:hover img,
+        #pick-paper:hover img,
+        #pick-scissor:hover img {
+            animation: pixelFloat 0.6s steps(1) infinite;
+        }
+
+        .player-hand {
+            height: 160px;
+            display: inline-block;
+            animation: pixelFloat 0.7s steps(1) infinite;
+        }
+
+        .cpu-hand {
+            height: 160px;
+            display: inline-block;
+            animation: pixelFloat 0.7s steps(1) infinite reverse;
+            animation-delay: 0.1s;
+        }
+
+        .shake {
+            animation: throw 700ms steps(1) 1;
+        }
+
+        .hand-damage {
+            animation: sideDamage 420ms steps(1) 1;
+        }
+
+        .heart-damage {
+            animation: heartDamage 1.5s steps(1) 1 forwards;
+        }
+
+        @keyframes throw {
+            0% {
+                transform: translate(0px, 0px);
+            }
+
+            16% {
+                transform: translate(0px, 13px);
+            }
+
+            33% {
+                transform: translate(0px, 0px);
+            }
+
+            50% {
+                transform: translate(0px, 13px);
+            }
+
+            66% {
+                transform: translate(0px, 0px);
+            }
+
+            83% {
+                transform: translate(0px, 15px);
+            }
+
+            100% {
+                transform: translate(0px, 0px);
+            }
+        }
+
+        @keyframes sideDamage {
+            0% {
+                filter: none;
+                transform: translate(0px, 0px);
+            }
+
+            8% {
+                filter: brightness(1.35) contrast(1.2);
+            }
+
+            16% {
+                filter: none;
+            }
+
+            24% {
+                filter: brightness(1.35) contrast(1.2);
+            }
+
+            32% {
+                filter: none;
+            }
+
+            40% {
+                transform: translate(-3px, 2px);
+            }
+
+            50% {
+                transform: translate(3px, -2px);
+            }
+
+            60% {
+                transform: translate(-3px, -1px);
+            }
+
+            70% {
+                transform: translate(3px, 1px);
+            }
+
+            80% {
+                transform: translate(-2px, 2px);
+            }
+
+            90% {
+                transform: translate(2px, -2px);
+            }
+
+            100% {
+                filter: none;
+                transform: translate(0px, 0px);
+            }
+        }
+
+        @keyframes heartDamage {
+            0% {
+                opacity: 1;
+                transform: translate(0px, 0px);
+            }
+
+            8% {
+                opacity: 0;
+            }
+
+            16% {
+                opacity: 1;
+            }
+
+            25% {
+                transform: translate(-2px, 1px);
+            }
+
+            32% {
+                transform: translate(3px, -1px);
+            }
+
+            38% {
+                transform: translate(-3px, 2px);
+            }
+
+            44% {
+                transform: translate(2px, -2px);
+            }
+
+            50% {
+                transform: translate(-2px, 0px);
+            }
+
+            56% {
+                transform: translate(3px, 1px);
+            }
+
+            62% {
+                transform: translate(-3px, -1px);
+            }
+
+            68% {
+                transform: translate(2px, 2px);
+            }
+
+            80% {
+                transform: translate(0px, 10px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(0px, 0px);
+                opacity: 0;
+            }
+        }
+
+        /* ACTIVE HERO DISPLAY */
+        #active-hero-display {
+            text-align: center;
+            color: #fff !important;
+            margin-bottom: 20px !important;
+            font-size: 2rem !important;
+            text-shadow: 0 0 10px var(--pixel-gold), 0 0 20px var(--pixel-gold), 2px 2px 0 #000 !important;
+            animation: glowPulse 1.5s infinite alternate;
+        }
+
+        @keyframes glowPulse {
+            0% {
+                filter: drop-shadow(0 0 5px var(--pixel-gold));
+                transform: scale(1);
+            }
+
+            100% {
+                filter: drop-shadow(0 0 15px var(--pixel-gold));
+                transform: scale(1.05);
+            }
+        }
+
+        .blinking-text {
+            animation: blinkText 1s infinite;
+            color: var(--pixel-gold);
+        }
+
+        @keyframes blinkText {
+
+            0%,
+            49% {
+                opacity: 1;
+            }
+
+            50%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        /* KEYBOARD NAVIGATION HIGHLIGHTS */
+        .menu-item:focus {
+            transform: scale(1.05);
+            filter: brightness(1.3) drop-shadow(0 0 8px var(--pixel-gold));
+            outline: 2px solid var(--pixel-gold);
+            color: var(--pixel-gold);
+        }
+
+        .btn-start:focus {
+            transform: translate(-1px, -1px);
+            box-shadow: 0 0 0 2px #2B1B0E inset, 3px 3px 0 rgba(0, 0, 0, 0.25);
+            outline: none;
+        }
+
+        .cc:focus {
+            transform: translateY(-5px);
+            outline: 4px solid var(--pixel-gold);
+        }
+
+        .pick-hand:focus {
+            transform: translateY(-5px);
+            outline: none;
+            filter: brightness(1.2) drop-shadow(0px 0px 10px var(--pixel-gold));
+        }
+
+        .pause-menu-item:focus {
+            background: #8ce99a;
+            transform: translateY(-2px);
+            outline: none;
+            color: #2C3A47;
+        }
+
+        .cancel-target:focus,
+        .cancel-target.focused-target {
+            color: var(--pixel-gold);
+            text-shadow: 2px 2px 0 #000, 0 0 8px rgba(255, 215, 0, 0.6);
+            outline: none;
+            border-color: var(--pixel-gold);
+        }
+
+        .close-x:focus {
+            filter: brightness(1.5);
+            outline: none;
+        }
+
+        #new-game-btn:focus {
+            transform: translate(-1px, -1px);
+            box-shadow: 0 0 0 2px #2B1B0E inset, 3px 3px 0 rgba(0, 0, 0, 0.25);
+            outline: none;
+        }
+
+        .info-icon-btn:focus {
+            transform: scale(1.2);
+            background: var(--pixel-gold);
+            outline: 2px solid #fff;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="transition-overlay" class="iris-overlay hidden"></div>
+    <canvas id="transition-canvas"
+        style="position:fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:9999;"></canvas>
+    <div id="pause-btn" class="hidden" onclick="togglePause()"></div>
+
+    <!-- SCREEN 1: HOME MENU -->
+    <div id="menuScreen" class="screen active">
+        <div id="menu-scene-container">
+            <div id="layer-sky" class="parallax-layer"></div>
+            <div id="layer-grass" class="parallax-layer"></div>
+            <div id="layer-tree" class="parallax-layer"></div>
+            <div id="layer-flowers" class="parallax-layer"></div>
+            <div id="menu-cat"></div>
+        </div>
+        <div class="vignette"></div>
+        <div class="title-container">
+            <div class="game-title">AXIOM CLASH</div>
+        </div>
+        <div class="press-start-wrap">
+            <div class="press-start-text"><span>&lt;</span> PRESS START <span>&gt;</span></div>
+        </div>
+
+        <div class="social-links-container">
+            <!-- Website Link Icon -->
+            <a href="https://github.com/elijhpadln/PADLAN-ALIDIO.git" target="_blank" class="weblink-icon" id="weblink-btn-1" tabindex="0">
+                <img src="assets/icon.gif" alt="Website" style="width:100%; height:100%; image-rendering:pixelated;" onerror="this.src='assets/cursor.png'">
+            </a>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: TEAM SELECT -->
+    <div id="teamScreen" class="screen">
+        <div class="inner">
+            <div class="screen-title">ASSEMBLE YOUR PARTY</div>
+            <div class="screen-subtitle">SELECT 3 HEROES</div>
+            <div class="creature-grid" id="creatureGrid"></div>
+            <div class="team-preview">
+                <div class="tp-label">YOUR PARTY</div>
+                <div class="team-slot" id="slot0">?</div>
+                <div class="team-slot" id="slot1">?</div>
+                <div class="team-slot" id="slot2">?</div>
+                <button class="btn-start" id="confirmBtn" onclick="confirmTeam()" disabled>BATTLE!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 2.5: ROCK PAPER SCISSORS GAMBLE -->
+    <div id="rpsScreen" class="screen">
+        <div class="pick-hand-menu">
+            <div class="pick-hand-container">
+                <div class="menu-head" style="flex-direction: column; align-items: center; padding: 15px;">
+                    <h1>INITIATIVE GAMBLE</h1>
+                    <p
+                        style="font-size: 0.75rem; color: #555; margin-top: 5px; font-family: 'Rajdhani', sans-serif; font-weight: bold;">
+                        Win to strike first!</p>
+                </div>
+                <div class="pick-hand-content">
+                    <div id="pick-rock" class="pick-hand" data-hand="rock" tabindex="0"><img
+                            src="assets/pick-rock-hand.png" alt="">
+                        <p>ROCK</p>
+                    </div>
+                    <div id="pick-paper" class="pick-hand" data-hand="paper" tabindex="0"><img
+                            src="assets/pick-paper-hand.png" alt="">
+                        <p>PAPER</p>
+                    </div>
+                    <div id="pick-scissor" class="pick-hand" data-hand="scissor" tabindex="0"><img
+                            src="assets/pick-scissor-hand.png" alt="">
+                        <p>SCISSOR</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="new-game-overlay hide-new-game-menu">
+            <div class="new-game-content" style="text-align: center;">
+                <h1 id="rpsWinStatus" style="font-size: 2.5rem; margin-bottom: 10px;">WINNER</h1>
+                <p id="rpsBonusDesc" style="color:#7D4400; margin-bottom: 30px; font-size: 1.2rem;">Your party attacks
+                    first!</p>
+                <button id="new-game-btn">START BATTLE!</button>
+            </div>
+        </div>
+        <div id="rps-main">
+            <div class="player-container">
+                <h1>PLAYER</h1>
+                <div class="hearts"><img src="assets/life-heart.svg" width="40" alt="heart"></div>
+                <div class="hand-wrap"><img class="player-hand" src="assets/player-rock.png" alt=""></div>
+            </div>
+            <div class="cpu-container">
+                <h1>CPU</h1>
+                <div class="hearts"><img src="assets/life-heart.svg" width="40" alt="heart"></div>
+                <div class="hand-wrap"><img class="cpu-hand" src="assets/cpu-rock.png" alt=""></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: BATTLE -->
+    <div id="battleScreen" class="screen">
+        <div class="stage" id="stage">
+
+            <div id="game-hud">
+                <!-- TOP STAIR-STEP STATS -->
+                <div id="top-hud">
+                    <div id="ally-hud" class="side-hud left-hud"></div>
+                    <div class="vs-text">VS</div>
+                    <div id="enemy-hud" class="side-hud right-hud"></div>
+                </div>
+
+                <!-- BATTLE NARRATOR -->
+                <div id="battle-log-hud">
+                    <div id="battle-log" class="jrpg-window"></div>
+                </div>
+
+                <!-- BOTTOM COMMAND PANEL -->
+                <div id="bottom-hud">
+                    <div id="command-panel" class="jrpg-window">
+                        <!-- Added Display For Active Hero's Turn -->
+                        <div id="active-hero-display"
+                            style="text-align:center; color:var(--pixel-gold); margin-bottom:10px; font-size:1.2rem; text-shadow: 2px 2px 0 #000;">
+                        </div>
+                        <div id="mainMenuBox" class="menu-list">
+                            <button class="menu-item" onclick="handleStrike()">STRIKE</button>
+                            <button class="menu-item" id="skill-btn" onclick="showSkillsMenu()">SKILLS</button>
+                            <button class="menu-item" onclick="showInfoModal()">INFO</button>
+                        </div>
+                    </div>
+
+                    <div id="skillsMenuBox" class="jrpg-window hidden">
+                        <div id="skillsList"></div>
+                        <button class="menu-item" onclick="showMainMenu()">BACK</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="targetMenuOverlay" class="hidden">
+                <div class="target-msg">SELECT TARGET</div>
+                <div class="cancel-target" onclick="cancelTargeting()" tabindex="0">[ CANCEL ]</div>
+            </div>
+            <div id="entitiesLayer"></div>
+        </div>
+    </div>
+
+    <!-- PAUSE MODAL -->
+    <div id="pauseScreen" class="modal-overlay hidden">
+        <div class="pause-box">
+            <div class="close-x" onclick="resumeGame()" tabindex="0"></div>
+            <div class="pause-title">PAUSED</div>
+            <div class="pause-menu-item" onclick="resumeGame()" tabindex="0">RESUME</div>
+            <div class="pause-menu-item" onclick="restartBattle()" tabindex="0">RESTART</div>
+            <div class="pause-menu-item" onclick="quitToMenu()" tabindex="0">QUIT</div>
+        </div>
+    </div>
+
+    <!-- INFO MODAL -->
+    <div id="infoModal" class="modal-overlay hidden">
+        <div class="modal-box jrpg-window">
+            <div class="modal-header">BATTLEFIELD INFO</div>
+            <div class="modal-body" id="infoModalBody" style="display:flex; gap:20px;"></div>
+            <button class="menu-item" style="display:block; margin: 25px auto 0;" onclick="closeModals()">Close</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: GAME OVER -->
+    <div id="gameoverScreen" class="screen">
+        <div class="go-title" id="goTitle">—</div>
+        <div class="go-sub" id="goSub">—</div>
+        <div style="margin-top: 30px; display: flex; gap: 15px;">
+            <button class="btn-start" onclick="playAgain()">PLAY AGAIN</button>
+            <button class="btn-start" onclick="quitToMenu()">MENU</button>
+        </div>
+    </div>
+
+    <script>
+        const ANIMATION_ASSETS = {
+            // --- VFX EFFECTS ---
+            vfx: {
+                slash_1: { src: 'assets/Slash_color4_frame1.png', frames: 1 },
+                slash_2: { src: 'assets/Slash_color4_frame2.png', frames: 1 },
+                slash_3: { src: 'assets/Slash_color4_frame3.png', frames: 1 },
+                slash_4: { src: 'assets/Slash_color4_frame4.png', frames: 1 },
+                slash_5: { src: 'assets/Slash_color4_frame5.png', frames: 1 },
+                slash_6: { src: 'assets/Slash_color4_frame6.png', frames: 1 },
+                slash_7: { src: 'assets/Slash_color4_frame7.png', frames: 1 },
+                slash_8: { src: 'assets/Slash_color4_frame8.png', frames: 1 },
+                slash_9: { src: 'assets/Slash_color4_frame9.png', frames: 1 },
+                smoke_1: { src: 'assets/Smoke_VFX_C1.png', frames: 1 },
+                smoke_2: { src: 'assets/Smoke_VFX_C2.png', frames: 1 },
+                smoke_3: { src: 'assets/Smoke_VFX_C3.png', frames: 1 },
+                smoke_4: { src: 'assets/Smoke_VFX_C4.png', frames: 1 },
+                smoke_5: { src: 'assets/Smoke_VFX_C5.png', frames: 1 },
+                smoke_6: { src: 'assets/Smoke_VFX_C6.png', frames: 1 },
+                smoke_7: { src: 'assets/Smoke_VFX_C7.png', frames: 1 },
+                smoke_8: { src: 'assets/Smoke_VFX_C8.png', frames: 1 },
+                mage_hit_1: { src: 'assets/Hit Effect.png', frames: 5 },
+                explosion_1: { src: 'assets/explosioneffect_1.png', frames: 1 },
+                explosion_2: { src: 'assets/explosioneffect_2.png', frames: 1 },
+                explosion_3: { src: 'assets/explosioneffect_3.png', frames: 1 },
+                explosion_4: { src: 'assets/explosioneffect_4.png', frames: 1 },
+                explosion_5: { src: 'assets/explosioneffect_5.png', frames: 1 },
+                explosion_6: { src: 'assets/explosioneffect_6.png', frames: 1 },
+                explosion_7: { src: 'assets/explosioneffect_7.png', frames: 1 },
+                explosion_8: { src: 'assets/explosioneffect_8.png', frames: 1 },
+                explosion_9: { src: 'assets/explosioneffect_9.png', frames: 1 },
+                explosion_10: { src: 'assets/explosioneffect_10.png', frames: 1 },
+                explosion_11: { src: 'assets/explosioneffect_11.png', frames: 1 },
+                explosion_12: { src: 'assets/explosioneffect_12.png', frames: 1 },
+                explosion_13: { src: 'assets/explosioneffect_13.png', frames: 1 },
+                explosion_14: { src: 'assets/explosioneffect_14.png', frames: 1 },
+                explosion_15: { src: 'assets/explosioneffect_15.png', frames: 1 },
+                heal_1: { src: 'assets/heal_1.png', frames: 1 },
+                heal_2: { src: 'assets/heal_2.png', frames: 1 },
+                heal_3: { src: 'assets/heal_3.png', frames: 1 },
+                heal_4: { src: 'assets/heal_4.png', frames: 1 },
+                heal_5: { src: 'assets/heal_5.png', frames: 1 },
+                heal_6: { src: 'assets/heal_6.png', frames: 1 },
+                heal_7: { src: 'assets/heal_7.png', frames: 1 },
+                heal_8: { src: 'assets/heal_8.png', frames: 1 },
+                heal_9: { src: 'assets/heal_9.png', frames: 1 },
+                heal_10: { src: 'assets/heal_10.png', frames: 1 },
+                heal_11: { src: 'assets/heal_11.png', frames: 1 },
+                heal_12: { src: 'assets/heal_12.png', frames: 1 },
+                heal_13: { src: 'assets/heal_13.png', frames: 1 },
+                heal_14: { src: 'assets/heal_14.png', frames: 1 },
+                heal_15: { src: 'assets/heal_15.png', frames: 1 },
+                heal_16: { src: 'assets/heal_16.png', frames: 1 }
+            },
+
+            // --- HEROES ---
+            archer: {
+                arrow: { src: 'assets/archer_arrow.png' }, attack1: { src: 'assets/archer_attack1.png' },
+                die: { src: 'assets/archer_dead.png' }, hurt: { src: 'assets/archer_hurt.png' },
+                idle: { src: 'assets/archer_idle.png' }, idle2: { src: 'assets/archer_idle2.png' },
+                jump: { src: 'assets/archer_jump.png' }, shot1: { src: 'assets/archer_shot1.png' },
+                shot2: { src: 'assets/archer_shot2.png' }
+            },
+            swordsman: {
+                attack1: { src: 'assets/swordsman_attack1.png' }, attack2: { src: 'assets/swordsman_attack2.png' },
+                attack3: { src: 'assets/swordsman_attack3.png' }, die: { src: 'assets/swordsman_dead.png' },
+                hurt: { src: 'assets/swordsman_hurt.png' }, idle: { src: 'assets/swordsman_idle.png' },
+                idle2: { src: 'assets/swordsman_idle2.png' }, jump: { src: 'assets/swordsman_jump.png' }
+            },
+            wizard: {
+                jump: { src: 'assets/wizard_jump.png' }, idle2: { src: 'assets/wizard_idle2.png' },
+                idle: { src: 'assets/wizard_idle.png' }, hurt: { src: 'assets/wizard_hurt.png' },
+                die: { src: 'assets/wizard_dead.png' }, attack3: { src: 'assets/wizard_attack3.png' },
+                attack2: { src: 'assets/wizard_attack2.png' }, attack1: { src: 'assets/wizard_attack1.png' }
+            },
+            enchantress: {
+                attack1: { src: 'assets/enchantress_attack1.png' }, attack2: { src: 'assets/enchantress_attack2.png' },
+                attack3: { src: 'assets/enchantress_attack3.png' }, attack4: { src: 'assets/enchantress_attack4.png' },
+                die: { src: 'assets/enchantress_dead.png' }, hurt: { src: 'assets/enchantress_hurt.png' },
+                idle: { src: 'assets/enchantress_idle.png' }, jump: { src: 'assets/enchantress_jump.png' }
+            },
+            knight: {
+                attack1: { src: 'assets/knight_attack1.png' }, attack2: { src: 'assets/knight_attack2.png' },
+                attack3: { src: 'assets/knight_attack3.png' }, attack4: { src: 'assets/knight_attack4.png' },
+                die: { src: 'assets/knight_dead.png' }, hurt: { src: 'assets/knight_hurt.png' },
+                idle: { src: 'assets/knight_idle.png' }, jump: { src: 'assets/knight_jump.png' }
+            },
+            musketeer: {
+                attack1: { src: 'assets/musketeer_attack1.png' }, attack2: { src: 'assets/musketeer_attack2.png' },
+                attack3: { src: 'assets/musketeer_attack3.png' }, attack4: { src: 'assets/musketeer_attack4.png' },
+                die: { src: 'assets/musketeer_dead.png' }, hurt: { src: 'assets/musketeer_hurt.png' },
+                idle: { src: 'assets/musketeer_idle.png' }, jump: { src: 'assets/musketeer_jump.png' }
+            },
+
+            // --- MONSTERS ---
+            firespirit: { idle: { src: 'assets/firespirit_idle.png' }, idle2: { src: 'assets/firespirit_idle_2.png' }, attack1: { src: 'assets/firespirit_attack.png' }, shot: { src: 'assets/firespirit_shot.png' }, charge: { src: 'assets/firespirit_charge.png' }, flame: { src: 'assets/firespirit_flame.png' }, explosion: { src: 'assets/firespirit_explosion.png' }, hurt: { src: 'assets/firespirit_hurt.png' }, die: { src: 'assets/firespirit_dead.png' }, jump: { src: 'assets/firespirit_hurt.png' } },
+            plent: { idle: { src: 'assets/plent_idle.png' }, attack1: { src: 'assets/plent_attack_1.png' }, attack2: { src: 'assets/plent_attack_2.png' }, attack3: { src: 'assets/plent_attack_3.png' }, poison: { src: 'assets/plent_poison.png' }, cloud_poison: { src: 'assets/plent_cloud_poison.png' }, disguise: { src: 'assets/plent_disguise.png' }, attack_disguise: { src: 'assets/plent_attack_disquise.png' }, hurt: { src: 'assets/plent_hurt.png' }, die: { src: 'assets/plent_dead.png' }, jump: { src: 'assets/plent_hurt.png' } },
+            skeleton: { idle: { src: 'assets/skeleton_idle.png' }, attack1: { src: 'assets/skeleton_attack_1.png' }, attack2: { src: 'assets/skeleton_attack_2.png' }, attack3: { src: 'assets/skeleton_attack_3.png' }, special_attack: { src: 'assets/skeleton_special_attack.png' }, jump: { src: 'assets/skeleton_jump.png' }, hurt: { src: 'assets/skeleton_hurt.png' }, die: { src: 'assets/skeleton_dead.png' } }
+        };
+
+        const CHARACTERS = [
+            {
+                id: 0, name: 'Archer', key: 'archer', color: '#2ecc71', isMelee: false, maxHp: 560, atk: 45, spd: 85, maxMp: 150,
+                desc: "A nimble marksman who strikes from afar with deadly precision. Prefers to stay at range to unleash a storm of arrows.",
+                moves: [
+                    { name: 'Volley', icon: 'assets/icon_volley.png', power: 75, mpCost: 20, anim: 'shot1' },
+                    { name: 'Piercing Arrow', icon: 'assets/icon_pierce.png', power: 110, mpCost: 35, anim: 'shot2' },
+                    { name: 'Rain of Arrows', icon: 'assets/icon_arrow_rain.png', power: 90, mpCost: 40, anim: 'jump', isAoe: true }
+                ]
+            },
+            {
+                id: 1, name: 'Swordsman', key: 'swordsman', color: '#e74c3c', isMelee: true, maxHp: 700, atk: 55, spd: 60, maxMp: 100,
+                desc: "A courageous frontline fighter excelling in close-quarters combat. Balanced heavily between raw damage and physical defense.",
+                moves: [
+                    { name: 'Cross Slash', icon: 'assets/icon_cross_slash.png', power: 90, mpCost: 25, anim: 'attack2' },
+                    { name: 'Blade Dance', icon: 'assets/icon_blade_dance.png', power: 120, mpCost: 50, anim: 'attack3', isAoe: true },
+                    { name: 'Defensive Stance', icon: 'assets/icon_defense.png', power: 0, mpCost: 20, anim: 'idle2', effect: 'defenseUp' }
+                ]
+            },
+            {
+                id: 2, name: 'Wizard', key: 'wizard', color: '#9b59b6', isMelee: false, maxHp: 420, atk: 65, spd: 55, maxMp: 200,
+                desc: "A master of the arcane arts, capable of unleashing devastating area magic or shifting the tide with powerful single-target spells.",
+                moves: [
+                    { name: 'Arcane Missiles', icon: 'assets/icon_arcane_missiles.png', power: 100, mpCost: 30, anim: 'attack2' },
+                    { name: 'Meteor', icon: 'assets/icon_meteor.png', power: 150, mpCost: 70, anim: 'attack3', isAoe: true },
+                    { name: 'Healing Light', icon: 'assets/icon_healing_light.png', power: 250, mpCost: 40, anim: 'jump', isHeal: true }
+                ]
+            },
+            {
+                id: 3, name: 'Enchantress', key: 'enchantress', color: '#e056fd', isMelee: false, maxHp: 455, atk: 60, spd: 65, maxMp: 180,
+                desc: "A mystical support caster who disrupts enemy formations and mends the wounds of her allies using ancient rejuvenation magic.",
+                moves: [
+                    { name: 'Mystic Orb', icon: 'assets/icon_mystic_orb.png', power: 95, mpCost: 30, anim: 'attack2' },
+                    { name: 'Astral Storm', icon: 'assets/icon_astral_storm.png', power: 130, mpCost: 60, anim: 'attack4', isAoe: true },
+                    { name: 'Rejuvenation', icon: 'assets/icon_rejuvenation.png', power: 220, mpCost: 35, anim: 'jump', isHeal: true }
+                ]
+            },
+            {
+                id: 4, name: 'Knight', key: 'knight', color: '#c0c0c0', isMelee: true, maxHp: 875, atk: 40, spd: 40, maxMp: 90,
+                desc: "An armored bulwark who protects the team and absorbs heavy damage. His attacks are slow, but hit with staggering, weighty force.",
+                moves: [
+                    { name: 'Shield Strike', icon: 'assets/icon_shield_strike.png', power: 80, mpCost: 15, anim: 'attack2' },
+                    { name: 'Holy Cleave', icon: 'assets/icon_holy_cleave.png', power: 100, mpCost: 40, anim: 'attack3', isAoe: true },
+                    { name: 'Fortify', icon: 'assets/icon_fortify.png', power: 0, mpCost: 30, anim: 'attack4', effect: 'defenseUp' }
+                ]
+            },
+            {
+                id: 5, name: 'Musketeer', key: 'musketeer', color: '#f1c40f', isMelee: true, maxHp: 490, atk: 55, spd: 75, maxMp: 120,
+                desc: "A cunning duelist blending quick swordplay with explosive firearms. High mobility allows her to quickly close gaps on targets.",
+                moves: [
+                    { name: 'Swift Strike', icon: 'assets/icon_quick_draw.png', power: 90, mpCost: 25, anim: 'attack2' },
+                    { name: 'Vital Point', icon: 'assets/icon_headshot.png', power: 140, mpCost: 50, anim: 'attack3' },
+                    { name: 'Blade Fury', icon: 'assets/icon_explosive_shot.png', power: 110, mpCost: 60, anim: 'attack4', isAoe: true }
+                ]
+            },
+
+            {
+                id: 6, name: 'Fire Spirit', key: 'firespirit', color: '#e67e22', isMelee: false, isEnemy: true, maxHp: 350, atk: 70, spd: 80, maxMp: 150,
+                desc: "A volatile elemental entity composed of pure, scorching flames. It lashes out indiscriminately against any living targets.",
+                moves: [
+                    { name: 'Fireball', power: 55, mpCost: 20, anim: 'shot' }, { name: 'Flame Dash', power: 75, mpCost: 35, anim: 'charge' }, { name: 'Inferno', power: 85, mpCost: 45, anim: 'flame' }, { name: 'Supernova', power: 90, mpCost: 60, anim: 'explosion', isAoe: true }
+                ]
+            },
+            {
+                id: 7, name: 'Plent', key: 'plent', color: '#27ae60', isMelee: true, isEnemy: true, maxHp: 960, atk: 45, spd: 45, maxMp: 100,
+                desc: "A mutated plant monster possessing tremendous vitality. It relies on natural camouflage and spreading toxic, suffocating spores.",
+                moves: [
+                    { name: 'Vine Whip', power: 45, mpCost: 15, anim: 'attack2' }, { name: 'Toxic Spit', power: 65, mpCost: 30, anim: 'poison' }, { name: 'Camouflage', power: 0, mpCost: 20, anim: 'disguise', effect: 'defenseUp' }, { name: 'Sneak Attack', power: 90, mpCost: 45, anim: 'attack_disguise' }, { name: 'Poison Cloud', power: 65, mpCost: 55, anim: 'cloud_poison', isAoe: true }
+                ]
+            },
+            {
+                id: 8, name: 'Skeleton', key: 'skeleton', color: '#ecf0f1', isMelee: true, isEnemy: true, maxHp: 560, atk: 60, spd: 65, maxMp: 120,
+                desc: "An undead warrior reanimated by dark magic. It attacks with relentless, tireless fury, feeling no pain as its bones are shattered.",
+                moves: [
+                    { name: 'Bone Slash', power: 55, mpCost: 20, anim: 'attack2' }, { name: 'Fatal Strike', power: 80, mpCost: 40, anim: 'attack3' }, { name: 'Leaping Strike', power: 75, mpCost: 35, anim: 'jump' }, { name: 'Bone Storm', power: 70, mpCost: 50, anim: 'special_attack', isAoe: true }
+                ]
+            }
+        ];
+
+        let G = { selectedTeam: [], p: null, c: null, predictedQueue: [], activeEnt: null, pendingMove: null, isAnimating: false, isPaused: false, activeTimers: new Set(), activeAnimations: [], lastBattleParams: null };
+        let uidCounter = 0;
+        let globalFrameCount = 0;
+        let animTick = 0;
+        const LOADED_IMAGES = {};
+        let imagesToLoad = 0;
+        let imagesLoaded = 0;
+
+        const SFX = {
+            btn: new Audio('assets/buttons.mp3'),
+            lose: new Audio('assets/lose.mp3'),
+            die: new Audio('assets/die.mp3'),
+            hurt: new Audio('assets/hurt.mp3'),
+            heal: new Audio('assets/healed.mp3'),
+            victoryRps: new Audio('assets/victory minigame.mp3')
+        };
+        function playSFX(name) {
+            if (SFX[name]) {
+                let snd = SFX[name].cloneNode();
+                snd.volume = 0.5;
+                snd.play().catch(e => console.log('Audio blocked:', e));
+            }
+        }
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('button') || e.target.closest('.menu-item') || e.target.closest('.pause-menu-item') || e.target.closest('.btn-start') || e.target.closest('.cc') || e.target.closest('.pick-hand') || e.target.closest('.close-x') || e.target.closest('#pause-btn') || e.target.closest('.cancel-target') || e.target.closest('.press-start-text')) {
+                playSFX('btn');
+            }
+        });
+
+        const BGM = {
+            title: new Audio('assets/xDeviruchi - Title Theme .wav'),
+            battle: new Audio('assets/xDeviruchi - Decisive Battle.wav'),
+            victory: new Audio('assets/BandCampDownloader.app - Victory_ - xDeviruchi.mp3'),
+            rps: new Audio('assets/headinthesand.ogg')
+        };
+        Object.values(BGM).forEach(a => a.loop = true);
+
+        let currentBGM = null;
+        let bgmNameActive = null;
+        let hasInteracted = false;
+        function playBGM(name) {
+            bgmNameActive = name;
+            if (name && currentBGM === BGM[name]) {
+                if (currentBGM.paused) currentBGM.play().catch(e => console.log('BGM blocked:', e));
+                return;
+            }
+            fadeBGM(() => {
+                if (name && BGM[name]) {
+                    currentBGM = BGM[name];
+                    currentBGM.volume = 0;
+                    currentBGM.currentTime = 0;
+                    currentBGM.play().catch(e => console.log('BGM blocked:', e));
+                    let vol = 0;
+                    let fadeInterval = setInterval(() => {
+                        vol += 0.05;
+                        if (vol >= 0.5) { vol = 0.5; clearInterval(fadeInterval); }
+                        if (currentBGM === BGM[name]) currentBGM.volume = vol;
+                    }, 100);
+                }
+            });
+        }
+        function fadeBGM(callback) {
+            if (!currentBGM) { if (callback) callback(); return; }
+            let vol = currentBGM.volume;
+            let fadingTrack = currentBGM;
+            currentBGM = null;
+            let fadeInterval = setInterval(() => {
+                vol -= 0.05;
+                if (vol <= 0) {
+                    vol = 0;
+                    fadingTrack.pause();
+                    fadingTrack.currentTime = 0;
+                    clearInterval(fadeInterval);
+                    if (callback) callback();
+                } else {
+                    fadingTrack.volume = Math.max(0, vol);
+                }
+            }, 100);
+        }
+
+        function pausableTimeout(cb, delay) {
+            let start = Date.now();
+            let remaining = delay;
+            let timerId;
+            let pt = {
+                pause: () => { clearTimeout(timerId); remaining -= (Date.now() - start); },
+                resume: () => { start = Date.now(); clearTimeout(timerId); if (remaining <= 0) remaining = 0; timerId = setTimeout(() => { cb(); G.activeTimers.delete(pt); }, remaining); },
+                clear: () => { clearTimeout(timerId); G.activeTimers.delete(pt); }
+            };
+            G.activeTimers.add(pt);
+            if (!G.isPaused) { pt.resume(); }
+            return pt;
+        }
+
+        const tryStartBGM = () => {
+            if (!hasInteracted) {
+                hasInteracted = true;
+                if (currentBGM && currentBGM.paused) {
+                    currentBGM.play().catch(e => console.log('BGM blocked:', e));
+                } else if (!currentBGM && bgmNameActive) {
+                    playBGM(bgmNameActive);
+                }
+            }
+        };
+        window.addEventListener('click', tryStartBGM);
+        window.addEventListener('keydown', tryStartBGM);
+
+        window.onload = () => {
+            document.querySelector('.press-start-text').innerHTML = "";
+            for (let char in ANIMATION_ASSETS) { for (let anim in ANIMATION_ASSETS[char]) imagesToLoad++; }
+            if (imagesToLoad === 0) finishLoading();
+
+            for (let char in ANIMATION_ASSETS) {
+                for (let anim in ANIMATION_ASSETS[char]) {
+                    const img = new Image();
+                    img.src = ANIMATION_ASSETS[char][anim].src;
+                    img.onload = () => { imagesLoaded++; if (imagesLoaded === imagesToLoad) finishLoading(); };
+                    img.onerror = () => { console.warn(`Missing: ${img.src}`); imagesLoaded++; if (imagesLoaded === imagesToLoad) finishLoading(); };
+                    LOADED_IMAGES[`${char}_${anim}`] = img;
+                }
+            }
+        };
+
+        function initGameAudio() {
+            if (hasInteracted) return;
+            hasInteracted = true;
+            playBGM('title');
+            startGame();
+        }
+
+        function finishLoading() {
+            const startText = document.querySelector('.press-start-text');
+            startText.innerHTML = "<span>&lt;</span> PRESS START <span>&gt;</span>";
+            startText.style.cursor = "pointer";
+            startText.style.pointerEvents = "all";
+
+            // Remove any previous listeners to avoid double-firing
+            const newStartText = startText.cloneNode(true);
+            startText.parentNode.replaceChild(newStartText, startText);
+
+            newStartText.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                initGameAudio();
+            };
+
+            // Ensure the menuScreen itself DOES NOT start the game
+            const menuScreen = document.getElementById('menuScreen');
+            menuScreen.onclick = null;
+            menuScreen.removeEventListener('click', startGame);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop(timestamp) {
+            requestAnimationFrame(gameLoop);
+            if (G.isPaused) return;
+
+            const menuScreen = document.getElementById('menuScreen');
+            const teamScreen = document.getElementById('teamScreen');
+            const isMenu = (menuScreen && menuScreen.classList.contains('active')) || (teamScreen && teamScreen.classList.contains('active'));
+
+            const tickThreshold = isMenu ? 14 : 9;
+
+            if (isMenu && menuScreen && menuScreen.classList.contains('active')) {
+                const skyLayer = document.getElementById('layer-sky');
+                const flowerLayer = document.getElementById('layer-flowers');
+                if (skyLayer && flowerLayer) {
+                    const elapsed = timestamp || performance.now();
+                    skyLayer.style.transform = `scale(1.05) translateX(${Math.sin(elapsed * 0.0002) * 3}%)`;
+                    flowerLayer.style.transform = `translate(${Math.sin(elapsed * 0.0015) * 2}px, ${Math.cos(elapsed * 0.002) * 1.5}px)`;
+                }
+            }
+
+            globalFrameCount++;
+            if (globalFrameCount >= tickThreshold) {
+                globalFrameCount = 0;
+                animTick++;
+            }
+
+            const allEnts = (G.p && G.c) ? [...G.p.team, ...G.c.team] : [];
+            allEnts.forEach(ent => {
+                drawModularSprite(`sprite_${ent.uid}`, ent.key, ent.action, !ent.isPlayer, false, ent);
+            });
+
+            CHARACTERS.forEach(h => drawModularSprite(`select_sprite_${h.id}`, h.key, 'idle', false, true));
+
+            for (let i = 0; i < 3; i++) {
+                if (G.selectedTeam[i] !== undefined) {
+                    const charObj = CHARACTERS.find(c => c.id === G.selectedTeam[i]);
+                    if (charObj) drawModularSprite(`preview_sprite_${i}`, charObj.key, 'idle', false, true);
+                }
+            }
+
+            if (!document.getElementById('infoModal').classList.contains('hidden')) {
+                const modalEnts = (G.p && G.c) ? [...G.p.team, ...G.c.team] : [];
+                modalEnts.forEach(c => {
+                    if (document.getElementById(`info_icon_${c.uid}`)) {
+                        drawModularSprite(`info_icon_${c.uid}`, c.key, 'idle', !c.isPlayer, true, c);
+                    }
+                });
+            }
+        }
+
+        function drawModularSprite(canvasId, charKey, action, flipX, isUI = false, ent = null) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            let usingIdle2 = false;
+            if (action === 'idle' && LOADED_IMAGES[`${charKey}_idle2`]) {
+                if (ent && ent.idleSwapTime === undefined) {
+                    ent.idleSwapTime = animTick + 40 + Math.floor(Math.random() * 60);
+                    ent.playingIdle2 = false;
+                }
+
+                if (ent && !ent.playingIdle2 && animTick >= ent.idleSwapTime) {
+                    ent.playingIdle2 = true;
+                    ent.idle2StartTick = animTick;
+                }
+
+                if (ent && ent.playingIdle2) {
+                    const tempImg = LOADED_IMAGES[`${charKey}_idle2`];
+                    if (tempImg && tempImg.complete && tempImg.naturalWidth > 0) {
+                        const tempFrames = Math.max(1, Math.floor(tempImg.naturalWidth / tempImg.naturalHeight));
+                        let ticksPassed = animTick - ent.idle2StartTick;
+                        let frameCalc = Math.floor(ticksPassed / 2.5);
+
+                        if (frameCalc >= tempFrames) {
+                            ent.playingIdle2 = false;
+                            ent.idleSwapTime = animTick + 40 + Math.floor(Math.random() * 60);
+                        } else {
+                            usingIdle2 = true;
+                            action = 'idle2';
+                        }
+                    }
+                }
+            }
+
+            const imgKey = `${charKey}_${action}`;
+            const img = LOADED_IMAGES[imgKey];
+
+            if (!img || !img.complete || img.naturalWidth === 0) return;
+
+            const totalFrames = Math.max(1, Math.floor(img.naturalWidth / img.naturalHeight));
+            const frameWidth = Math.floor(img.naturalWidth / totalFrames);
+            const frameHeight = img.naturalHeight;
+
+            let currentFrame = 0;
+            const isAttack = ['attack1', 'attack2', 'attack3', 'attack4', 'shot', 'shot1', 'shot2', 'charge', 'flame', 'explosion', 'poison', 'cloud_poison', 'special_attack', 'jump'].includes(action);
+
+            if (usingIdle2 && ent) {
+                let ticksPassed = animTick - ent.idle2StartTick;
+                currentFrame = Math.floor(ticksPassed / 2.5);
+            }
+            else if (isAttack) {
+                if (ent && ent.action !== ent.lastAction) {
+                    ent.actionStartTick = animTick;
+                }
+                let ticksPassed = animTick - (ent ? (ent.actionStartTick || animTick) : animTick);
+                currentFrame = Math.min(ticksPassed, totalFrames - 1);
+            }
+            else if (action === 'die' || action === 'dead') {
+                if (ent && ent.dieTick !== undefined) {
+                    let ticksPassed = animTick - ent.dieTick;
+                    currentFrame = Math.min(Math.floor(ticksPassed / 1.5), totalFrames - 1);
+                } else {
+                    currentFrame = totalFrames - 1;
+                }
+            }
+            else {
+                if (charKey === 'enchantress' && action === 'idle') {
+                    currentFrame = totalFrames === 1 ? 0 : (Math.floor(animTick / 1.5) % totalFrames);
+                } else {
+                    currentFrame = totalFrames === 1 ? 0 : (animTick % totalFrames);
+                }
+            }
+
+            if (ent) ent.lastAction = action;
+
+            const sourceX = currentFrame * frameWidth;
+            const clipW = frameWidth;
+            ctx.save();
+
+            if (isUI) {
+                if (flipX) { ctx.translate(canvas.width, 0); ctx.scale(-1, 1); }
+                let scale = Math.min(canvas.width / frameWidth, canvas.height / frameHeight);
+
+                let dy;
+                if (canvasId.includes('select_sprite') || canvasId.includes('preview_sprite')) {
+                    const bottomPadding = (canvasId.includes('select_sprite')) ? 25 : 20;
+                    const safeDrawHeight = canvas.height - bottomPadding;
+                    scale = safeDrawHeight / frameHeight;
+                    dy = canvas.height - (frameHeight * scale) - bottomPadding;
+                } else if (canvasId.includes('info_icon')) {
+                    scale *= 1.25;
+                    dy = (canvas.height - (frameHeight * scale)) / 2;
+                } else {
+                    dy = (canvas.height - (frameHeight * scale)) / 2;
+                }
+
+                const dw = clipW * scale;
+                const dh = frameHeight * scale;
+                const dx = (canvas.width - dw) / 2;
+
+                ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
+            } else {
+                let scale = 1.8;
+                if (clipW * scale > canvas.width) scale = canvas.width / clipW;
+                if (frameHeight * scale > canvas.height) scale = canvas.height / frameHeight;
+                const dw = clipW * scale;
+                const dh = frameHeight * scale;
+                const dx = (canvas.width - dw) / 2;
+                const dy = canvas.height - dh;
+
+                if (flipX) {
+                    ctx.translate(canvas.width / 2, 0);
+                    ctx.scale(-1, 1);
+                    ctx.translate(-canvas.width / 2, 0);
+                }
+                ctx.drawImage(img, sourceX, 0, clipW, frameHeight, dx, dy, dw, dh);
+            }
+            ctx.restore();
+        }
+
+        function togglePause() {
+            if (!G.p) return;
+            if (G.isPaused) {
+                resumeGame();
+            } else {
+                G.isPaused = true;
+                document.getElementById('pauseScreen').classList.remove('hidden');
+                document.body.classList.add('paused-anim');
+                G.activeAnimations.forEach(a => a.pause());
+                G.activeTimers.forEach(t => t.pause());
+                if (currentBGM) currentBGM.pause();
+            }
+        }
+
+        function resumeGame() {
+            G.isPaused = false;
+            document.getElementById('pauseScreen').classList.add('hidden');
+            document.body.classList.remove('paused-anim');
+            G.activeAnimations.forEach(a => a.play());
+            G.activeTimers.forEach(t => t.resume());
+            if (currentBGM) currentBGM.play().catch(e => console.log('BGM resume blocked:', e));
+        }
+
+        function quitToMenu() {
+            window.location.reload();
+        }
+
+        function restartBattle() {
+            G.activeTimers.forEach(t => t.clear());
+            G.activeAnimations.forEach(a => a.cancel());
+            G.activeAnimations = [];
+            resumeGame();
+            G.pendingMove = null;
+            G.isAnimating = false;
+
+            initBattle(G.lastBattleParams.pIds, G.lastBattleParams.cIds, G.lastBattleParams.bonus);
+            showScreen('battle');
+            document.getElementById('pause-btn').classList.remove('hidden');
+        }
+
+        function playAgain() {
+            G.activeTimers.forEach(t => t.clear());
+            G.activeAnimations.forEach(a => a.cancel());
+            G.activeAnimations = [];
+            resumeGame();
+            G.pendingMove = null;
+            G.isAnimating = false;
+            G.p = null;
+            G.c = null;
+            G.selectedTeam = [];
+            document.getElementById('pause-btn').classList.add('hidden');
+            playBGM('title');
+            showScreen('team');
+            renderTeamSelect();
+            updatePreview();
+        }
+
+        function showScreen(n) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(n + 'Screen').classList.add('active'); }
+        function startGame() { G.selectedTeam = []; showScreen('team'); renderTeamSelect(); }
+
+        function renderTeamSelect() {
+            const grid = document.getElementById('creatureGrid');
+            grid.innerHTML = '';
+            CHARACTERS.filter(c => !c.isEnemy).forEach(c => {
+                const el = document.createElement('div');
+                el.className = 'cc';
+                el.innerHTML = `
+            <div class="portrait-frame" onclick="toggleCreature(CHARACTERS.find(ch => ch.id === ${c.id}), this.parentElement)">
+                <canvas id="select_sprite_${c.id}" width="110" height="154"></canvas>
+            </div>
+            <div class="cc-name" style="color:${c.color}">
+                <span>${c.name}</span>
+                <div class="info-icon-btn" tabindex="0" onclick="showCharacterInfo(${c.id});">i</div>
+            </div>
+        `;
+                el.tabIndex = 0;
+
+                grid.appendChild(el);
+            });
+        }
+
+        function toggleCreature(c, el) {
+            const idx = G.selectedTeam.indexOf(c.id);
+            if (idx !== -1) {
+                G.selectedTeam.splice(idx, 1);
+            } else if (G.selectedTeam.length < 3) {
+                G.selectedTeam.push(c.id);
+            } else {
+                G.selectedTeam.shift();
+                G.selectedTeam.push(c.id);
+            }
+
+            document.querySelectorAll('.cc').forEach(card => {
+                const cardCanvas = card.querySelector('canvas');
+                if (cardCanvas) {
+                    const cardId = parseInt(cardCanvas.id.split('_').pop());
+                    if (G.selectedTeam.includes(cardId)) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                }
+            });
+
+            updatePreview();
+        }
+
+        function updatePreview() {
+            for (let i = 0; i < 3; i++) {
+                const slot = document.getElementById('slot' + i);
+                const id = G.selectedTeam[i];
+                if (id !== undefined) {
+                    slot.innerHTML = `<canvas id="preview_sprite_${i}" width="75" height="105"></canvas>`;
+                    slot.classList.add('filled');
+                } else {
+                    slot.innerHTML = '?';
+                    slot.classList.remove('filled');
+                }
+            }
+            document.getElementById('confirmBtn').disabled = G.selectedTeam.length !== 3;
+        }
+
+        const pickHands = document.querySelectorAll(".pick-hand");
+        const pickHandMenu = document.querySelector(".pick-hand-container");
+        const rpsOverlay = document.querySelector(".pick-hand-menu");
+        const playerHandImg = document.querySelector(".player-hand");
+        const cpuHandImg = document.querySelector(".cpu-hand");
+        const newGameMenu = document.querySelector(".new-game-overlay");
+        let rpsIsLocked = false;
+        pickHands.forEach(hand => hand.addEventListener("click", onPick));
+
+        function confirmTeam() {
+            transitionClose(() => {
+                document.querySelector('.player-container .hearts').innerHTML = '<img src="assets/life-heart.svg" width="40" alt="heart">';
+                document.querySelector('.cpu-container .hearts').innerHTML = '<img src="assets/life-heart.svg" width="40" alt="heart">';
+                newGameMenu.classList.add("hide-new-game-menu");
+
+                pickHandMenu.classList.remove("menu-exit");
+                rpsOverlay.classList.remove("overlay-exit");
+                playerHandImg.classList.remove("hand-damage", "shake");
+                cpuHandImg.classList.remove("hand-damage", "shake");
+
+                rpsIsLocked = false;
+                playBGM('rps');
+                showScreen('rps');
+                transitionOpen();
+            });
+        }
+
+        function transitionClose(callback) {
+            const canvas = document.getElementById('transition-canvas');
+            if (!canvas) { if (callback) callback(); return; }
+            const ctx = canvas.getContext('2d');
+            const size = 60;
+            let p = 0;
+            function draw() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'black';
+                for (let x = 0; x < canvas.width; x += size) {
+                    for (let y = 0; y < canvas.height; y += size) {
+                        const ux = x / canvas.width;
+                        const uy = 1.0 - (y / canvas.height);
+                        const progressValue = (p * 4) - (ux + uy);
+                        const scale = Math.max(0, Math.min(1.0, progressValue));
+                        if (scale > 0) {
+                            const cx = x + size / 2;
+                            const cy = y + size / 2;
+                            const r = scale * size;
+                            ctx.beginPath();
+                            ctx.moveTo(cx, cy - r);
+                            ctx.lineTo(cx + r, cy);
+                            ctx.lineTo(cx, cy + r);
+                            ctx.lineTo(cx - r, cy);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                    }
+                }
+                p += 0.025;
+                if (p <= 1.3) {
+                    requestAnimationFrame(draw);
+                } else {
+                    if (callback) callback();
+                }
+            }
+            draw();
+        }
+
+        function transitionOpen(callback) {
+            const canvas = document.getElementById('transition-canvas');
+            if (!canvas) { if (callback) callback(); return; }
+            const ctx = canvas.getContext('2d');
+            const size = 60;
+            let p = 0;
+            function draw() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.fillStyle = 'black';
+
+                for (let x = 0; x < canvas.width; x += size) {
+                    for (let y = 0; y < canvas.height; y += size) {
+                        const ux = x / canvas.width;
+                        const uy = 1.0 - (y / canvas.height);
+                        const progressValue = (p * 4) - ((1.0 - ux) + (1.0 - uy));
+                        const scale = Math.max(0, Math.min(1.0, progressValue));
+                        if (scale > 0) {
+                            const cx = x + size / 2;
+                            const cy = y + size / 2;
+                            const r = scale * size;
+                            ctx.beginPath();
+                            ctx.moveTo(cx, cy - r);
+                            ctx.lineTo(cx + r, cy);
+                            ctx.lineTo(cx, cy + r);
+                            ctx.lineTo(cx - r, cy);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                    }
+                }
+                ctx.globalCompositeOperation = 'source-over';
+                p += 0.025;
+                if (p <= 1.3) {
+                    requestAnimationFrame(draw);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    if (callback) callback();
+                }
+            }
+            draw();
+        }
+
+        function waitTransition(element, timeout = 1000) {
+            return new Promise(resolve => {
+                let isResolved = false;
+                const timer = setTimeout(() => {
+                    if (!isResolved) { isResolved = true; element.removeEventListener("transitionend", handler); resolve(); }
+                }, timeout);
+                function handler(e) {
+                    if (e.target === element && !isResolved) {
+                        isResolved = true; clearTimeout(timer); element.removeEventListener("transitionend", handler); resolve();
+                    }
+                }
+                element.addEventListener("transitionend", handler);
+            });
+        }
+
+        function waitAnimation(element, timeout = 2000) {
+            return new Promise(resolve => {
+                let isResolved = false;
+                const timer = setTimeout(() => {
+                    if (!isResolved) { isResolved = true; element.removeEventListener("animationend", handler); resolve(); }
+                }, timeout);
+                function handler(e) {
+                    if (e.target === element && !isResolved) {
+                        isResolved = true; clearTimeout(timer); element.removeEventListener("animationend", handler); resolve();
+                    }
+                }
+                element.addEventListener("animationend", handler);
+            });
+        }
+
+        async function onPick(e) {
+            if (rpsIsLocked) return;
+            rpsIsLocked = true;
+            let playerHand = e.currentTarget.dataset.hand;
+            let cpuHand = pickCpuHand();
+            await exitMenu();
+            await revealHand(playerHand, cpuHand);
+            let roundWinner = determineRoundWinner(playerHand, cpuHand);
+
+            if (roundWinner === 'draw') {
+                setTimeout(async () => { await openMenu(); rpsIsLocked = false; }, 1000);
+            } else {
+                playSFX('hurt');
+                if (roundWinner === 'player') {
+                    const hearts = document.querySelectorAll(".cpu-container .hearts img");
+                    if (hearts.length > 0) {
+                        let heart = hearts[hearts.length - 1];
+                        cpuHandImg.classList.add("hand-damage");
+                        heart.classList.add("heart-damage");
+                        await waitAnimation(heart, 2000);
+                        heart.remove();
+                    } else {
+                        cpuHandImg.classList.add("hand-damage"); await waitAnimation(cpuHandImg);
+                    }
+                    cpuHandImg.classList.remove("hand-damage");
+                } else {
+                    const hearts = document.querySelectorAll(".player-container .hearts img");
+                    if (hearts.length > 0) {
+                        let heart = hearts[hearts.length - 1];
+                        playerHandImg.classList.add("hand-damage");
+                        heart.classList.add("heart-damage");
+                        await waitAnimation(heart, 2000);
+                        heart.remove();
+                    } else {
+                        playerHandImg.classList.add("hand-damage"); await waitAnimation(playerHandImg);
+                    }
+                    playerHandImg.classList.remove("hand-damage");
+                }
+                setTimeout(() => { endRPSGame(roundWinner); }, 500);
+            }
+        }
+
+        async function exitMenu() { pickHandMenu.classList.add("menu-exit"); await waitTransition(pickHandMenu); rpsOverlay.classList.add("overlay-exit"); await waitTransition(rpsOverlay); }
+        async function openMenu() { pickHandMenu.classList.remove("menu-exit"); rpsOverlay.classList.remove("overlay-exit"); }
+
+        async function shakeAnimation() {
+            return new Promise(resolve => {
+                setTimeout(() => { cpuHandImg.classList.add("shake"); }, 500);
+                setTimeout(() => { playerHandImg.classList.add("shake"); }, 500);
+
+                setTimeout(async () => {
+                    await waitAnimation(playerHandImg, 1000);
+                    cpuHandImg.classList.remove("shake");
+                    playerHandImg.classList.remove("shake");
+                    resolve();
+                }, 500);
+            });
+        }
+
+        async function revealHand(playerHand, cpuHand) {
+            await shakeAnimation();
+            return new Promise(resolve => {
+                const playerOriginalImage = playerHandImg.src;
+                const cpuOriginalImage = cpuHandImg.src;
+                playerHandImg.src = `assets/player-${playerHand}.png`;
+                cpuHandImg.src = `assets/cpu-${cpuHand}.png`;
+                setTimeout(() => { playerHandImg.src = playerOriginalImage; cpuHandImg.src = cpuOriginalImage; resolve(); }, 1500);
+            });
+        }
+        const determineRoundWinner = (playerHand, cpuHand) => {
+            if (playerHand === "rock") playerHand = 1; else if (playerHand === "paper") playerHand = 2; else if (playerHand === "scissor") playerHand = 3;
+            if (cpuHand === "rock") cpuHand = 1; else if (cpuHand === "paper") cpuHand = 2; else if (cpuHand === "scissor") cpuHand = 3;
+            const result = ((playerHand - cpuHand + 3) % 3);
+            if (result === 1) return "player"; else if (result === 2) return "cpu"; else return "draw";
+        }
+        const pickCpuHand = () => { const cpuHand = Math.floor((Math.random() * 3) + 1); if (cpuHand === 1) return "rock"; else if (cpuHand === 2) return "paper"; else return "scissor"; }
+
+        function endRPSGame(winner) {
+            let winStatus = document.getElementById("rpsWinStatus");
+            let bonus = 'none';
+            if (winner === "cpu") {
+                winStatus.textContent = "AMBUSHED!";
+                winStatus.style.color = "#ff5252";
+                document.getElementById("rpsBonusDesc").textContent = "The enemy strikes first!";
+                bonus = 'enemy';
+                playSFX('lose');
+            } else {
+                winStatus.textContent = "PREEMPTIVE STRIKE!";
+                winStatus.style.color = "#2ecc71";
+                document.getElementById("rpsBonusDesc").textContent = "Your party attacks first!";
+                bonus = 'player';
+                playSFX('victoryRps');
+            }
+            newGameMenu.classList.remove("hide-new-game-menu");
+            const nextBtn = document.getElementById("new-game-btn");
+            nextBtn.onclick = (e) => {
+                e.preventDefault();
+                playBGM('battle');
+                const enemyRoster = CHARACTERS.filter(c => c.isEnemy);
+                const cpuIds = []; for (let i = 0; i < 3; i++) { const randomMonster = enemyRoster[Math.floor(Math.random() * enemyRoster.length)]; cpuIds.push(randomMonster.id); }
+                const overlay = document.getElementById('transition-overlay');
+                overlay.classList.remove('hidden', 'iris-opening');
+                overlay.classList.add('iris-closing'); // Iris out to black screen
+                setTimeout(() => {
+                    initBattle(G.selectedTeam, cpuIds, bonus);
+                    showScreen('battle');
+                    document.getElementById('pause-btn').classList.remove('hidden');
+                    overlay.classList.remove('iris-closing');
+                    overlay.classList.add('iris-opening'); // Iris in revealing the battlefield
+                    setTimeout(() => { overlay.classList.add('hidden'); }, 800);
+                }, 800);
+            };
+        }
+
+        // ===============================================
+        // BATTLE ENGINE
+        // ===============================================
+        function initBattle(pIds, cIds, bonus = 'none') {
+            G.lastBattleParams = { pIds, cIds, bonus };
+            const mkP = ids => ids.map(id => { const b = CHARACTERS.find(h => h.id === id); const startCT = bonus === 'player' ? 1000 : (bonus === 'enemy' ? 0 : Math.random() * 200); return { ...b, uid: 'u' + (uidCounter++), currentHp: b.maxHp, mp: b.maxMp, isPlayer: true, action: 'idle', ct: startCT }; });
+            const mkC = ids => ids.map(id => { const b = CHARACTERS.find(m => m.id === id); const startCT = bonus === 'enemy' ? 1000 : (bonus === 'player' ? 0 : Math.random() * 200); return { ...b, name: `Enemy ${b.name}`, uid: 'u' + (uidCounter++), currentHp: b.maxHp, mp: b.maxMp, isPlayer: false, action: 'idle', ct: startCT }; });
+            G.p = { team: mkP(pIds) };
+            G.c = { team: mkC(cIds) };
+            G.turnQueue = [];
+            renderEntities();
+            renderHUD();
+            pausableTimeout(advanceTurn, 100);
+        }
+
+        function renderEntities() {
+            const layer = document.getElementById('entitiesLayer');
+            layer.innerHTML = '';
+            const pPos = [{ x: 30, y: 15 }, { x: 18, y: 15 }, { x: 6, y: 15 }];
+            const cPos = [{ x: 70, y: 15 }, { x: 82, y: 15 }, { x: 94, y: 15 }];
+            G.p.team.forEach((c, i) => createEntityHTML(layer, c, pPos[i].x, pPos[i].y, 100 - i));
+            G.c.team.forEach((c, i) => createEntityHTML(layer, c, cPos[i].x, cPos[i].y, 100 - i));
+        }
+
+        function createEntityHTML(layer, c, x, y, z) {
+            layer.innerHTML += `<div class="entity-wrap" id="wrap_${c.uid}" style="left:${x}%; bottom:${y}%; z-index:${z}; transform:translateX(-50%)"><div class="platform"></div><canvas class="sprite" id="sprite_${c.uid}" width="350" height="350"></canvas></div>`;
+        }
+
+        function renderHUD() {
+            const allyHud = document.getElementById('ally-hud');
+            const enemyHud = document.getElementById('enemy-hud');
+
+            // Creates the stat blocks for the TOP-HUD layout
+            const createBarHTML = (c) => {
+                const cleanName = (c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '')).toUpperCase();
+
+                return `
+            <div class="entity-stats ${c.isPlayer ? 'ally' : 'enemy'}" id="stats_${c.uid}">
+                <div class="entity-stat-name">
+                    <span>${cleanName}</span><div class="info-icon-btn" tabindex="0" onclick="showCharacterInfo(${c.id})" style="width:16px; height:16px; font-size:10px;">i</div>
+                </div>
+                <div class="entity-stat-bar hp">
+                    <div class="entity-stat-track"><div class="entity-stat-fill hp-fill" id="hp_fill_${c.uid}"></div></div>
+                    <div class="stat-bar-text" id="hp_text_${c.uid}">${Math.ceil(c.currentHp)}/${c.maxHp}</div>
+                </div>
+                <div class="entity-stat-bar mp">
+                    <div class="entity-stat-track"><div class="entity-stat-fill mp-fill" id="mp_fill_${c.uid}"></div></div>
+                    <div class="stat-bar-text" id="mp_text_${c.uid}">${Math.floor(c.mp)}/${c.maxMp}</div>
+                </div>
+            </div>`;
+            };
+
+            // Populate both sides of the top HUD
+            allyHud.innerHTML = G.p.team.map(createBarHTML).join('');
+            enemyHud.innerHTML = G.c.team.map(createBarHTML).join('');
+
+            updateBars();
+        }
+
+        function advanceTurn() {
+            if (checkGameOver()) return;
+            let alive = [...G.p.team, ...G.c.team].filter(e => e.currentHp > 0);
+            if (alive.length === 0) return;
+            let minTime = Infinity, nextUnit = null;
+            for (let e of alive) { let timeNeeded = (1000 - e.ct) / e.spd; if (timeNeeded < minTime) { minTime = timeNeeded; nextUnit = e; } }
+            alive.forEach(e => { e.ct += e.spd * minTime; });
+            G.activeEnt = nextUnit;
+            G.activeEnt.ct = 0;
+
+            G.activeEnt.immunity = false;
+            G.activeEnt.mp = Math.min(G.activeEnt.maxMp, G.activeEnt.mp + 20);
+            updateBars();
+
+            document.querySelectorAll('.entity-wrap').forEach(e => e.classList.remove('is-active'));
+            document.getElementById(`wrap_${G.activeEnt.uid}`).classList.add('is-active');
+
+            const commandPanel = document.getElementById('command-panel');
+            const heroDisplay = document.getElementById('active-hero-display');
+
+            // Update the selector to show whose turn it is
+            if (heroDisplay) {
+                if (G.activeEnt.isPlayer) {
+                    heroDisplay.innerText = `${G.activeEnt.name.toUpperCase()}'S TURN`;
+                    heroDisplay.style.visibility = 'visible';
+                } else {
+                    heroDisplay.innerText = ""; // Hide name when it's enemy turn
+                    heroDisplay.style.visibility = 'hidden';
+                }
+            }
+
+            commandPanel.classList.remove('hidden');
+            if (G.activeEnt.isPlayer) {
+                commandPanel.classList.add('active-turn');
+                showMainMenu();
+            } else {
+                commandPanel.classList.remove('active-turn');
+                pausableTimeout(cpuTurn, 1000);
+            }
+        }
+
+
+        function showMainMenu() {
+            document.getElementById('targetMenuOverlay').classList.add('hidden');
+            document.getElementById('skillsMenuBox').classList.add('hidden');
+            document.getElementById('mainMenuBox').classList.remove('hidden');
+            document.getElementById('command-panel').classList.remove('hidden');
+            clearTargeting();
+            const skillBtn = document.getElementById('skill-btn');
+            if (G.activeEnt.moves.some(m => G.activeEnt.mp >= m.mpCost)) skillBtn.classList.remove('disabled');
+            else skillBtn.classList.add('disabled');
+        }
+
+        function handleStrike() { if (G.isAnimating) return; G.pendingMove = { name: 'Strike', power: G.activeEnt.atk, mpCost: 0, anim: 'attack1' }; startTargeting(); }
+
+        function showSkillsMenu() {
+            document.getElementById('mainMenuBox').classList.add('hidden');
+            document.getElementById('skillsMenuBox').classList.remove('hidden');
+            const list = document.getElementById('skillsList');
+            list.innerHTML = '';
+            G.activeEnt.moves.forEach(m => {
+                const canUse = G.activeEnt.mp >= m.mpCost;
+                const item = document.createElement('button');
+                item.className = `menu-item ${!canUse ? 'disabled' : ''}`;
+                const iconHtml = m.icon ? `<img src="${m.icon}" class="skill-icon" alt="${m.name} icon">` : '<span class="skill-icon-placeholder"></span>';
+                item.innerHTML = `${iconHtml}<span>${m.name}</span><span class="skill-mp-cost">${m.mpCost} MP</span>`;
+                if (canUse) { item.onclick = () => { G.pendingMove = m; startTargeting(); }; }
+                list.appendChild(item);
+            });
+        }
+
+        function startTargeting() {
+            document.getElementById('targetMenuOverlay').classList.remove('hidden');
+            document.getElementById('skillsMenuBox').classList.add('hidden');
+            document.getElementById('command-panel').classList.add('hidden');
+
+            const heroDisplay = document.getElementById('active-hero-display');
+            if (heroDisplay) heroDisplay.style.visibility = 'hidden';
+
+            let targets;
+            if (G.pendingMove.isHeal) { targets = G.activeEnt.isPlayer ? G.p.team : G.c.team; }
+            else { targets = (G.activeEnt.isPlayer ? G.c.team : G.p.team); }
+            targets.forEach(c => {
+                if (c.currentHp > 0) {
+                    const wrap = document.getElementById(`wrap_${c.uid}`);
+                    wrap.classList.add('targetable');
+                    wrap.onclick = () => { clearTargeting(); executeMove(G.activeEnt, c, G.pendingMove); };
+                }
+            });
+        }
+
+        function cancelTargeting() {
+            clearTargeting();
+            document.getElementById('command-panel').classList.remove('hidden');
+            const heroDisplay = document.getElementById('active-hero-display');
+            if (heroDisplay) heroDisplay.style.visibility = 'visible';
+            showMainMenu();
+        }
+
+        function clearTargeting() {
+            document.getElementById('targetMenuOverlay').classList.add('hidden');[...G.p.team, ...G.c.team].forEach(c => {
+                const w = document.getElementById(`wrap_${c.uid}`);
+                if (w) { w.classList.remove('targetable'); w.onclick = null; }
+            });
+        }
+
+        function cpuTurn() {
+            const validMoves = G.activeEnt.moves.filter(m => m.mpCost <= G.activeEnt.mp);
+            let move = { name: 'Strike', power: G.activeEnt.atk, mpCost: 0, anim: 'attack1' };
+            if (validMoves.length > 0 && Math.random() > 0.5) { move = validMoves[Math.floor(Math.random() * validMoves.length)]; }
+            let targets = move.isHeal ? G.c.team.filter(c => c.currentHp > 0) : G.p.team.filter(c => c.currentHp > 0);
+            if (targets.length === 0) { pausableTimeout(advanceTurn, 200); return; }
+            const target = targets[Math.floor(Math.random() * targets.length)];
+            executeMove(G.activeEnt, target, move);
+        }
+
+        let logTimeout;
+        function updateBattleLog(message, duration = 4000) {
+            const logEl = document.getElementById('battle-log');
+            if (!logEl) return;
+
+            clearTimeout(logTimeout);
+
+            logEl.innerHTML = message;
+            logEl.style.opacity = 1;
+
+            logTimeout = pausableTimeout(() => {
+                logEl.style.opacity = 0;
+            }, duration);
+        }
+
+        function executeMove(actor, target, move) {
+            G.isAnimating = true;
+            document.getElementById('command-panel').classList.remove('active-turn');
+            document.getElementById('command-panel').classList.add('hidden');
+
+            const displayName = actor.name.replace(/^Enemy\s+/i, '');
+            updateBattleLog(`${displayName} used ${move.name}!`);
+
+            if (move.effect === 'defenseUp') {
+                actor.immunity = true;
+            }
+
+            actor.mp = Math.max(0, actor.mp - (move.mpCost || 0));
+            updateBars();
+
+            actor.lastAction = actor.action;
+            actor.action = move.anim || 'attack1';
+            actor.actionStartTick = animTick;
+
+            let animDuration = 1200;
+            let stepDuration = Math.max(animDuration, 600);
+            let attackDelay = stepDuration * 0.5;
+            let totalWait = Math.max(stepDuration + 500, 1000);
+
+            const wrap = document.getElementById(`wrap_${actor.uid}`);
+            let dir = actor.isPlayer ? 40 : -40;
+
+            let anim;
+            if (actor.isMelee) {
+                anim = wrap.animate([
+                    { transform: `translateX(-50%) translate(0px, 0px)` },
+                    { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.3 },
+                    { transform: `translateX(-50%) translate(${dir}px, 0px)`, offset: 0.7 },
+                    { transform: `translateX(-50%) translate(0px, 0px)` }
+                ], { duration: stepDuration, easing: 'ease-in-out' });
+
+                G.activeAnimations.push(anim);
+                anim.onfinish = () => { G.activeAnimations = G.activeAnimations.filter(a => a !== anim); wrap.style.transform = `translateX(-50%)`; };
+                if (G.isPaused) anim.pause();
+
+                spawnSmokeVFX(actor.uid);
+            }
+
+            pausableTimeout(() => {
+                if (move.isAoe) { (actor.isPlayer ? G.c.team : G.p.team).filter(t => t.currentHp > 0).forEach(t => applyDamage(actor, t, move)); }
+                else { applyDamage(actor, target, move); }
+                updateBars();
+            }, actor.isMelee ? attackDelay : 200);
+
+            pausableTimeout(() => {
+                if (actor.currentHp > 0) actor.action = 'idle';
+                G.isAnimating = false;
+                pausableTimeout(advanceTurn, 200);
+            }, totalWait);
+        }
+
+        function applyDamage(actor, target, move) {
+            if (target.currentHp <= 0) return;
+
+            if (!move.isHeal && target.immunity) {
+                spawnNum(`BLOCKED`, target.uid, 'shld');
+                return;
+            }
+
+            document.getElementById('stage').classList.add('screen-shake');
+            setTimeout(() => document.getElementById('stage').classList.remove('screen-shake'), 300);
+
+            let dmg = Math.floor(move.power + (actor.atk * 0.25));
+            if (move.power === 0 && !move.isHeal) dmg = 0;
+
+            if (move.isHeal) {
+                target.action = 'idle';
+                let healAmt = Math.abs(move.power);
+                spawnNum(`+${healAmt}`, target.uid, 'heal');
+                spawnHealVFX(target.uid);
+                playSFX('heal');
+                target.currentHp = Math.min(target.maxHp, target.currentHp + healAmt);
+                pausableTimeout(() => { if (target.currentHp > 0) target.action = 'idle'; }, 400);
+            } else {
+                if (actor.isMelee) {
+                    spawnHitVFX(target.uid);
+                }
+
+                if ((actor.key === 'wizard' || actor.key === 'enchantress') && !move.isAoe) {
+                    spawnMageHitVFX(target.uid);
+                }
+
+                if ((actor.key === 'wizard' && move.name === 'Meteor') || (actor.key === 'enchantress' && move.name === 'Mystic Orb') || actor.key === 'firespirit') {
+                    spawnExplosionVFX(target.uid);
+                }
+
+                if (Math.random() < (move.critChance || 0.05)) { dmg = Math.floor(dmg * 1.5); spawnNum(`CRIT ${dmg}`, target.uid, 'crit'); }
+                else { spawnNum(`-${dmg}`, target.uid, 'dmg'); }
+
+                target.currentHp = Math.max(0, target.currentHp - dmg);
+                doHitAnim(target.uid, target.isPlayer);
+
+                if (target.currentHp <= 0) {
+                    if (target.action !== 'die' && target.action !== 'jump') {
+                        playSFX('die');
+                        target.action = 'jump';
+                        target.lastAction = null;
+                        pausableTimeout(() => {
+                            target.action = 'die';
+                            target.lastAction = null;
+                            target.dieTick = animTick;
+                        }, 600);
+                    }
+                } else {
+                    playSFX('hurt');
+                    target.action = 'hurt';
+                    pausableTimeout(() => { if (target.currentHp > 0) target.action = 'idle'; }, 400);
+                }
+            }
+        }
+
+        function spawnNum(txt, uid, type) {
+            const w = document.getElementById(`wrap_${uid}`); if (!w) return;
+            const s = document.getElementById('stage'), r = w.getBoundingClientRect(), sr = s.getBoundingClientRect();
+            const el = document.createElement('div');
+            el.className = `fnum ${type}`; el.innerText = txt;
+            el.style.left = (r.left + r.width / 2 - sr.left) + 'px'; el.style.top = (r.top - sr.top) + 'px';
+            s.appendChild(el); pausableTimeout(() => el.remove(), 1200);
+        }
+
+        function doHitAnim(uid, isPlayer) {
+            const w = document.getElementById(`wrap_${uid}`);
+            if (w) { w.style.animation = isPlayer ? 'hit 0.4s' : 'hitE 0.4s'; pausableTimeout(() => w.style.animation = '', 400); }
+        }
+
+        function spawnHealVFX(uid) {
+            const w = document.getElementById(`wrap_${uid}`);
+            if (!w) { return; }
+            const s = document.getElementById('stage');
+            if (!s) { return; }
+
+            const r = w.getBoundingClientRect();
+            const sr = s.getBoundingClientRect();
+
+            const centerX = r.left + r.width / 2 - sr.left;
+            const centerY = r.top + r.height * 0.85 - sr.top;
+
+            const vfxContainer = document.createElement('div');
+            vfxContainer.className = 'vfx-sprite heal';
+            vfxContainer.style.left = centerX + 'px';
+            vfxContainer.style.top = centerY + 'px';
+            vfxContainer.style.transform = 'translate(-50%, -50%)';
+            vfxContainer.style.backgroundSize = '100% 100%';
+            vfxContainer.style.backgroundRepeat = 'no-repeat';
+            vfxContainer.style.backgroundPosition = 'center';
+
+            s.appendChild(vfxContainer);
+
+            let currentFrame = 1;
+            const imagePath = ANIMATION_ASSETS.vfx[`heal_${currentFrame}`].src;
+            vfxContainer.style.backgroundImage = `url('${imagePath}')`;
+
+            const frameInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame > 16) {
+                    clearInterval(frameInterval);
+                    vfxContainer.remove();
+                    return;
+                }
+
+                const newImagePath = ANIMATION_ASSETS.vfx[`heal_${currentFrame}`].src;
+                vfxContainer.style.backgroundImage = `url('${newImagePath}')`;
+            }, 75);
+        }
+
+        function spawnHitVFX(uid) {
+            const w = document.getElementById(`wrap_${uid}`);
+            if (!w) { return; }
+            const s = document.getElementById('stage');
+            if (!s) { return; }
+
+            const r = w.getBoundingClientRect();
+            const sr = s.getBoundingClientRect();
+
+            const centerX = r.left + r.width / 2 - sr.left;
+            const centerY = r.top + r.height * 0.85 - sr.top;
+
+            const vfxContainer = document.createElement('div');
+            vfxContainer.className = 'vfx-sprite slash';
+            vfxContainer.style.left = centerX + 'px';
+            vfxContainer.style.top = centerY + 'px';
+            vfxContainer.style.transform = 'translate(-50%, -50%)';
+            vfxContainer.style.backgroundSize = '100% 100%';
+            vfxContainer.style.backgroundRepeat = 'no-repeat';
+            vfxContainer.style.backgroundPosition = 'center';
+
+            s.appendChild(vfxContainer);
+
+            let currentFrame = 1;
+            const imagePath = ANIMATION_ASSETS.vfx[`slash_${currentFrame}`].src;
+            vfxContainer.style.backgroundImage = `url('${imagePath}')`;
+
+            const frameInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame > 9) {
+                    clearInterval(frameInterval);
+                    vfxContainer.remove();
+                    return;
+                }
+
+                const newImagePath = ANIMATION_ASSETS.vfx[`slash_${currentFrame}`].src;
+                vfxContainer.style.backgroundImage = `url('${newImagePath}')`;
+            }, 75);
+        }
+
+        function spawnSmokeVFX(uid) {
+            const w = document.getElementById(`wrap_${uid}`);
+            if (!w) { return; }
+            const s = document.getElementById('stage');
+            if (!s) { return; }
+
+            const r = w.getBoundingClientRect();
+            const sr = s.getBoundingClientRect();
+
+            const centerX = r.left + r.width / 2 - sr.left;
+            const centerY = r.top + r.height * 0.95 - sr.top;
+
+            const vfxContainer = document.createElement('div');
+            vfxContainer.className = 'vfx-sprite smoke';
+            vfxContainer.style.left = centerX + 'px';
+            vfxContainer.style.top = centerY + 'px';
+            vfxContainer.style.transform = 'translate(-50%, -50%)';
+            vfxContainer.style.backgroundSize = '100% 100%';
+            vfxContainer.style.backgroundRepeat = 'no-repeat';
+            vfxContainer.style.backgroundPosition = 'center';
+
+            s.appendChild(vfxContainer);
+
+            let currentFrame = 1;
+            const imagePath = ANIMATION_ASSETS.vfx[`smoke_${currentFrame}`].src;
+            vfxContainer.style.backgroundImage = `url('${imagePath}')`;
+
+            const frameInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame > 8) {
+                    clearInterval(frameInterval);
+                    vfxContainer.remove();
+                    return;
+                }
+
+                const newImagePath = ANIMATION_ASSETS.vfx[`smoke_${currentFrame}`].src;
+                vfxContainer.style.backgroundImage = `url('${newImagePath}')`;
+            }, 100);
+        }
+
+        function spawnMageHitVFX(uid) {
+            const w = document.getElementById(`wrap_${uid}`);
+            if (!w) { return; }
+            const s = document.getElementById('stage');
+            if (!s) { return; }
+
+            const r = w.getBoundingClientRect();
+            const sr = s.getBoundingClientRect();
+
+            const centerX = r.left + r.width / 2 - sr.left;
+            const centerY = r.top + r.height * 0.85 - sr.top;
+
+            const vfxContainer = document.createElement('div');
+            vfxContainer.className = 'vfx-sprite mage-hit';
+            vfxContainer.style.left = centerX + 'px';
+            vfxContainer.style.top = centerY + 'px';
+            vfxContainer.style.transform = 'translate(-50%, -50%)';
+            vfxContainer.style.backgroundSize = 'cover';
+            vfxContainer.style.backgroundRepeat = 'no-repeat';
+            vfxContainer.style.backgroundPosition = 'center';
+            vfxContainer.style.width = '300px';
+            vfxContainer.style.height = '300px';
+
+            s.appendChild(vfxContainer);
+
+            let currentFrame = 1;
+            const spriteSheet = ANIMATION_ASSETS.vfx.mage_hit_1.src;
+            const frameWidth = 100;
+
+            const updateFrame = (frame) => {
+                const xOffset = (frame - 1) * frameWidth;
+                vfxContainer.style.backgroundImage = `url('${spriteSheet}')`;
+                vfxContainer.style.backgroundPosition = `-${xOffset}px 0`;
+                vfxContainer.style.backgroundSize = '500px 100px';
+            };
+
+            updateFrame(currentFrame);
+
+            const frameInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame > 5) {
+                    clearInterval(frameInterval);
+                    vfxContainer.remove();
+                    return;
+                }
+                updateFrame(currentFrame);
+            }, 75);
+        }
+
+        function spawnExplosionVFX(uid) {
+            const w = document.getElementById(`wrap_${uid}`);
+            if (!w) { return; }
+            const s = document.getElementById('stage');
+            if (!s) { return; }
+
+            const r = w.getBoundingClientRect();
+            const sr = s.getBoundingClientRect();
+
+            const centerX = r.left + r.width / 2 - sr.left;
+            const centerY = r.top + r.height * 0.95 - sr.top;
+
+            const vfxContainer = document.createElement('div');
+            vfxContainer.className = 'vfx-sprite explosion';
+            vfxContainer.style.left = centerX + 'px';
+            vfxContainer.style.top = centerY + 'px';
+            vfxContainer.style.transform = 'translate(-50%, -50%)';
+            vfxContainer.style.backgroundSize = '100% 100%';
+            vfxContainer.style.backgroundRepeat = 'no-repeat';
+            vfxContainer.style.backgroundPosition = 'center';
+            vfxContainer.style.width = '200px';
+            vfxContainer.style.height = '200px';
+
+            s.appendChild(vfxContainer);
+
+            let currentFrame = 1;
+            const imagePath = ANIMATION_ASSETS.vfx[`explosion_${currentFrame}`].src;
+            vfxContainer.style.backgroundImage = `url('${imagePath}')`;
+
+            const frameInterval = setInterval(() => {
+                currentFrame++;
+                if (currentFrame > 15) {
+                    clearInterval(frameInterval);
+                    vfxContainer.remove();
+                    return;
+                }
+
+                const newImagePath = ANIMATION_ASSETS.vfx[`explosion_${currentFrame}`].src;
+                vfxContainer.style.backgroundImage = `url('${newImagePath}')`;
+            }, 75);
+        }
+
+        function updateBars() {
+            if (!G.p) return;
+
+            const updateEntityBars = (c) => {
+                const hpPct = Math.max(0, (c.currentHp / c.maxHp) * 100);
+                const mpPct = Math.max(0, (c.mp / c.maxMp) * 100);
+
+                const hpFill = document.getElementById(`hp_fill_${c.uid}`);
+                const mpFill = document.getElementById(`mp_fill_${c.uid}`);
+                const hpText = document.getElementById(`hp_text_${c.uid}`);
+                const mpText = document.getElementById(`mp_text_${c.uid}`);
+                const statBlock = document.getElementById(`stats_${c.uid}`);
+                const nameSpan = document.querySelector(`#stats_${c.uid} .entity-stat-name span`);
+
+                if (hpFill) hpFill.style.width = hpPct + '%';
+                if (mpFill) mpFill.style.width = mpPct + '%';
+                if (nameSpan) {
+                    const cleanName = (c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '')).toUpperCase();
+                    if (G.activeEnt === c) {
+                        nameSpan.innerText = `> ${cleanName} <`;
+                        nameSpan.classList.add('blinking-text');
+                    } else {
+                        nameSpan.innerText = cleanName;
+                        nameSpan.classList.remove('blinking-text');
+                    }
+                }
+                if (hpText) hpText.textContent = `${Math.ceil(c.currentHp)}/${c.maxHp}`;
+                if (mpText) mpText.textContent = `${Math.floor(c.mp)}/${c.maxMp}`;
+
+                if (statBlock) {
+                    if (c.currentHp <= 0) statBlock.classList.add('dead');
+                    else statBlock.classList.remove('dead');
+                }
+            };
+
+            G.p.team.forEach(updateEntityBars);
+            G.c.team.forEach(updateEntityBars);
+        }
+
+        function showCharacterInfo(id) {
+            const c = CHARACTERS.find(ch => ch.id === id);
+            if (!c) return;
+
+            const skillsHTML = c.moves.map(m => `
+        <div class="info-row" style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <span style="color:var(--pixel-gold); font-weight:bold;">${m.name}</span>
+                ${m.isAoe ? '<span class="info-skill-badge" style="margin-left:5px;">AoE</span>' : ''}
+                ${m.isHeal ? '<span class="info-skill-badge" style="margin-left:5px; color:#69db7c;">Heal</span>' : ''}
+            </div>
+            <span class="skill-mp-cost">${m.mpCost} MP</span>
+        </div>
+    `).join('');
+
+            document.getElementById('infoModalBody').innerHTML = `
+        <div class="info-col" style="width:100%;">
+            <h3 style="color:${c.color}; text-align:center; font-size:1.5rem;">${c.name.toUpperCase()}</h3>
+            <div class="info-col-scroll">
+                <p style="color:#eee; font-size:1.1rem; line-height:1.4; margin-bottom:20px; text-align:center;">${c.desc}</p>
+                <div style="background:rgba(0,0,0,0.5); padding:15px; border-radius:8px; border:1px solid #444; margin-bottom:20px;">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; text-align:center; font-size:1rem;">
+                        <div><span style="color:#e74c3c;">HP:</span> ${c.maxHp}</div>
+                        <div><span style="color:#3498db;">MP:</span> ${c.maxMp}</div>
+                        <div><span style="color:var(--pixel-gold);">ATK:</span> ${c.atk}</div>
+                        <div><span style="color:#9b59b6;">SPD:</span> ${c.spd}</div>
+                    </div>
+                </div>
+                <h4 style="color:var(--pixel-gold); border-bottom:2px solid #555; padding-bottom:5px; margin-bottom:15px;">ABILITIES</h4>
+                ${skillsHTML}
+            </div>
+        </div>
+    `;
+            document.getElementById('infoModal').classList.remove('hidden');
+        }
+
+        function showInfoModal() {
+            const renderCol = (title, team) => {
+                let html = `<div class="info-col"><h3>${title}</h3><div class="info-col-scroll">`;
+                team.forEach(c => {
+                    const displayName = c.isPlayer ? c.name : c.name.replace(/^Enemy\s+/i, '');
+                    const skillsHTML = c.moves.map(m => `<span class="info-skill-badge">${m.name}</span>`).join('');
+                    html += `
+            <div class="info-row" style="display:flex; align-items:flex-start; gap: 15px;">
+                <div class="info-icon-frame"><canvas id="info_icon_${c.uid}" width="80" height="80"></canvas></div>
+                <div class="info-details" style="flex:1;">
+                    <strong style="font-size:1.2rem; color:var(--pixel-gold);">${displayName}</strong><br>
+                    <span style="color:#e74c3c;">HP:</span> ${Math.ceil(c.currentHp)}/${c.maxHp} 
+                    ${c.isPlayer ? ` | <span style="color:#3498db;">MP:</span> ${Math.floor(c.mp)}/${c.maxMp}` : ''}
+                    <p style="font-size:0.8rem; color:#ccc; margin: 8px 0; line-height: 1.3;">${c.desc}</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;">${skillsHTML}</div>
+                </div>
+            </div>`;
+                });
+                return html + `</div></div>`;
+            };
+            document.getElementById('infoModalBody').innerHTML = renderCol("YOUR PARTY", G.p.team) + renderCol("ENEMY TEAM", G.c.team);
+            document.getElementById('infoModal').classList.remove('hidden');
+        }
+
+        function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden')); }
+
+        function checkGameOver() {
+            if (!G.p || !G.c) return false;
+            const pAlive = G.p.team.some(c => c.currentHp > 0);
+            const cAlive = G.c.team.some(c => c.currentHp > 0);
+            if (!pAlive || !cAlive) {
+                document.getElementById('pause-btn').classList.add('hidden');
+                document.getElementById('command-panel').classList.remove('active-turn');
+                document.getElementById('goTitle').innerText = pAlive ? "VICTORY!" : "DEFEAT";
+                document.getElementById('goTitle').style.color = pAlive ? "var(--pixel-gold)" : "#ff5252";
+                document.getElementById('goSub').innerText = pAlive ? "You crushed the enemy." : "Your party was wiped out.";
+
+                if (!pAlive) {
+                    playSFX('lose');
+                    playBGM(null);
+                } else {
+                    playBGM('victory');
+                }
+
+                pausableTimeout(() => showScreen('gameover'), 1500);
+                return true;
+            }
+            return false;
+        }
+
+        // GLOBAL KEYBOARD NAVIGATION
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') { togglePause(); return; }
+
+            const targetMenu = document.getElementById('targetMenuOverlay');
+            if (targetMenu && !targetMenu.classList.contains('hidden')) {
+                let targets = Array.from(document.querySelectorAll('.entity-wrap.targetable, .cancel-target'));
+                if (targets.length === 0) return;
+
+                let focused = targets.findIndex(t => t.classList.contains('focused-target'));
+                if (focused === -1) focused = 0;
+
+                if (['ArrowRight', 'd', 'ArrowDown', 's'].includes(e.key)) {
+                    focused = (focused + 1) % targets.length;
+                    playSFX('btn');
+                    e.preventDefault();
+                } else if (['ArrowLeft', 'a', 'ArrowUp', 'w'].includes(e.key)) {
+                    focused = (focused - 1 + targets.length) % targets.length;
+                    playSFX('btn');
+                    e.preventDefault();
+                } else if (['Enter', ' '].includes(e.key)) {
+                    targets[focused].click();
+                    return;
+                }
+
+                targets.forEach(t => t.classList.remove('focused-target'));
+                targets[focused].classList.add('focused-target');
+                return;
+            }
+
+            const interactables = Array.from(document.querySelectorAll('button:not(:disabled), .cc, .pick-hand, .pause-menu-item, .cancel-target, .close-x, #pause-btn, #real-start-btn, #weblink-btn, .info-icon-btn'))
+                .filter(el => {
+                    if (el.offsetWidth === 0 || el.offsetHeight === 0) return false;
+                    let style = window.getComputedStyle(el);
+                    if (style.display === 'none' || style.opacity === '0' || style.visibility === 'hidden') return false;
+                    let parent = el.parentElement;
+                    while (parent) {
+                        let pStyle = window.getComputedStyle(parent);
+                        if (pStyle.display === 'none' || pStyle.opacity === '0' || pStyle.visibility === 'hidden') return false;
+                        parent = parent.parentElement;
+                    }
+                    const pauseScreen = document.getElementById('pauseScreen');
+                    if (pauseScreen && !pauseScreen.classList.contains('hidden')) {
+                        return el.closest('#pauseScreen') !== null;
+                    }
+                    const infoModal = document.getElementById('infoModal');
+                    if (infoModal && !infoModal.classList.contains('hidden')) {
+                        return el.closest('#infoModal') !== null;
+                    }
+                    return true;
+                });
+
+            if (interactables.length === 0) return;
+
+            let activeIdx = interactables.indexOf(document.activeElement);
+
+            if (['ArrowRight', 'd', 'ArrowDown', 's'].includes(e.key)) {
+                activeIdx = (activeIdx + 1) % interactables.length;
+                interactables[activeIdx].focus();
+                playSFX('btn');
+                e.preventDefault();
+            } else if (['ArrowLeft', 'a', 'ArrowUp', 'w'].includes(e.key)) {
+                if (activeIdx <= 0) activeIdx = interactables.length - 1;
+                else activeIdx--;
+                interactables[activeIdx].focus();
+                playSFX('btn');
+                e.preventDefault();
+            } else if (['Enter', ' '].includes(e.key)) {
+                if (activeIdx !== -1) {
+                    interactables[activeIdx].click();
+                    e.preventDefault();
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
