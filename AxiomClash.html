@@ -189,8 +189,8 @@
         .title-container,
         .press-start-wrap {
             position: relative;
-            z-index: 5;
-            pointer-events: none;
+            z-index: 10;
+            pointer-events: auto;
             text-align: center;
         }
 
@@ -208,9 +208,10 @@
             text-shadow: 3px 3px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
             animation: blink 1s step-end infinite;
             cursor: pointer;
-            pointer-events: all;
-            padding: 20px;
+            pointer-events: auto;
+            padding: 30px;
             font-weight: bold;
+            display: inline-block;
         }
 
         .press-start-text span {
@@ -560,35 +561,41 @@
         #top-hud {
             position: absolute;
             top: 20px;
-            left: 0;
-            right: 0;
+            left: 20px;
+            right: 20px;
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: flex-start;
-            gap: 40px;
-            pointer-events: auto;
+            gap: 20px;
+            pointer-events: none;
             z-index: 100;
         }
 
         .side-hud {
             display: flex;
             flex-direction: row;
-            gap: 40px;
+            gap: 15px;
+            flex: 1;
         }
+        .left-hud { justify-content: flex-start; }
+        .right-hud { justify-content: flex-end; }
 
         .vs-text {
             position: relative;
             font-family: 'CustomPixelFont', sans-serif;
-            font-size: 3rem;
+            font-size: 2.5rem;
             color: white;
             text-shadow: 4px 4px 0 #000;
             margin-top: 55px;
+            flex-shrink: 0;
+            padding: 0 10px;
         }
 
         .entity-stats {
             position: relative;
-            width: 170px;
+            width: 180px;
             transition: opacity 0.3s, filter 0.3s, margin 0.3s;
+            flex-shrink: 0;
         }
 
         /* FLAT ALIGNMENT FOR ALL ENTITY STATS */
@@ -625,11 +632,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 1.2rem;
+            font-size: 1rem;
             color: #fff;
             text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000;
             margin-bottom: 6px;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .right-hud .entity-stat-name {
@@ -740,10 +748,10 @@
             transform: translateX(-50%);
             width: max-content;
             min-width: 450px;
-            padding: 10px 25px;
+            padding: 5px 20px;
             background: transparent;
             border-style: solid;
-            border-width: 18px;
+            border-width: 10px;
             border-image: url('assets/20240707dragon9SlicesA.png') 32 fill stretch;
             z-index: 2000;
             pointer-events: none;
@@ -783,9 +791,9 @@
             min-width: 320px;
             background: transparent;
             border-style: solid;
-            border-width: 18px;
+            border-width: 10px;
             border-image: url('assets/20250420manaSoul9SlicesB-Sheet.png') 32 fill stretch;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -876,11 +884,11 @@
         .entity-wrap.targetable.focused-target::after {
             content: '';
             position: absolute;
-            bottom: -5px;
+            bottom: -15px;
             left: 50%;
             transform: translateX(-50%);
-            width: 180px;
-            height: 180px;
+            width: 160px;
+            height: 160px;
             background-image: url('assets/target1.png');
             background-size: contain;
             background-repeat: no-repeat;
@@ -951,21 +959,21 @@
         /* FIXED: Pause button cursor and hitbox */
         #pause-btn {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 48px;
-            height: 48px;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 64px;
+            height: 64px;
             background: url('assets/pause_icon.png') no-repeat center;
             background-size: contain;
-            z-index: 9999;
+            z-index: 10000;
             filter: drop-shadow(2px 2px 0 #000);
-            transition: 0.1s;
             cursor: url('assets/cursor_pointer.png'), pointer !important;
             pointer-events: auto;
         }
 
-        #pause-btn:hover {
-            transform: scale(1.1);
+        #pause-btn:active {
+            transform: translateX(-50%) scale(0.95);
         }
 
         .pause-box {
@@ -1216,6 +1224,10 @@
             50% {
                 opacity: 0;
             }
+        }
+
+        .blinking-text {
+            animation: blink 0.8s step-end infinite;
         }
 
         @keyframes titleFloat {
@@ -2235,44 +2247,42 @@
         let bgmNameActive = null;
         let hasInteracted = false;
         function playBGM(name) {
+            if (!name || !BGM[name]) return;
+            if (bgmNameActive === name && currentBGM && !currentBGM.paused) return;
+            
             bgmNameActive = name;
-            if (name && currentBGM === BGM[name]) {
-                if (currentBGM.paused) currentBGM.play().catch(e => console.log('BGM blocked:', e));
-                return;
-            }
-            fadeBGM(() => {
-                if (name && BGM[name]) {
-                    currentBGM = BGM[name];
-                    currentBGM.volume = 0;
+            
+            // Stop any existing fade intervals
+            if (window.bgmFadeInterval) clearInterval(window.bgmFadeInterval);
+            if (window.bgmInInterval) clearInterval(window.bgmInInterval);
+
+            const startNewBGM = () => {
+                if (currentBGM) {
+                    currentBGM.pause();
                     currentBGM.currentTime = 0;
-                    currentBGM.play().catch(e => console.log('BGM blocked:', e));
-                    let vol = 0;
-                    let fadeInterval = setInterval(() => {
-                        vol += 0.05;
-                        if (vol >= 0.5) { vol = 0.5; clearInterval(fadeInterval); }
-                        if (currentBGM === BGM[name]) currentBGM.volume = vol;
-                    }, 100);
                 }
-            });
+                currentBGM = BGM[name];
+                currentBGM.volume = 0.5; // Direct set to avoid fade-in issues for now
+                currentBGM.currentTime = 0;
+                currentBGM.play().catch(e => console.log('BGM blocked:', e));
+            };
+
+            if (currentBGM && currentBGM.volume > 0) {
+                let vol = currentBGM.volume;
+                window.bgmFadeInterval = setInterval(() => {
+                    vol -= 0.1;
+                    if (vol <= 0) {
+                        clearInterval(window.bgmFadeInterval);
+                        startNewBGM();
+                    } else {
+                        currentBGM.volume = vol;
+                    }
+                }, 50);
+            } else {
+                startNewBGM();
+            }
         }
-        function fadeBGM(callback) {
-            if (!currentBGM) { if (callback) callback(); return; }
-            let vol = currentBGM.volume;
-            let fadingTrack = currentBGM;
-            currentBGM = null;
-            let fadeInterval = setInterval(() => {
-                vol -= 0.05;
-                if (vol <= 0) {
-                    vol = 0;
-                    fadingTrack.pause();
-                    fadingTrack.currentTime = 0;
-                    clearInterval(fadeInterval);
-                    if (callback) callback();
-                } else {
-                    fadingTrack.volume = Math.max(0, vol);
-                }
-            }, 100);
-        }
+        // Removed old fadeBGM in favor of integrated logic in playBGM
 
         function pausableTimeout(cb, delay) {
             let start = Date.now();
@@ -2318,7 +2328,6 @@
         };
 
         function initGameAudio() {
-            if (hasInteracted) return;
             hasInteracted = true;
             playBGM('title');
             startGame();
@@ -2943,7 +2952,7 @@
                 return `
             <div class="entity-stats ${c.isPlayer ? 'ally' : 'enemy'}" id="stats_${c.uid}">
                 <div class="entity-stat-name">
-                    <span>${cleanName}</span><div class="info-icon-btn" tabindex="0" onclick="showCharacterInfo(${c.id})" style="width:16px; height:16px; font-size:10px;">i</div>
+                    <span>${cleanName}</span>
                 </div>
                 <div class="entity-stat-bar hp">
                     <div class="entity-stat-track"><div class="entity-stat-fill hp-fill" id="hp_fill_${c.uid}"></div></div>
@@ -2988,9 +2997,11 @@
                 if (G.activeEnt.isPlayer) {
                     heroDisplay.innerText = `${G.activeEnt.name.toUpperCase()}'S TURN`;
                     heroDisplay.style.visibility = 'visible';
+                    heroDisplay.classList.add('blinking-text');
                 } else {
                     heroDisplay.innerText = ""; // Hide name when it's enemy turn
                     heroDisplay.style.visibility = 'hidden';
+                    heroDisplay.classList.remove('blinking-text');
                 }
             }
 
